@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-04-18
+
+### Added
+- **Parallel async fetcher** — new `async_fetch_many` in `fetcher.py`
+  uses `httpx.AsyncClient` with a 5-way semaphore. `warm_vipmp_cache`
+  and `build_index` use it. Cold rebuild dropped from **38s to 6.6s
+  (5.7x faster)**. Includes the same trailing-slash fallback and content
+  sanity check as the sync fetcher; per-path failures are isolated so
+  one bad page doesn't abort a batch.
+- **Adobe-published validation regex enforcement** — extracts the
+  `Field Name | Resource | Regular Expression` table from
+  `/vipmp/docs/references/validations` and checks every string field in
+  a body against the matching rule. Cross-cutting: a rule for
+  `firstName` (defined on the Contact resource) fires even when
+  validating a Customer body. Works for `companyName`, `firstName`,
+  `lastName`, and `postalCode` today; auto-extends as Adobe documents
+  more.
+- **Java → Python regex translator** — Adobe ships regexes as Java
+  source string literals (doubled backslashes); we now un-escape them
+  correctly. Uses the third-party `regex` package (added as a runtime
+  dependency) for full Unicode property support (`\\p{L}`, `\\p{N}`),
+  with a graceful ASCII fallback if `regex` isn't available.
+
+### Changed
+- **Index schema bumped to v4** — adds `validations: list[ValidationRule]`
+  to `IndexSnapshot`. v0.5.x indexes are transparently discarded and
+  rebuilt.
+- **Baseline index rebuilt** — 21 endpoints, 65 error codes, 18 schemas,
+  17 releases, **4 validation rules**.
+- **Build performance:** `build_index` uses parallel fetching (was
+  serial). `warm_vipmp_cache` likewise.
+
+### Tests
+- 24 new tests across `test_async_fetcher.py` and `test_validations.py`.
+- Full suite now **138 tests** passing in ~4 seconds.
+
 ## [0.5.0] — 2026-04-18
 
 ### Added
@@ -203,7 +239,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.2...v0.4.0

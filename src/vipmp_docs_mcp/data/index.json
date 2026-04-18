@@ -1,6 +1,6 @@
 {
-  "schema_version": 3,
-  "built_at": 1776532329.1557574,
+  "schema_version": 4,
+  "built_at": 1776533777.0402403,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -2027,6 +2027,32 @@
         }
       ],
       "docs_path": "/vipmp/docs/release-notes/upcoming-releases"
+    }
+  ],
+  "validations": [
+    {
+      "field_name": "companyName",
+      "resource": "CompanyProfile",
+      "pattern": "^[\\\\p{L}\\\\p{N}_ ,.＆&・\\\\'()（）\\\\\\\"\\\\/-]{4,80}$",
+      "notes": "Full Unicode letter and number support – no normalization is done."
+    },
+    {
+      "field_name": "firstName",
+      "resource": "Contact",
+      "pattern": "^[\\\\p{L}\\\\p{N}-_ ,.＆&'\\\\\\\"]{1,35}$",
+      "notes": "Full Unicode letter and number support – no normalization is done."
+    },
+    {
+      "field_name": "lastName",
+      "resource": "Contact",
+      "pattern": "See the regular expression given in the following section .",
+      "notes": "Source: emailregex.com"
+    },
+    {
+      "field_name": "postalCode",
+      "resource": "Address",
+      "pattern": "Varies based on country. Please see the Supported Countries and Locales section",
+      "notes": null
     }
   ]
 }

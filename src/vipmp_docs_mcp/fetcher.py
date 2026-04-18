@@ -3,9 +3,17 @@ HTTP client with retries, backoff, and content sanity checks.
 
 Wraps httpx with tenacity for resilience. Everything that fetches a page
 from developer.adobe.com goes through this module.
+
+The synchronous API (fetch_page_html, fetch_page_with_etag) is the main
+interface used by tools and cache code. async_fetch_many is a parallel
+fetch helper used by warm_vipmp_cache and build_index for situations
+where serial fetching would be unacceptably slow.
 """
 
 from __future__ import annotations
+
+import asyncio
+from collections.abc import Awaitable, Callable
 
 import httpx
 from tenacity import (
@@ -209,3 +217,116 @@ def fetch_page_with_etag(
 
     assert last_err is not None
     raise last_err
+
+
+# ---------------------------------------------------------------------------
+# Parallel async fetcher (used by warm_vipmp_cache and build_index for
+# situations where serial fetching would be unacceptably slow).
+# ---------------------------------------------------------------------------
+
+
+DEFAULT_CONCURRENCY = 5
+"""Be polite to Adobe's CDN — 5 concurrent requests is plenty for our use case."""
+
+
+async def _async_fetch_one(
+    client: httpx.AsyncClient,
+    path: str,
+    *,
+    validate: bool = True,
+) -> str:
+    """
+    Async equivalent of fetch_page_html for one path. Includes the same
+    trailing-slash fallback semantics. Raises FetchError on failure.
+    """
+    last_err: Exception | None = None
+    for candidate in _trailing_slash_variants(path):
+        url = BASE_URL + candidate
+        try:
+            response = await client.get(url, headers=_default_headers())
+        except (httpx.TransportError, httpx.TimeoutException) as exc:
+            log.warning("network error for %s: %s", candidate, exc)
+            raise FetchError(f"network error fetching {path}: {exc}") from exc
+
+        if response.status_code == 404:
+            last_err = FetchError(f"HTTP 404 Not Found for {candidate}")
+            log.debug("404 for %s; trying next variant", candidate)
+            continue
+
+        if response.status_code >= 400:
+            log.warning("HTTP %s for %s (non-retryable)", response.status_code, candidate)
+            raise FetchError(
+                f"HTTP {response.status_code} {response.reason_phrase} for {path}"
+            )
+
+        html = response.text
+        if validate and not looks_like_docs_page(html):
+            log.warning("suspicious content for %s (len=%d)", candidate, len(html))
+            raise SuspiciousContentError(
+                f"response for {path} did not look like an Adobe docs page"
+            )
+
+        log.debug("async-fetched %s (%d bytes)", candidate, len(html))
+        return html
+
+    assert last_err is not None
+    raise last_err
+
+
+async def async_fetch_many(
+    paths: list[str],
+    *,
+    concurrency: int = DEFAULT_CONCURRENCY,
+    validate: bool = True,
+    on_progress: Callable[[int, int, str, FetchError | None], Awaitable[None] | None] | None = None,
+) -> dict[str, str | FetchError]:
+    """
+    Fetch many paths in parallel, returning a dict of {path: html | FetchError}.
+
+    Failures are captured per-path rather than aborting the batch — callers
+    decide what to do with partial successes (warm_cache logs and skips,
+    build_index appends to parse_errors).
+
+    Args:
+        paths: Doc paths to fetch.
+        concurrency: Maximum concurrent requests. Default 5 — we're polite.
+        validate: Same as fetch_page_html.
+        on_progress: Optional callback(done, total, path, error_or_none).
+            Useful for emitting progress to logs while a long fetch runs.
+
+    Returns:
+        {path: html_string} for successes, {path: FetchError} for failures.
+    """
+    semaphore = asyncio.Semaphore(concurrency)
+    results: dict[str, str | FetchError] = {}
+    done = 0
+    total = len(paths)
+
+    timeout = httpx.Timeout(15.0, connect=10.0)
+    limits = httpx.Limits(max_connections=concurrency * 2, max_keepalive_connections=concurrency)
+
+    async with httpx.AsyncClient(
+        timeout=timeout, limits=limits, follow_redirects=True
+    ) as client:
+
+        async def fetch_one(path: str) -> None:
+            nonlocal done
+            async with semaphore:
+                err: FetchError | None = None
+                try:
+                    html = await _async_fetch_one(client, path, validate=validate)
+                    results[path] = html
+                except FetchError as exc:
+                    results[path] = exc
+                    err = exc
+                done += 1
+                if on_progress is not None:
+                    maybe_aw = on_progress(done, total, path, err)
+                    if asyncio.iscoroutine(maybe_aw):
+                        await maybe_aw
+
+        await asyncio.gather(*(fetch_one(p) for p in paths))
+
+    succeeded = sum(1 for v in results.values() if isinstance(v, str))
+    log.info("async_fetch_many: %d/%d succeeded", succeeded, total)
+    return results

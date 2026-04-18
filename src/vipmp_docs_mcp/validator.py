@@ -22,11 +22,121 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from .extractors import SchemaField, SchemaResource
+from .extractors import SchemaField, SchemaResource, ValidationRule
 from .index import IndexSnapshot, get_active_index
 from .logging_config import get_logger
 
 log = get_logger("validator")
+
+
+# ---------------------------------------------------------------------------
+# Java → Python regex translation
+# ---------------------------------------------------------------------------
+#
+# Adobe publishes Java-style regexes, which mostly overlap with Python's
+# `re`. The notable difference is Unicode property classes — Java uses
+# `\p{L}` (any letter), `\p{N}` (any number), etc. Python's stdlib `re`
+# doesn't support these, but the third-party `regex` module does.
+#
+# We try `regex` first; if not available, we approximate by mapping the
+# most common Unicode property classes to ASCII equivalents and fall back
+# to `re`. The approximation is lossy (won't accept non-ASCII letters even
+# when Adobe's docs allow them), so we annotate validation results when
+# we've fallen back.
+
+try:
+    import regex as _regex_engine  # third-party — full Java-compatible Unicode
+
+    _REGEX_ENGINE_NAME = "regex"
+    _REGEX_FALLBACK = False
+except ImportError:  # pragma: no cover - exercised on minimal installs
+    import re as _regex_engine
+
+    _REGEX_ENGINE_NAME = "re"
+    _REGEX_FALLBACK = True
+
+
+_JAVA_PROPERTY_FALLBACK = {
+    r"\p{L}": "[a-zA-Z]",
+    r"\p{N}": "[0-9]",
+    r"\p{Nd}": "[0-9]",
+    r"\p{Lu}": "[A-Z]",
+    r"\p{Ll}": "[a-z]",
+    r"\p{Z}": " ",
+    r"\p{S}": "",
+    r"\P{L}": "[^a-zA-Z]",
+    r"\P{N}": "[^0-9]",
+}
+
+
+def _unescape_java_source(pattern: str) -> str:
+    """
+    Adobe publishes regexes as Java *source string literals* (e.g.
+    ``"^[\\\\p{L}]+$"``), not as raw regex source. After HTML extraction
+    we get strings with doubled backslashes (`\\\\p{L}`, `\\\\"`, `\\\\'`)
+    that need un-escaping before they're valid regexes in any engine.
+
+    Heuristic: if the pattern contains the Java-source signature `\\\\p{`
+    or starts with `^\\\\`, halve every backslash run — the result is
+    valid raw regex source.
+    """
+    if "\\\\" not in pattern:
+        return pattern
+    # Convert "\\\\p{L}" → "\\p{L}", "\\\\\"" → "\\\"", etc.
+    return pattern.replace("\\\\", "\\")
+
+
+def _to_python_pattern(java_pattern: str) -> str:
+    """
+    Convert a Java-style regex string to one Python's regex engine accepts.
+
+    1. Un-escape Java string literal doubling.
+    2. With the `regex` module installed, no further translation is needed
+       (it understands `\\p{L}` natively).
+    3. Without it, substitute ASCII approximations for the most common
+       Unicode property classes — lossy but better than refusing to
+       validate at all.
+    """
+    pattern = _unescape_java_source(java_pattern)
+    if not _REGEX_FALLBACK:
+        return pattern
+    for java, py in _JAVA_PROPERTY_FALLBACK.items():
+        pattern = pattern.replace(java, py)
+    return pattern
+
+
+def _check_against_validation_rule(
+    field: SchemaField, value: str, rule: ValidationRule
+) -> ValidationIssue | None:
+    """
+    Test a string value against an Adobe-published validation regex.
+    Returns an issue if the regex doesn't match, None if it matches.
+    Returns None silently if the regex can't be compiled.
+    """
+    py_pattern = _to_python_pattern(rule.pattern)
+    try:
+        compiled = _regex_engine.compile(py_pattern)
+    except Exception as exc:
+        log.debug("could not compile validation regex for %s: %s", field.name, exc)
+        return None
+
+    if compiled.fullmatch(value):
+        return None
+
+    note_suffix = f" ({rule.notes})" if rule.notes else ""
+    fallback_suffix = (
+        " — note: regex `regex` module not installed, so Unicode "
+        "letter/number classes were approximated as ASCII; non-ASCII "
+        "characters may produce false negatives"
+        if _REGEX_FALLBACK
+        else ""
+    )
+    return ValidationIssue(
+        ISSUE_ERROR,
+        field.name,
+        f"Value does not match Adobe-documented regex `{rule.pattern}`"
+        f"{note_suffix}{fallback_suffix}.",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -438,6 +548,26 @@ def validate_body(endpoint: str, body_json: str) -> ValidationResult:
                     f"Array of {len(value)} object(s) — items not recursively validated.",
                 )
             )
+
+    # Adobe-published regex checks — applied to ANY top-level string field
+    # whose name matches a documented validation rule, regardless of whether
+    # the field appears in the active schema. Adobe's rules (companyName,
+    # firstName, lastName, postalCode) cross-cut nested resources, so even
+    # an "unknown" top-level field gets the benefit of the regex check.
+    rule_by_name = {r.field_name.lower(): r for r in idx.validations}
+    for name, value in body.items():
+        if not isinstance(value, str):
+            continue
+        rule = rule_by_name.get(name.lower())
+        if rule is None:
+            continue
+        # Build a minimal SchemaField just to label the issue.
+        proxy_field = field_map.get(name) or SchemaField(
+            name=name, type="String", required=None, description=""
+        )
+        regex_issue = _check_against_validation_rule(proxy_field, value, rule)
+        if regex_issue:
+            issues.append(regex_issue)
 
     return ValidationResult(
         endpoint=endpoint,

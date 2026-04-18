@@ -25,9 +25,11 @@ from .extractors import (
     Endpoint,
     ErrorCode,
     SchemaResource,
+    ValidationRule,
     extract_endpoints,
     extract_error_codes,
     extract_schemas,
+    extract_validations,
 )
 from .fetcher import FetchError, fetch_page_html
 from .logging_config import CACHE_DIR, get_logger
@@ -41,7 +43,7 @@ from .releases import (
 
 log = get_logger("index")
 
-INDEX_SCHEMA_VERSION = 3  # v2 added releases; v3 added deprecated + deprecation_note on Endpoint and deprecated on SchemaField.
+INDEX_SCHEMA_VERSION = 4  # v4 added `validations` (Adobe-published regex rules per field).
 
 # Per-user refresh: written by rebuild_vipmp_index tool / GHA artifact drop.
 USER_INDEX_PATH = CACHE_DIR / "index.json"
@@ -64,6 +66,7 @@ class IndexSnapshot:
     error_codes: list[ErrorCode] = field(default_factory=list)
     schemas: list[SchemaResource] = field(default_factory=list)
     releases: list[ReleaseEntry] = field(default_factory=list)
+    validations: list[ValidationRule] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -78,6 +81,7 @@ class IndexSnapshot:
             "error_codes": [e.to_dict() for e in self.error_codes],
             "schemas": [s.to_dict() for s in self.schemas],
             "releases": [r.to_dict() for r in self.releases],
+            "validations": [v.to_dict() for v in self.validations],
         }
 
     @classmethod
@@ -105,6 +109,7 @@ class IndexSnapshot:
                 for s in data.get("schemas", [])
             ],
             releases=[ReleaseEntry.from_dict(r) for r in data.get("releases", [])],
+            validations=[ValidationRule(**v) for v in data.get("validations", [])],
         )
 
     @property
@@ -119,32 +124,47 @@ class IndexSnapshot:
 
 def build_index() -> IndexSnapshot:
     """
-    Walk the active sitemap, fetch every page, and extract endpoints,
-    error codes, and schemas into one snapshot. Parse errors are captured
-    (not raised) so a single broken page doesn't abort the whole build.
+    Walk the active sitemap, fetch every page in parallel, and extract
+    endpoints, error codes, schemas, and validation regexes into one
+    snapshot. Parse errors are captured (not raised) so a single broken
+    page doesn't abort the whole build.
 
-    Takes ~30s end-to-end against a warm cache, ~60s cold.
+    Takes ~10s with a warm cache and parallel fetcher (was ~30s serial),
+    ~20s cold (was ~60s serial).
     """
+    import asyncio
+
+    from .fetcher import async_fetch_many
+
     sitemap = get_active_sitemap()
     snap = IndexSnapshot(source_sitemap_size=len(sitemap))
+    paths = [entry["path"] for entry in sitemap]
+    title_for = {entry["path"]: entry["title"] for entry in sitemap}
 
-    for i, entry in enumerate(sitemap, 1):
-        path = entry["path"]
-        title = entry["title"]
-        try:
-            html = fetch_page_html(path)
-        except FetchError as exc:
-            log.warning("(%d/%d) fetch failed %s: %s", i, len(sitemap), path, exc)
-            snap.parse_errors.append((path, str(exc)))
+    log.info("build_index: fetching %d pages in parallel", len(paths))
+    fetch_results = asyncio.run(async_fetch_many(paths, concurrency=5))
+
+    for path in paths:
+        result = fetch_results.get(path)
+        if isinstance(result, FetchError) or result is None:
+            err_msg = str(result) if result else "missing from fetch results"
+            log.warning("fetch failed %s: %s", path, err_msg)
+            snap.parse_errors.append((path, err_msg))
             continue
 
+        html = result
+        title = title_for[path]
         try:
             snap.endpoints.extend(extract_endpoints(html, path, title))
             snap.error_codes.extend(extract_error_codes(html, docs_path=path))
             snap.schemas.extend(extract_schemas(html, docs_path=path))
+            # Validations live exclusively on the references/validations page,
+            # but extracting unconditionally is cheap (no-op if not the right
+            # page) and future-proofs against Adobe moving them.
+            snap.validations.extend(extract_validations(html, docs_path=path))
             snap.pages_parsed += 1
         except Exception as exc:
-            log.exception("(%d/%d) parse failed %s", i, len(sitemap), path)
+            log.exception("parse failed %s", path)
             snap.parse_errors.append((path, f"parse error: {exc}"))
 
     # Release notes — parsed from two dedicated pages (structure is different

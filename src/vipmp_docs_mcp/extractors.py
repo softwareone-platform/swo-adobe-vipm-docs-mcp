@@ -429,6 +429,91 @@ class CodeExample:
 _LANG_RE = re.compile(r"language-([\w+-]+)")
 
 
+# ---------------------------------------------------------------------------
+# Validation rules (field name -> regex)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ValidationRule:
+    """A single field validation rule from Adobe's regex reference page."""
+
+    field_name: str  # e.g. "companyName", "firstName"
+    resource: str  # e.g. "CompanyProfile", "Contact"
+    pattern: str  # Java-style regex, e.g. "^[\\\\p{L}\\\\p{N} ]{1,80}$"
+    notes: str | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "field_name": self.field_name,
+            "resource": self.resource,
+            "pattern": self.pattern,
+            "notes": self.notes,
+        }
+
+
+def extract_validations(html: str, docs_path: str | None = None) -> list[ValidationRule]:
+    """
+    Extract validation regexes from Adobe's `references/validations` page.
+
+    The page structure is a single 4-column `div.table`:
+        Field Name | Resource/Object | Regular Expression (Java String) | Notes
+
+    Adobe publishes Java-style regexes; we store them verbatim. Translation
+    to Python's `re` syntax (or use of a Java-compatible regex library
+    like `regex`) happens at validation time.
+    """
+    rules: list[ValidationRule] = []
+    for headers, rows in _find_tables(html):
+        header_lower = [h.lower() for h in headers]
+        # Match by content, not exact header strings — Adobe might tweak labels.
+        if not any("field name" in h for h in header_lower):
+            continue
+        if not any("regular expression" in h or "regex" in h for h in header_lower):
+            continue
+        try:
+            field_idx = next(
+                i for i, h in enumerate(header_lower) if "field name" in h
+            )
+            resource_idx = next(
+                i for i, h in enumerate(header_lower) if "resource" in h or "object" in h
+            )
+            regex_idx = next(
+                i for i, h in enumerate(header_lower)
+                if "regular expression" in h or "regex" in h
+            )
+        except StopIteration:
+            continue
+        notes_idx = next(
+            (i for i, h in enumerate(header_lower) if "note" in h), None
+        )
+
+        for row in rows:
+            if len(row) <= max(field_idx, resource_idx, regex_idx):
+                continue
+            field_name = row[field_idx].strip()
+            resource = row[resource_idx].strip()
+            pattern = row[regex_idx].strip()
+            notes = (
+                row[notes_idx].strip()
+                if notes_idx is not None and notes_idx < len(row)
+                else None
+            )
+            if not field_name or not pattern:
+                continue
+            rules.append(
+                ValidationRule(
+                    field_name=field_name,
+                    resource=resource,
+                    pattern=pattern,
+                    notes=notes or None,
+                )
+            )
+
+    log.info("extracted %d validation rules from %s", len(rules), docs_path or "page")
+    return rules
+
+
 def extract_code_examples(html: str, language: str | None = None) -> list[CodeExample]:
     """
     Return every `<pre><code>` block. If `language` is set, filter to only
