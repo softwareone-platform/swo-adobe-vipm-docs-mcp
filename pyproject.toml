@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vipmp-docs-mcp"
-version = "0.6.0"
+version = "0.6.1"
 description = "MCP server exposing Adobe VIP Marketplace Partner API documentation as searchable tools"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -53,9 +53,9 @@ Issues = "https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/issues
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vipmp_docs_mcp"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/vipmp_docs_mcp/data" = "vipmp_docs_mcp/data"
+# data/index.json ships with the wheel automatically because it's under
+# the package directory — no force-include needed (and adding one
+# triggers a "duplicate file" warning at build time).
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

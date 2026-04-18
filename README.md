@@ -72,9 +72,37 @@ Pre-baked prompt templates your MCP client can offer directly (no need to rememb
 
 ## Install
 
-### With `uvx` (recommended — zero setup)
+### With `uvx` (recommended — zero setup, no clone, no git required)
 
-If you have [uv](https://docs.astral.sh/uv/) installed, you don't need to clone anything. Add this to `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+If you have [uv](https://docs.astral.sh/uv/) installed, drop this into `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "vipmp-docs": {
+      "command": "uvx",
+      "args": ["vipmp-docs-mcp"]
+    }
+  }
+}
+```
+
+`uvx` fetches `vipmp-docs-mcp` from PyPI on first run and caches it. Updates: `uvx cache clean vipmp-docs-mcp` then restart Claude Desktop.
+
+**Pin to a specific version** if you want stability:
+
+```json
+{
+  "mcpServers": {
+    "vipmp-docs": {
+      "command": "uvx",
+      "args": ["vipmp-docs-mcp==0.6.1"]
+    }
+  }
+}
+```
+
+**Install bleeding-edge from source** (requires git on PATH):
 
 ```json
 {
@@ -91,7 +119,7 @@ If you have [uv](https://docs.astral.sh/uv/) installed, you don't need to clone 
 }
 ```
 
-`uvx` fetches, builds, and caches the package on first run. Updates are one `uvx cache clean` away.
+> **Note:** the git-source variant requires `git` to be on the PATH that Claude Desktop's subprocess sees. On Windows this is sometimes only on the User PATH and not the System PATH; if you see "Git executable not found" in Claude Desktop's MCP logs, either move git into System PATH or use the PyPI snippet above (which doesn't need git).
 
 ### From a clone (for development)
 

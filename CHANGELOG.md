@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-04-18
+
+### Added
+- **PyPI publishing.** New `.github/workflows/publish-pypi.yml` workflow
+  publishes to PyPI on every `v*` tag push using **Trusted Publishing**
+  (OIDC) — no API tokens to rotate. Verifies the wheel includes
+  `data/index.json` and that the git tag matches the package version
+  before publishing.
+- **README install snippet** simplified to `uvx vipmp-docs-mcp`
+  (PyPI-backed). The git-source snippet is still documented for
+  bleeding-edge installs but flagged with a Windows-PATH caveat — Claude
+  Desktop's subprocess often can't find git, which broke the install
+  for at least one user who tried the v0.6.0 snippet.
+
+### Changed
+- **Removed redundant `force-include` block** from `pyproject.toml`'s
+  hatchling config. It was duplicating `data/index.json` into the
+  wheel, triggering a build warning. The default `packages` directive
+  already ships everything under the package directory.
+
+### Internal
+- Bumped to v0.6.1 to mark the first PyPI-published release. No code
+  changes.
+
 ## [0.6.0] — 2026-04-18
 
 ### Added
@@ -239,7 +263,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...v0.4.1
