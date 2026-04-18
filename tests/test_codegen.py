@@ -7,8 +7,8 @@ from unittest.mock import patch
 import pytest
 
 from vipmp_docs_mcp.codegen import (
-    CodeSnippet,
     SUPPORTED_LANGUAGES,
+    CodeSnippet,
     generate_snippet,
 )
 from vipmp_docs_mcp.extractors import Endpoint, SchemaField, SchemaResource
@@ -48,9 +48,11 @@ def synthetic_index() -> IndexSnapshot:
 
 @pytest.fixture
 def patched_index(synthetic_index):
-    with patch("vipmp_docs_mcp.codegen.get_active_index", return_value=synthetic_index):
-        with patch("vipmp_docs_mcp.validator.get_active_index", return_value=synthetic_index):
-            yield synthetic_index
+    with (
+        patch("vipmp_docs_mcp.codegen.get_active_index", return_value=synthetic_index),
+        patch("vipmp_docs_mcp.validator.get_active_index", return_value=synthetic_index),
+    ):
+        yield synthetic_index
 
 
 class TestGenerateSnippet:

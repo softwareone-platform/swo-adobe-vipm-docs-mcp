@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vipmp-docs-mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "MCP server exposing Adobe VIP Marketplace Partner API documentation as searchable tools"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -36,7 +36,7 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
     "pytest-httpx>=0.35.0",
-    "ruff>=0.6.0",
+    "ruff>=0.15.0,<0.16",
 ]
 
 [project.scripts]

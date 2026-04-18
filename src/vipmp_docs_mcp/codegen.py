@@ -94,12 +94,9 @@ def _build_placeholder_body(schema: SchemaResource) -> dict:
         return "read only" in (f.name or "").lower() or "read only" in (f.type or "").lower()
 
     required_fields = [f for f in schema.fields if f.required and not is_read_only(f)]
-
-    if required_fields:
-        source = required_fields
-    else:
-        # No explicit required fields — include all non-read-only fields.
-        source = [f for f in schema.fields if not is_read_only(f)]
+    # Fall back to every non-read-only field when nothing is explicitly required
+    # (Adobe's docs often mark fields "Optional" and leave the rest implicit).
+    source = required_fields or [f for f in schema.fields if not is_read_only(f)]
 
     for f in source:
         body[f.name] = _placeholder_value(f)

@@ -23,7 +23,6 @@ from vipmp_docs_mcp.validator import (
     validate_body,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixture: a synthetic index with one endpoint + request schema
 # ---------------------------------------------------------------------------
@@ -159,7 +158,7 @@ class TestResolveSchema:
         assert docs_path == "/vipmp/docs/customer-account/create-customer-account"
 
     def test_unknown_endpoint(self, synthetic_index):
-        schema, docs_path, err = resolve_schema(synthetic_index, "GET /v3/nowhere")
+        schema, _docs_path, err = resolve_schema(synthetic_index, "GET /v3/nowhere")
         assert schema is None
         assert err is not None
         assert "not found" in err.lower()

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-04-18
+
+### Fixed
+- CI lint failures on ruff 0.15 that didn't fire on the older ruff
+  version pinned locally. Addressed by:
+  - Replacing a trivial `if`/`else`-block with a `value or fallback`
+    expression in `codegen.py` (SIM108).
+  - Combining nested `with patch(...):` statements in
+    `tests/test_codegen.py` (SIM117).
+  - Prefixing an unused unpacked variable with `_` in
+    `tests/test_validator.py` (RUF059).
+  - Re-sorting import blocks in both new test files (I001).
+
+### Changed
+- **Pinned `ruff>=0.15.0,<0.16`** in the dev extras so local and CI see
+  the same rule set. Avoids the kind of surprise where a working local
+  pre-commit run passes but CI fails on newly-enabled rules.
+
 ## [0.4.0] — 2026-04-18
 
 ### Added
@@ -144,7 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.0...v0.3.1
