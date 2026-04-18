@@ -91,7 +91,7 @@ jobs:
 
       - name: Open PR with refreshed index
         if: steps.diff.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore(index): refresh structured index from Adobe docs'
           branch: bot/refresh-index
