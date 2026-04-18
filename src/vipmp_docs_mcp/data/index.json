@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "built_at": 1776528824.410461,
+  "schema_version": 3,
+  "built_at": 1776532329.1557574,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -9,127 +9,169 @@
       "method": "POST",
       "path": "/v3/customers",
       "docs_path": "/vipmp/docs/customer-account/create-customer-account",
-      "title": "Create customer account"
+      "title": "Create customer account",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "<env root url>/v3/resellers/<reseller_id>/customers",
       "docs_path": "/vipmp/docs/customer-account/get-customer-list",
-      "title": "Get customer list"
+      "title": "Get customer list",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/flex-discounts",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/customers/<customer-id>/flex-discounts",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customer-id>/orders",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/customers/<customer-id>/orders/<order-id>",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/customers/<customer-id>/orders",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customer-id>/orders",
       "docs_path": "/vipmp/docs/flex-discounts/apis",
-      "title": "Manage Flexible Discounts using APIs"
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/pricelist",
       "docs_path": "/vipmp/docs/manage-pricing",
-      "title": "Access Price Lists"
+      "title": "Access Price Lists",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "<env root url>/v3/customers/{{customerId}}/orders",
       "docs_path": "/vipmp/docs/mid-term/apis",
-      "title": "Manage mid-term upgrades through APIs"
+      "title": "Manage mid-term upgrades through APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customer-id>/orders",
       "docs_path": "/vipmp/docs/order-management/order-scenarios",
-      "title": "Order creation scenarios"
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customer-id>/orders",
       "docs_path": "/vipmp/docs/order-management/order-scenarios",
-      "title": "Order creation scenarios"
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "<env root url>/v3/customers/{{customerId}}/orders",
       "docs_path": "/vipmp/docs/order-management/order-scenarios",
-      "title": "Order creation scenarios"
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/recommendations",
       "docs_path": "/vipmp/docs/recommendations/apis",
-      "title": "Manage Recommendations using APIs"
+      "title": "Manage Recommendations using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customerId>/orders",
       "docs_path": "/vipmp/docs/recommendations/apis",
-      "title": "Manage Recommendations using APIs"
+      "title": "Manage Recommendations using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customerId>/orders",
       "docs_path": "/vipmp/docs/recommendations/apis",
-      "title": "Manage Recommendations using APIs"
+      "title": "Manage Recommendations using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/customers/<customerId>/subscriptions",
       "docs_path": "/vipmp/docs/recommendations/apis",
-      "title": "Manage Recommendations using APIs"
+      "title": "Manage Recommendations using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "/v3/customers/<customerId>/orders",
       "docs_path": "/vipmp/docs/recommendations/apis",
-      "title": "Manage Recommendations using APIs"
+      "title": "Manage Recommendations using APIs",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "GET",
       "path": "<env root url>/v3/resellers",
       "docs_path": "/vipmp/docs/reseller-account/get-reseller-list",
-      "title": "Get reseller list"
+      "title": "Get reseller list",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "POST",
       "path": "/v3/customers/<customer-id>/subscriptions",
       "docs_path": "/vipmp/docs/subscription-management/create-subscription",
-      "title": "Create subscription"
+      "title": "Create subscription",
+      "deprecated": false,
+      "deprecation_note": null
     },
     {
       "method": "PATCH",
       "path": "/v3/customers/<customer-id>/subscriptions/<subscription-id>",
       "docs_path": "/vipmp/docs/subscription-management/update-subscription",
-      "title": "Update subscription"
+      "title": "Update subscription",
+      "deprecated": true,
+      "deprecation_note": "If it is lower, then licenses will be removed at renewal"
     }
   ],
   "error_codes": [
@@ -599,91 +641,104 @@
           "type": "String",
           "required": false,
           "description": "Marketplace’s ID for customer. ID does not need to be unique.",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "customerId (read only)",
           "type": "String",
           "required": null,
           "description": "Unique ID for customer created upon account creation",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "resellerId",
           "type": "String",
           "required": null,
           "description": "ID of reseller tied to customer",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "globalSalesEnabled",
           "type": "String",
           "required": null,
           "description": "Global status of a customer",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "tags",
           "type": "String",
           "required": null,
           "description": "Special label on thhe customer. Example: HVD_MIGRATED_CUSTOMER",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "linkedMembership",
           "type": "linkedMembership resource",
           "required": null,
           "description": "Information about the linked membership",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "companyProfile",
           "type": "CompanyProfile resource",
           "required": null,
           "description": "Information about the customer",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "discounts",
           "type": "discounts resource",
           "required": null,
           "description": "Details of the discount applicable to the customer, including the discount level.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "benefits",
           "type": "benefits resource",
           "required": null,
           "description": "Details of the benefits applied to the customer account and its corresponding status. For example, the type parameter indicates LARGE_GOVERNMENT_AGENCY if the customer is an LGA customer.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "cotermDate (read only)",
           "type": "String (date)",
           "required": null,
           "description": "Date that renewal order is to be placed. Should be one year after the first order is provisioned (if a 1-yr term) and gets updated upon each renewal order.",
-          "constraints": "10 characters"
+          "constraints": "10 characters",
+          "deprecated": false
         },
         {
           "name": "creationDate (read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time of account creation in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status (read only)",
           "type": "String",
           "required": null,
           "description": "Status code of customer account",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get customer account details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/customer-account/create-customer-account"
@@ -697,49 +752,56 @@
           "type": "String",
           "required": false,
           "description": "Marketplace’s ID for reseller. ID does not need to be unique.",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "distributorId",
           "type": "String",
           "required": null,
           "description": "Adobe-generated unique ID for distributor tied to this reseller",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "resellerId (read only)",
           "type": "String",
           "required": null,
           "description": "Unique ID for reseller created upon account creation",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "companyProfile",
           "type": "CompanyProfile resource",
           "required": null,
           "description": "Information about the reseller",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "creationDate (read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time of account creation in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status (read only)",
           "type": "String",
           "required": null,
           "description": "Status code for the reseller account",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get customer account details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -753,91 +815,104 @@
           "type": "String",
           "required": false,
           "description": "Marketplace’s ID for customer. ID does not need to be unique.",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "customerId (read only)",
           "type": "String",
           "required": null,
           "description": "Unique ID for customer created upon account creation",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "resellerId",
           "type": "String",
           "required": null,
           "description": "ID of reseller tied to customer",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "globalSalesEnabled",
           "type": "String",
           "required": null,
           "description": "Global status of a customer",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "tags",
           "type": "String",
           "required": null,
           "description": "Special label on thhe customer. Example: HVD_MIGRATED_CUSTOMER",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "linkedMembership",
           "type": "linkedMembership resource",
           "required": null,
           "description": "Information about the linked membership",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "companyProfile",
           "type": "CompanyProfile resource",
           "required": null,
           "description": "Information about the customer",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "discounts",
           "type": "discounts resource",
           "required": null,
           "description": "Details of the discount applicable to the customer, including the discount level.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "benefits",
           "type": "benefits resource",
           "required": null,
           "description": "Details of the benefits applied to the customer account and its corresponding status. For example, the type parameter indicates LARGE_GOVERNMENT_AGENCY if the customer is an LGA customer.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "cotermDate (read only)",
           "type": "String (date)",
           "required": null,
           "description": "Date that renewal order is to be placed. Should be one year after the first order is provisioned (if a 1-yr term) and gets updated upon each renewal order.",
-          "constraints": "10 characters"
+          "constraints": "10 characters",
+          "deprecated": false
         },
         {
           "name": "creationDate (read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time of account creation in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status (read only)",
           "type": "String",
           "required": null,
           "description": "Status code of customer account",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get customer account details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -851,35 +926,40 @@
           "type": "String",
           "required": null,
           "description": "Unique ID of the Linked Membership.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "name",
           "type": "String",
           "required": null,
           "description": "Name of the Linked Membership",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "type",
           "type": "String",
           "required": null,
           "description": "Linked Membership type. Possible Values are:\n- STANDARD\n- CONSORTIUM",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "linkedMembershipType",
           "type": "String",
           "required": null,
           "description": "Member type. Possible values are:\n- MEMBER\n- OWNER",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "creationDate",
           "type": "Date",
           "required": null,
           "description": "Date of creation.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -893,35 +973,40 @@
           "type": "String",
           "required": null,
           "description": "Unique ID for the deployment generated upon deployment creation",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "companyProfile",
           "type": "CompanyProfile resource",
           "required": null,
           "description": "Information about the customer",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "creationDate (read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time of account creation in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status",
           "type": "String",
           "required": null,
           "description": "Status code of customer account",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get customer account details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -935,28 +1020,32 @@
           "type": "String",
           "required": null,
           "description": "Name of company",
-          "constraints": "Min: 4 characters\nMax: 80 characters"
+          "constraints": "Min: 4 characters\nMax: 80 characters",
+          "deprecated": false
         },
         {
           "name": "preferredLanguage",
           "type": "String",
           "required": null,
           "description": "Preferred language for company (IETF hyphenated language tag)",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "address",
           "type": "Address resource",
           "required": null,
           "description": "Address of company",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "contacts",
           "type": "Array of Contact resources",
           "required": null,
           "description": "Points of contact for admin console",
-          "constraints": "Min: One contact\nNo limit"
+          "constraints": "Min: One contact\nNo limit",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -970,49 +1059,56 @@
           "type": "String",
           "required": null,
           "description": "Country of address (ISO 3166 standard)",
-          "constraints": "2 or 3 characters"
+          "constraints": "2 or 3 characters",
+          "deprecated": false
         },
         {
           "name": "region",
           "type": "String",
           "required": null,
           "description": "State/region of the address (ISO 3166-2\nstandard – only send code after hyphen).\nExample: US-CA → CA",
-          "constraints": "Max: 255 characters"
+          "constraints": "Max: 255 characters",
+          "deprecated": false
         },
         {
           "name": "city",
           "type": "String",
           "required": null,
           "description": "City",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "addressLine1",
           "type": "String",
           "required": null,
           "description": "Line 1 of the address",
-          "constraints": "Max: 60 characters"
+          "constraints": "Max: 60 characters",
+          "deprecated": false
         },
         {
           "name": "addressLine2",
           "type": "String",
           "required": null,
           "description": "Optional. Line 2 of the address",
-          "constraints": "Max: 60 characters"
+          "constraints": "Max: 60 characters",
+          "deprecated": false
         },
         {
           "name": "postalCode",
           "type": "String",
           "required": null,
           "description": "Zip code/postal code of address. Must match city/region/country.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "phoneNumber",
           "type": "String",
           "required": null,
           "description": "Optional. Phone number associated with this address",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1026,28 +1122,32 @@
           "type": "String",
           "required": null,
           "description": "Email address of the contact",
-          "constraints": "Max: 240 characters"
+          "constraints": "Max: 240 characters",
+          "deprecated": false
         },
         {
           "name": "firstName",
           "type": "String",
           "required": null,
           "description": "First name of the contact",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "lastName",
           "type": "String",
           "required": null,
           "description": "Last name of the contact",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "phoneNumber",
           "type": "String",
           "required": null,
           "description": "Optional. Phone number of the contact",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1061,98 +1161,112 @@
           "type": "String",
           "required": false,
           "description": "Reconciliation ID for this order (Example: PO Number, Order ID, and so on).\nID does not need to be unique.",
-          "constraints": "Max: 35 characters"
+          "constraints": "Max: 35 characters",
+          "deprecated": false
         },
         {
           "name": "orderId\n(read only)",
           "type": "String",
           "required": null,
           "description": "Unique identifier for order that is created upon order creation",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "customerId\n(read only)",
           "type": "String",
           "required": null,
           "description": "ID of the customer that placed this order",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "referenceOrderId",
           "type": "String",
           "required": true,
           "description": "The ID of the order being returned in a RETURN order.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "orderType",
           "type": "String",
           "required": null,
           "description": "Type of the order. Valid values: NEW, PREVIEW, PREVIEW_RENEWAL, RETURN, TRANSFER, RENEWAL, PREVIEW_SWITCH, SWITCH, PREVIEW_REVERT_SWITCH, REVERT_SWITCH",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "lineItems",
           "type": "lineItem resources",
           "required": null,
           "description": "Itemized list of the offers and their quantity for this order",
-          "constraints": "Min: 1 item\nMax: 499 items"
+          "constraints": "Min: 1 item\nMax: 499 items",
+          "deprecated": false
         },
         {
           "name": "pricingSummary",
           "type": "pricingSummary resources",
           "required": null,
           "description": "A summary of prices of offers included in the line item.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "eligibleOffers",
           "type": "eligibleOffers resource",
           "required": null,
           "description": "The details of High Growth Offers available to the customer.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "recommendations",
           "type": "recommendations resource",
           "required": null,
           "description": "Lists products available for the customer in the upsell, cross-sell, and add-on motions.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "currencyCode",
           "type": "String",
           "required": null,
           "description": "Currency used for placing the order (ISO 4217 format).",
-          "constraints": "3 characters"
+          "constraints": "3 characters",
+          "deprecated": false
         },
         {
           "name": "creationDate\n(read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time the order was created in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status (read only, except for canceling)",
           "type": "String",
           "required": null,
           "description": "Status code of the order",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "Source",
           "type": "String",
           "required": null,
           "description": "Indicates the origin of the order. Possible values are:\n- API: Order placed through APIs\n- System: Order generated by the system.",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get order details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1166,42 +1280,48 @@
           "type": "String",
           "required": null,
           "description": "The unique ID of the offer.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "renewalCode",
           "type": "String",
           "required": null,
           "description": "Unique identifier of the Minimum Order Quantity Offer. Available values are:\n- MOQ_100\n- MOQ_250\n- MOQ_500",
-          "constraints": "Max: 30 characters"
+          "constraints": "Max: 30 characters",
+          "deprecated": false
         },
         {
           "name": "eligibilityCriteria",
           "type": "Array",
           "required": null,
           "description": "The eligibility criteria for availing the MOQ offer.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "minQuantity",
           "type": "Integer",
           "required": null,
           "description": "The minimum quantity for which this offer is applicable, also the minimum quantity that the customer needs to commit for a 3YC term to be eligible for this offer.",
-          "constraints": "Min: 0\nMax: 999999"
+          "constraints": "Min: 0\nMax: 999999",
+          "deprecated": false
         },
         {
           "name": "additionalCriteria",
           "type": "String",
           "required": null,
           "description": "The additional criteria list for availing the High Growth Offer. Currently, THREE_YEAR_COMMIT is the only supported value, indicating that 3YC is required to avail the High Growth Offers.",
-          "constraints": "Min: 1 item\nMax: 499 items"
+          "constraints": "Min: 1 item\nMax: 499 items",
+          "deprecated": false
         },
         {
           "name": "deploymentId",
           "type": "String",
           "required": null,
           "description": "Unique ID of the deployment.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1215,119 +1335,136 @@
           "type": "integer",
           "required": null,
           "description": "Marketplace’s unique index for item in order",
-          "constraints": "Min: 0\nMax: 999999\nMust be unique"
+          "constraints": "Min: 0\nMax: 999999\nMust be unique",
+          "deprecated": false
         },
         {
           "name": "offerId",
           "type": "String",
           "required": null,
           "description": "The ID of the offer being purchased",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "quantity",
           "type": "integer",
           "required": null,
           "description": "Quantity of this offer purchased in this order",
-          "constraints": "Min: 1\nMax: 10,000 for Team / 599,000 for Enterprise"
+          "constraints": "Min: 1\nMax: 10,000 for Team / 599,000 for Enterprise",
+          "deprecated": false
         },
         {
           "name": "discountCode",
           "type": "String",
           "required": null,
           "description": "The discount code applicable to the HVD customers migrating from VIP to VIP Marketplace.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "subscriptionId (read only)",
           "type": "String",
           "required": null,
           "description": "ID of the Subscription resource associated with this line item.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "status (read only)",
           "type": "String",
           "required": null,
           "description": "Status code of the line item",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "currencyCode",
           "type": "String",
           "required": null,
           "description": "Currency code applicable for the offer",
-          "constraints": "3 characters"
+          "constraints": "3 characters",
+          "deprecated": false
         },
         {
           "name": "proratedDays",
           "type": "Integer",
           "required": null,
           "description": "The number of days for which order will be invoiced. This applies in the case of mid-term purchases.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "flexDiscounts",
           "type": "Object",
           "required": null,
           "description": "Details of the flexible discount applied to that lineItem",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "flexDiscounts[].id",
           "type": "String",
           "required": null,
           "description": "A unique identifier for the flexible discount. Used to retrieve or reference a specific flexible discount.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "flexDiscounts[].code",
           "type": "String",
           "required": null,
           "description": "The flexible discount code that was applied to that lineItem",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "flexDiscount[].result",
           "type": "String",
           "required": null,
           "description": "The “SUCCESS\" indicates that the flexible discount code applicability was successful.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "pricing",
           "type": "Object",
           "required": null,
           "description": "Pricing details.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "pricing[].partnerPrice",
           "type": "Integer",
           "required": null,
           "description": "Non-prorated full-term unit price for the given offer, including any applicable volume discounts, but before applying flexible discounts and taxes.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "pricing[].discountedPartnerPrice",
           "type": "Integer",
           "required": null,
           "description": "Unit price after applying discount.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "pricing[].netPartnerPrice",
           "type": "Integer",
           "required": null,
           "description": "Prorated unit price after discount.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "pricing[].lineItemPrice",
           "type": "Integer",
           "required": null,
           "description": "Prorated price of item after discount and before tax. This is the price partner need to pay to Adobe for this item.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1341,28 +1478,32 @@
           "type": "Object",
           "required": null,
           "description": "Contains different categories of recommended products.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "upsells",
           "type": "Array of Recommendations",
           "required": null,
           "description": "List of recommended products that offer more value by providing a higher-tier, premium, or enhanced version of the selected product or offer. Example: Adobe Photoshop to Adobe Creative Cloud All Apps",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "crossSells",
           "type": "Array of Recommendations",
           "required": null,
           "description": "List of recommended products that complement the selected product by offering additional functionality or benefits. Example: Adobe Stock to Adobe Photoshop",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "addOns",
           "type": "Array of Recommendations",
           "required": null,
           "description": "List of recommended products to extend or enhance the functionality of a base product. These products are not standalone and must be used with the base product. Example: AI Assistant for Adobe Acrobat",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1376,56 +1517,64 @@
           "type": "String",
           "required": null,
           "description": "Unique identifier of the subscription resource",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "currentQuantity (read only)",
           "type": "integer",
           "required": null,
           "description": "Total quantity of the subscription that a customer has",
-          "constraints": "Max: 10,000 for Team\n599,000 for Enterprise"
+          "constraints": "Max: 10,000 for Team\n599,000 for Enterprise",
+          "deprecated": false
         },
         {
           "name": "usedQuantity",
           "type": "integer",
           "required": null,
           "description": "Total used quantity for the license or the consumable",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "offerId",
           "type": "String",
           "required": null,
           "description": "The base discount level offer id.\nNote: This attribute is included for developers to identify the offer and NOT the discount level. Partners need to use “Get customer Account” and “Get Order history” APIs to see discount level information.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "autoRenewal",
           "type": "AutoRenewal object",
           "required": null,
           "description": "Resource to manage auto-renewal flag and quantity",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "creationDate (read only)",
           "type": "String (datetime)",
           "required": null,
           "description": "Date and time of subscription creation in UTC",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "status (read only)",
           "type": "String",
           "required": null,
           "description": "Current status code of the subscription",
-          "constraints": "4 characters"
+          "constraints": "4 characters",
+          "deprecated": false
         },
         {
           "name": "links (read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get subscription details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1439,28 +1588,32 @@
           "type": "Boolean",
           "required": null,
           "description": "Indicates whether the auto renewal is enabled. Set enabled to false to disable auto renewal.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "renewalQuantity",
           "type": "Integer",
           "required": null,
           "description": "If the renewalQuantity is higher than currentQuantity at the renewal time, then the additional licenses will be included in renewal. If it is lower, then licenses will be removed at renewal.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": true
         },
         {
           "name": "renewalCode",
           "type": "String",
           "required": null,
           "description": "Unique identifier of the Minimum Order Quantity Offer. Available values are:\n- MOQ_100\n- MOQ_250\n- MOQ_500",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "flexDiscountCodes",
           "type": "String",
           "required": null,
           "description": "Indicates the flexible discounts applicable for the subscription.",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1474,42 +1627,48 @@
           "type": "integer",
           "required": null,
           "description": "Maximum number of notification items response can contain",
-          "constraints": "0 to INTEGER_MAX"
+          "constraints": "0 to INTEGER_MAX",
+          "deprecated": false
         },
         {
           "name": "offset",
           "type": "integer",
           "required": null,
           "description": "Number of notification items to skip before picking up the items",
-          "constraints": "0 to INTEGER_MAX"
+          "constraints": "0 to INTEGER_MAX",
+          "deprecated": false
         },
         {
           "name": "totalCount",
           "type": "integer",
           "required": null,
           "description": "Total number of items present for a notification",
-          "constraints": "0 to INTEGER_MAX"
+          "constraints": "0 to INTEGER_MAX",
+          "deprecated": false
         },
         {
           "name": "count",
           "type": "integer",
           "required": null,
           "description": "Actual number of notification item response contains",
-          "constraints": "0 to INTEGER_MAX"
+          "constraints": "0 to INTEGER_MAX",
+          "deprecated": false
         },
         {
           "name": "items",
           "type": "Array of NotificationItem resources",
           "required": null,
           "description": "Itemized list of notifications",
-          "constraints": "0 to INTEGER_MAX"
+          "constraints": "0 to INTEGER_MAX",
+          "deprecated": false
         },
         {
           "name": "links(read only)",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get notification details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1523,28 +1682,32 @@
           "type": "String",
           "required": null,
           "description": "Customer id for the account where partner order is pending",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "resellerId",
           "type": "String",
           "required": null,
           "description": "Reseller account id for the account whose partner order is still pending",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "notificationType",
           "type": "String",
           "required": null,
           "description": "Type of notification response",
-          "constraints": "Max: 40 characters"
+          "constraints": "Max: 40 characters",
+          "deprecated": false
         },
         {
           "name": "links",
           "type": "Links resource",
           "required": null,
           "description": "Deep links to get notification item details",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1558,14 +1721,16 @@
           "type": "boolean",
           "required": null,
           "description": "Boolean flag denoting whether or not autoRenewal is enabled",
-          "constraints": "true or false"
+          "constraints": "true or false",
+          "deprecated": false
         },
         {
           "name": "renewalQuantity",
           "type": "integer",
           "required": null,
           "description": "Optional. Total quantity to be renewed at the end of the contract period (can be higher than the current subscription quantity)",
-          "constraints": "Min: 1\nMax: 10,000 for Team / 599,000 for Enterprise"
+          "constraints": "Min: 1\nMax: 10,000 for Team / 599,000 for Enterprise",
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"
@@ -1579,42 +1744,48 @@
           "type": "Link object",
           "required": null,
           "description": "Link to get data about this resource",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "next",
           "type": "Link object",
           "required": null,
           "description": "Link to get data about the next resource",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "prev",
           "type": "Link object",
           "required": null,
           "description": "Link to get data about the previous resource",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "uri",
           "type": "String",
           "required": null,
           "description": "The URI to access this link",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "method",
           "type": "String",
           "required": null,
           "description": "The method used for the URI",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         },
         {
           "name": "headers",
           "type": "Array of Key:Value pairs",
           "required": null,
           "description": "The headers for the link.\nNote: Any headers in this are in addition to the required headers specified in the Headers section above.",
-          "constraints": null
+          "constraints": null,
+          "deprecated": false
         }
       ],
       "docs_path": "/vipmp/docs/references/resources"

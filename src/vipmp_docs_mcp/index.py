@@ -41,7 +41,7 @@ from .releases import (
 
 log = get_logger("index")
 
-INDEX_SCHEMA_VERSION = 2  # Bumped when `releases` was added to the snapshot.
+INDEX_SCHEMA_VERSION = 3  # v2 added releases; v3 added deprecated + deprecation_note on Endpoint and deprecated on SchemaField.
 
 # Per-user refresh: written by rebuild_vipmp_index tool / GHA artifact drop.
 USER_INDEX_PATH = CACHE_DIR / "index.json"

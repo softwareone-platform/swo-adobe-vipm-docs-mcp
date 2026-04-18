@@ -13,6 +13,7 @@ from mcp.types import ToolAnnotations
 
 from .autositemap import build_sitemap, get_active_sitemap, save_sitemap
 from .cache import get_cache
+from .codegen import SUPPORTED_LANGUAGES, generate_snippet
 from .extractors import (
     extract_code_examples,
     extract_endpoints,
@@ -64,11 +65,22 @@ def _known_paths() -> set[str]:
 mcp = FastMCP(
     "vipmp-docs",
     instructions=(
-        "Use this server to look up Adobe VIP Marketplace Partner API documentation. "
-        "Call search_vipmp_docs first to find relevant pages, then get_vipmp_page to read full content. "
-        "Structured tools: list_vipmp_endpoints, list_vipmp_error_codes, get_vipmp_schema, "
-        "get_vipmp_code_examples. Prompts: review_request_body, debug_error_code, draft_order, "
-        "check_3yc_eligibility."
+        "Look up Adobe VIP Marketplace Partner API documentation and reason about "
+        "it structurally.\n"
+        "\n"
+        "For questions about a specific endpoint, prefer `describe_vipmp_endpoint` — "
+        "it returns the schema, error codes, release-note mentions, and relevant "
+        "code examples in one call.\n"
+        "\n"
+        "To check a JSON request body for correctness, use `validate_vipmp_request` — "
+        "it programmatically checks field names, types, required-ness, constraints "
+        "(max length, numeric limits), and deprecation.\n"
+        "\n"
+        "To produce a runnable request snippet, use `generate_vipmp_request` with "
+        "language=\"curl\" | \"powershell\" | \"python\" | \"csharp\".\n"
+        "\n"
+        "For fuzzy doc search, use `search_vipmp_docs`. For a specific page, "
+        "`get_vipmp_page`. For release notes, `list_vipmp_releases(since, section)`."
     ),
 )
 
@@ -789,6 +801,285 @@ def list_vipmp_releases(
                 out.append(f"\n**{change.title}**\n")
                 if change.body:
                     out.append(change.body)
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# Endpoint-centric tools (Tier 1)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool(
+    title="Describe VIPMP endpoint",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,  # strictly index-backed
+    ),
+)
+def describe_vipmp_endpoint(method: str, path: str) -> str:
+    """
+    One-shot profile of a VIPMP endpoint. Returns schema, error codes,
+    code examples, and any release-note mentions in one call — so Claude
+    doesn't have to chain 4 separate tool invocations.
+
+    Args:
+        method: HTTP method (GET / POST / PATCH / PUT / DELETE).
+        path: API path (e.g. "/v3/customers").
+
+    Example:
+        describe_vipmp_endpoint(method="POST", path="/v3/customers")
+    """
+    idx = get_active_index()
+    if idx is None:
+        return (
+            "_(No index available — call `rebuild_vipmp_index` first.)_"
+        )
+
+    method = method.strip().upper()
+    path = path.strip()
+
+    matches = [
+        ep for ep in idx.endpoints if ep.method == method and ep.path == path
+    ]
+    if not matches:
+        suggestions = [
+            f"{ep.method} {ep.path}"
+            for ep in idx.endpoints
+            if ep.method == method
+        ][:5]
+        hint = (
+            "\n\nSimilar endpoints with this method:\n"
+            + "\n".join(f"- `{s}`" for s in suggestions)
+            if suggestions
+            else ""
+        )
+        return (
+            f"_(Endpoint `{method} {path}` not found in index. "
+            f"Try `list_vipmp_endpoints` to see documented endpoints.{hint})_"
+        )
+
+    ep = matches[0]
+    out = [
+        f"# `{ep.method} {ep.path}`\n",
+        _index_source_note(),
+        "",
+        f"**Title:** {ep.title}",
+        f"**Docs:** `{ep.docs_path}`",
+    ]
+    if ep.deprecated:
+        out.append(f"\n> ⚠️ **Deprecated.** {ep.deprecation_note or ''}".rstrip())
+
+    # Request schema (if any)
+    schemas_here = [s for s in idx.schemas if s.docs_path == ep.docs_path]
+    if schemas_here:
+        primary = next(
+            (s for s in schemas_here if "response" not in s.name.lower()),
+            schemas_here[0],
+        )
+        out.append(f"\n## Request schema: {primary.name}\n")
+        out.append("| Field | Type | Required | Description | Constraints |")
+        out.append("|---|---|---|---|---|")
+        for f in primary.fields:
+            req = (
+                "✅"
+                if f.required is True
+                else "optional"
+                if f.required is False
+                else "—"
+            )
+            flag = " 🛑" if f.deprecated else ""
+            desc = (f.description or "").replace("\n", " ").replace("|", "\\|")
+            cons = (f.constraints or "").replace("\n", " ").replace("|", "\\|")
+            out.append(
+                f"| `{f.name}`{flag} | {f.type} | {req} | {desc} | {cons} |"
+            )
+    else:
+        out.append("\n## Request schema\n\n_(No structured schema extracted.)_")
+
+    # Error codes for this endpoint
+    endpoint_str = f"{ep.method} {ep.path}"
+    matching_errors = [
+        c for c in idx.error_codes if c.endpoint and c.endpoint.lower() == endpoint_str.lower()
+    ]
+    # Be lenient — some error entries use slightly different endpoint strings
+    # (path parameters, capitalisation). Fall back to substring match.
+    if not matching_errors:
+        matching_errors = [
+            c
+            for c in idx.error_codes
+            if c.endpoint and ep.path.split("/")[-1] in c.endpoint
+        ]
+    if matching_errors:
+        out.append(f"\n## Documented error codes ({len(matching_errors)})\n")
+        for c in matching_errors[:20]:
+            out.append(f"- **{c.code}** — {c.reason}")
+        if len(matching_errors) > 20:
+            out.append(f"- _(+{len(matching_errors) - 20} more; call "
+                       f"`list_vipmp_error_codes` with `query=\"{ep.path}\"` for all)_")
+    else:
+        out.append("\n## Documented error codes\n\n_(No error codes specifically attributed to this endpoint.)_")
+
+    # Release notes mentioning this endpoint
+    rel_mentions = []
+    for r in idx.releases:
+        for change in r.changes:
+            haystack = (change.title + " " + change.body).lower()
+            if ep.path.lower() in haystack or ep.title.lower() in haystack:
+                rel_mentions.append((r.date or r.raw_date, r.section, change.title))
+                break
+    if rel_mentions:
+        out.append(f"\n## Release notes ({len(rel_mentions)} mention(s))\n")
+        for date, section, title in rel_mentions[:5]:
+            out.append(f"- **{date}** [{section}] — {title}")
+
+    out.append(
+        f"\n---\n"
+        f"_Related tools: `get_vipmp_code_examples(\"{ep.docs_path}\")` for example JSON, "
+        f"`generate_vipmp_request(\"{ep.method} {ep.path}\")` for a runnable snippet, "
+        f"`validate_vipmp_request(\"{ep.method} {ep.path}\", body_json)` to check a body._"
+    )
+    return "\n".join(out)
+
+
+@mcp.tool(
+    title="Validate VIPMP request body",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,  # purely computation against cached schema
+    ),
+)
+def validate_vipmp_request(endpoint: str, body_json: str) -> str:
+    """
+    Cross-check a JSON request body against the documented VIPMP schema.
+
+    Finds the endpoint's schema in the pre-built index and checks every
+    field against its documented type, required-ness, and constraints
+    (character limits, numeric ranges). Flags unknown fields, missing
+    required fields, type mismatches, constraint violations, and
+    deprecated-field usage.
+
+    Scope: top-level fields only. Nested objects are noted as
+    "not recursively validated" — check their schemas separately via
+    `get_vipmp_schema`.
+
+    Args:
+        endpoint: "METHOD /path" (e.g. "POST /v3/customers").
+        body_json: The request body to check, as a JSON string.
+
+    Example:
+        validate_vipmp_request(
+            endpoint="POST /v3/customers",
+            body_json='{"resellerId": "5556667778", "externalReferenceId": "342"}',
+        )
+    """
+    from .validator import (
+        ISSUE_ERROR,
+        ISSUE_INFO,
+        ISSUE_WARNING,
+        validate_body,
+    )
+
+    result = validate_body(endpoint, body_json)
+
+    # Summary header
+    status = "✅ Valid" if result.ok else "❌ Invalid"
+    summary = (
+        f"# {status} — `{result.endpoint}`\n\n"
+        f"- **Errors:** {result.error_count}\n"
+        f"- **Warnings:** {result.warning_count}\n"
+        f"- **Schema:** {result.schema_name or '_(unresolved)_'}\n"
+        f"- **Docs:** {f'`{result.docs_path}`' if result.docs_path else '_(none)_'}\n"
+    )
+
+    if not result.issues:
+        return summary + "\n_(No issues — body conforms to the documented schema at the top level.)_"
+
+    # Group issues by level for readability.
+    level_order = {ISSUE_ERROR: 0, ISSUE_WARNING: 1, ISSUE_INFO: 2}
+    level_label = {
+        ISSUE_ERROR: "🚫 Errors",
+        ISSUE_WARNING: "⚠️ Warnings",
+        ISSUE_INFO: "Info",
+    }
+    buckets: dict[str, list] = {}
+    for issue in result.issues:
+        buckets.setdefault(issue.level, []).append(issue)
+
+    out = [summary]
+    for level in sorted(buckets, key=lambda lvl: level_order.get(lvl, 99)):
+        out.append(f"\n## {level_label.get(level, level)}\n")
+        for issue in buckets[level]:
+            field = f"`{issue.field}`" if issue.field else "(body)"
+            out.append(f"- {field}: {issue.message}")
+
+    return "\n".join(out)
+
+
+@mcp.tool(
+    title="Generate VIPMP request snippet",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+def generate_vipmp_request(
+    endpoint: str,
+    body_json: str | None = None,
+    language: str = "curl",
+) -> str:
+    """
+    Emit a runnable code snippet for a VIPMP endpoint.
+
+    Useful for "give me a starting point for calling POST /v3/customers".
+    If you supply a body, it's used as-is. If not, we build a placeholder
+    body from the schema, filling required fields with type-appropriate
+    dummy values so the snippet shows the minimum valid shape.
+
+    Args:
+        endpoint: "METHOD /path" (e.g. "POST /v3/customers").
+        body_json: Optional JSON body to embed in the snippet. If omitted
+            and the method is POST/PATCH/PUT, a placeholder body is
+            constructed from the schema.
+        language: Output language. One of: "curl" (default), "powershell",
+            "python" (httpx), "csharp" (HttpClient).
+
+    Example:
+        generate_vipmp_request(
+            endpoint="POST /v3/customers",
+            language="python",
+        )
+    """
+    result = generate_snippet(endpoint, body_json=body_json, language=language)
+    if isinstance(result, str):
+        return f"_(Error: {result})_"
+
+    lang_to_code_fence = {
+        "curl": "bash",
+        "powershell": "powershell",
+        "python": "python",
+        "csharp": "csharp",
+    }
+    fence = lang_to_code_fence.get(result.language, "")
+
+    out = [
+        f"# `{endpoint}` — {result.language} snippet\n",
+        f"```{fence}\n{result.code}\n```",
+        "",
+        "## Notes",
+    ]
+    for note in result.notes:
+        out.append(f"- {note}")
+    out.append(
+        "\n_Supported languages: "
+        + ", ".join(f"`{lang}`" for lang in SUPPORTED_LANGUAGES)
+        + "._"
+    )
     return "\n".join(out)
 
 

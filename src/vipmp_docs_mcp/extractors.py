@@ -26,6 +26,36 @@ from .logging_config import get_logger
 log = get_logger("extractors")
 
 
+# Markers Adobe uses to flag deprecation in prose. Conservative — we only
+# match explicit language, not ambiguous phrases like "legacy" or "older".
+DEPRECATION_RE = re.compile(
+    r"\b(deprecated|will be removed|no longer supported?|sunset|end[- ]of[- ]life)\b",
+    re.IGNORECASE,
+)
+
+
+def detect_deprecation(text: str) -> str | None:
+    """
+    Return a short excerpt of the sentence containing a deprecation marker,
+    or None if no marker found. Used to surface *why* something is flagged.
+    """
+    if not text:
+        return None
+    match = DEPRECATION_RE.search(text)
+    if not match:
+        return None
+    # Grab the sentence the match lives in.
+    start = text.rfind(".", 0, match.start()) + 1
+    end = text.find(".", match.end())
+    if end == -1:
+        end = len(text)
+    sentence = text[start:end].strip()
+    # Trim runaway sentences.
+    if len(sentence) > 240:
+        sentence = sentence[:237] + "..."
+    return sentence
+
+
 # ---------------------------------------------------------------------------
 # Shared: div.table parser
 # ---------------------------------------------------------------------------
@@ -85,6 +115,8 @@ class Endpoint:
     path: str  # e.g. "/v3/customers"
     docs_path: str  # e.g. "/vipmp/docs/customer-account/create-customer-account"
     title: str  # human-readable doc title
+    deprecated: bool = False
+    deprecation_note: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -92,6 +124,8 @@ class Endpoint:
             "path": self.path,
             "docs_path": self.docs_path,
             "title": self.title,
+            "deprecated": self.deprecated,
+            "deprecation_note": self.deprecation_note,
         }
 
 
@@ -104,8 +138,22 @@ def extract_endpoints(html: str, docs_path: str, title: str) -> list[Endpoint]:
 
     Matches `div.table` with headers containing "Endpoint" and "Method".
     A page may expose multiple endpoints (rare but possible).
+
+    Also scans the full page text for deprecation markers — if the page
+    as a whole mentions deprecation, every endpoint on it inherits the
+    hint, since Adobe typically deprecates at the endpoint level rather
+    than at individual columns of the endpoint table.
     """
     endpoints: list[Endpoint] = []
+
+    # Page-level deprecation scan (cheap — one regex over cleaned page text).
+    soup = BeautifulSoup(html, "html.parser")
+    for sel in ("nav", "footer", "script", "style", "header"):
+        for t in soup.select(sel):
+            t.decompose()
+    page_text = soup.get_text(separator=" ", strip=True)
+    page_deprecation = detect_deprecation(page_text)
+
     for headers, rows in _find_tables(html):
         header_lower = [h.lower() for h in headers]
         if not ({"endpoint", "method"} <= set(header_lower)):
@@ -123,7 +171,14 @@ def extract_endpoints(html: str, docs_path: str, title: str) -> list[Endpoint]:
             if not _VERB.match(method) or not path:
                 continue
             endpoints.append(
-                Endpoint(method=method, path=path, docs_path=docs_path, title=title)
+                Endpoint(
+                    method=method,
+                    path=path,
+                    docs_path=docs_path,
+                    title=title,
+                    deprecated=page_deprecation is not None,
+                    deprecation_note=page_deprecation,
+                )
             )
     return endpoints
 
@@ -232,6 +287,7 @@ class SchemaField:
     required: bool | None  # True/False/None if unspecified
     description: str
     constraints: str | None = None  # "Max: 35 characters"
+    deprecated: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -240,6 +296,7 @@ class SchemaField:
             "required": self.required,
             "description": self.description,
             "constraints": self.constraints,
+            "deprecated": self.deprecated,
         }
 
 
@@ -333,6 +390,7 @@ def extract_schemas(html: str, docs_path: str | None = None) -> list[SchemaResou
                     required=required,
                     description=desc,
                     constraints=constraints or None,
+                    deprecated=detect_deprecation(desc) is not None,
                 )
             )
 

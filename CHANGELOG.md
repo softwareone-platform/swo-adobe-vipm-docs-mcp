@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-04-18
+
+### Added
+- **`describe_vipmp_endpoint(method, path)`** — one-shot endpoint profile:
+  returns the request schema, documented error codes, release-note
+  mentions, and cross-references to code examples + validation in a
+  single call. Replaces 4 chained tool invocations with one coherent
+  view. Index-backed; closed-world.
+- **`validate_vipmp_request(endpoint, body_json)`** — programmatic
+  validator that cross-checks a JSON body against the documented schema.
+  Detects unknown fields (warning), missing required fields (error),
+  type mismatches (error), constraint violations like "Max: 35 characters"
+  or numeric maxes (error), nested objects not recursively validated
+  (info), and usage of deprecated fields (warning). Turns the
+  `review_request_body` prompt workflow into a real programmatic tool.
+- **`generate_vipmp_request(endpoint, body?, language?)`** — emits a
+  runnable code snippet for an endpoint in one of four languages:
+  `curl` (default), `powershell` (Invoke-RestMethod), `python` (httpx),
+  `csharp` (HttpClient). When no body is supplied, builds a placeholder
+  body from the schema so the snippet shows the full shape the developer
+  needs to fill in. Skips read-only fields automatically.
+- **Deprecation tracking** — extractors now scan for deprecation markers
+  ("deprecated", "will be removed", "no longer supported", "sunset",
+  "end of life") and tag endpoints and schema fields with a
+  `deprecated: bool` + `deprecation_note: str | None`. Used by
+  `describe_vipmp_endpoint` (flags deprecated endpoints with a banner)
+  and `validate_vipmp_request` (warns when a deprecated field is used).
+
+### Changed
+- **Index schema bumped to v3.** Adds `deprecated` + `deprecation_note`
+  to `Endpoint`; adds `deprecated` to `SchemaField`. Any on-disk index
+  from v0.3.x is transparently discarded and rebuilt.
+- **Server instructions** rewritten to guide Claude toward the new
+  endpoint-centric tools before falling back to generic doc search.
+- **Code snippet placeholder body** now includes all non-read-only
+  fields when no field is explicitly required (Adobe's docs don't always
+  mark required fields), so developers see the full shape instead of
+  an empty body.
+
 ## [0.3.2] — 2026-04-18
 
 ### Added
@@ -105,7 +144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/releases/tag/v0.3.0

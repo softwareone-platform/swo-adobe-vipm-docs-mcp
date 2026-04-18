@@ -32,6 +32,13 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 | `list_vipmp_docs()` | Full sitemap of every documented page, grouped by topic. |
 | `get_vipmp_page(path)` | Fetch the full content of a specific page. |
 
+### Endpoint-centric tools (the highest-leverage workflows)
+| Tool | What it does |
+|---|---|
+| `describe_vipmp_endpoint(method, path)` | **One-shot profile**: schema + error codes + release-note mentions + cross-references in a single call. The fastest way to understand an endpoint end-to-end. |
+| `validate_vipmp_request(endpoint, body_json)` | Programmatically checks a JSON body against the documented schema. Catches unknown fields, missing required fields, type mismatches, constraint violations (e.g. "Max: 35 characters"), and deprecated-field usage. |
+| `generate_vipmp_request(endpoint, body?, language?)` | Emits a runnable snippet in `curl` / `powershell` / `python` (httpx) / `csharp` (HttpClient). Builds a placeholder body from the schema when you don't supply one. |
+
 ### Structured extractors
 | Tool | What it does |
 |---|---|
@@ -153,6 +160,15 @@ Use the `summarize_recent_changes` prompt with `area="LGA"`. Claude fetches rece
 
 ### "Is Mid-Term Upgrades live in production yet?"
 Use the `check_feature_status` prompt with `feature="Mid-term upgrades"`. Returns one of {Live / In Sandbox / Upcoming / Not documented}, with the release date and evidence quoted from the docs.
+
+### "Tell me everything about `POST /v3/customers`."
+One call: `describe_vipmp_endpoint(method="POST", path="/v3/customers")`. Returns the request schema, documented error codes, release-note mentions, and cross-references to `get_vipmp_code_examples` / `generate_vipmp_request` / `validate_vipmp_request`. Replaces what used to be four separate tool calls.
+
+### "Check this JSON body before I send it."
+`validate_vipmp_request(endpoint="POST /v3/customers", body_json='{"resellerId":"R1","externalReferenceId":"..."}')`. Returns a structured issue list: errors (missing required, type mismatch, constraint violation, deprecated field), warnings (unknown fields), and info (nested objects not recursively validated). Catches most real-world mistakes in milliseconds.
+
+### "Give me a Python / PowerShell / C# starting point for this endpoint."
+`generate_vipmp_request(endpoint="POST /v3/customers", language="python")`. Emits a runnable snippet with the auth-header scaffolding and a schema-derived placeholder body. Swap `${VIPMP_BASE_URL}` and `${VIPMP_ACCESS_TOKEN}` for your own values and you have a working request shell.
 
 ### "Pre-warm the cache so search works faster."
 Call the `warm_vipmp_cache` tool directly. One-time ~30s fetch of every page. Subsequent searches get content-level relevance matching across all 86 pages.

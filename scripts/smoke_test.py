@@ -83,6 +83,9 @@ async def main() -> int:
                 "get_vipmp_schema",
                 "get_vipmp_code_examples",
                 "list_vipmp_releases",
+                "describe_vipmp_endpoint",
+                "validate_vipmp_request",
+                "generate_vipmp_request",
             }
             got_tools = {t.name for t in tools.tools}
             missing = expected_tools - got_tools
@@ -235,6 +238,46 @@ async def main() -> int:
                 ok(f"sandbox filter returns sandbox entries ({len(text)} chars)")
             else:
                 fail(f"sandbox filter didn't return sandbox content: {text[:300]}")
+                failures += 1
+
+            # --- Tool: describe_vipmp_endpoint ----------------------------
+            print("\ndescribe_vipmp_endpoint(method='POST', path='/v3/customers')")
+            r = await session.call_tool(
+                "describe_vipmp_endpoint",
+                {"method": "POST", "path": "/v3/customers"},
+            )
+            text = "".join(c.text for c in r.content if hasattr(c, "text"))
+            if "POST" in text and "Request schema" in text and "/v3/customers" in text:
+                ok(f"endpoint described ({len(text)} chars)")
+            else:
+                fail(f"describe_vipmp_endpoint output unexpected: {text[:300]}")
+                failures += 1
+
+            # --- Tool: validate_vipmp_request -----------------------------
+            print("\nvalidate_vipmp_request(endpoint='POST /v3/customers', body=bad)")
+            bad_body = '{"externalReferenceId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+            r = await session.call_tool(
+                "validate_vipmp_request",
+                {"endpoint": "POST /v3/customers", "body_json": bad_body},
+            )
+            text = "".join(c.text for c in r.content if hasattr(c, "text"))
+            if "Invalid" in text and "too long" in text:
+                ok(f"validator correctly flagged over-long field ({len(text)} chars)")
+            else:
+                fail(f"validator output unexpected: {text[:300]}")
+                failures += 1
+
+            # --- Tool: generate_vipmp_request -----------------------------
+            print("\ngenerate_vipmp_request(endpoint='POST /v3/customers', language='python')")
+            r = await session.call_tool(
+                "generate_vipmp_request",
+                {"endpoint": "POST /v3/customers", "language": "python"},
+            )
+            text = "".join(c.text for c in r.content if hasattr(c, "text"))
+            if "import httpx" in text and "python" in text.lower():
+                ok(f"python snippet generated ({len(text)} chars)")
+            else:
+                fail(f"codegen output unexpected: {text[:300]}")
                 failures += 1
 
             # --- Prompt: debug_error_code ---------------------------------
