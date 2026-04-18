@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-04-18
+
+### Added
+- **`vipmp_server_info`** tool — diagnostic dump: package version,
+  Python version, index age + counts (endpoints / errors / schemas /
+  releases / deprecations), sitemap size, cache stats, log file path,
+  and a "Tips" section pointing at the right tool when something looks
+  off. First call when debugging.
+- **`Literal` types for closed-set arguments** — `section` on
+  `list_vipmp_releases`, `method` on `describe_vipmp_endpoint`, and
+  `language` on `generate_vipmp_request` are now declared as `Literal[...]`.
+  Surfaces in the tool's JSON schema as `enum: [...]`, so MCP clients
+  can render them as dropdowns (and reject invalid values before they
+  reach the server).
+
+### Changed
+- **Sharper error messages** across `server.py` and `validator.py` —
+  empty-result paths and fetch failures now tell the caller exactly
+  what to do next. Examples:
+  - `get_vipmp_page` fetch failure → suggests `refresh_vipmp_sitemap` /
+    `list_vipmp_docs` and explains the retry behaviour.
+  - "No error codes matched query" → suggests dropping the filter,
+    using a substring, or rebuilding the index.
+  - "No request schema extracted" → suggests `get_vipmp_page` and
+    `get_vipmp_code_examples` for the same path.
+- **CONTRIBUTING.md release checklist** — added a "refresh dev
+  dependencies" step (`pip install -e ".[dev]" --upgrade`) before
+  pre-tag lint, so future hotfixes like v0.4.1 don't recur from local
+  / CI ruff drift.
+
+### Considered, deferred
+- **Structured output** for `validate_vipmp_request` — FastMCP supports
+  it via TypedDict return types, but adopting it would replace the
+  current Markdown output with auto-generated text (less readable for
+  humans). Will revisit if any agent integration explicitly needs
+  programmatic issue lists.
+- **Prompt argument completion** — MCP spec scopes
+  `completion/complete` to prompts and resource templates, not tool
+  args. Our prompts currently don't have closed-set arguments worth
+  completing.
+
 ## [0.4.1] — 2026-04-18
 
 ### Fixed
@@ -162,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.3.1...v0.3.2

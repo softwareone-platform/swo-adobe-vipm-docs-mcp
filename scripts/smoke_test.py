@@ -86,6 +86,7 @@ async def main() -> int:
                 "describe_vipmp_endpoint",
                 "validate_vipmp_request",
                 "generate_vipmp_request",
+                "vipmp_server_info",
             }
             got_tools = {t.name for t in tools.tools}
             missing = expected_tools - got_tools
@@ -118,6 +119,17 @@ async def main() -> int:
                 ok(f"returned sitemap ({len(text)} chars)")
             else:
                 fail("sitemap output doesn't contain expected markers")
+                failures += 1
+
+            # --- Tool: vipmp_server_info (fast diagnostic) ----------------
+            print("\nvipmp_server_info")
+            r = await session.call_tool("vipmp_server_info", {})
+            text = "".join(c.text for c in r.content if hasattr(c, "text"))
+            lower = text.lower()
+            if "package" in lower and "index" in lower and "cache" in lower:
+                ok(f"diagnostic dumped ({len(text)} chars)")
+            else:
+                fail(f"server_info output unexpected: {text[:300]}")
                 failures += 1
 
             # --- Tool: vipmp_cache_stats ----------------------------------

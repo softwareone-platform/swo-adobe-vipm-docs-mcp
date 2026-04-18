@@ -94,10 +94,45 @@ Tests live in `tests/` with synthetic HTML fixtures in `tests/conftest.py`.
 
 Maintainers:
 
-1. Bump `version` in `pyproject.toml` and `__version__` in `src/vipmp_docs_mcp/__init__.py`.
-2. Move the `## [Unreleased]` entries in `CHANGELOG.md` under a new `## [X.Y.Z] — YYYY-MM-DD` heading.
-3. Commit, tag (`git tag -a vX.Y.Z -m "..."`), push `main` + tag.
-4. `gh release create vX.Y.Z --title "..." --notes "..."` referencing the changelog entry.
+1. **Refresh dev dependencies** so local matches CI:
+   ```bash
+   pip install -e ".[dev]" --upgrade
+   ```
+   Lint rules evolve with ruff versions. Without this step, your local
+   pre-tag check can pass under an older rule set while CI fails under
+   the latest — which is how we ended up hotfixing v0.4.1.
+
+2. **Full pre-tag check:**
+   ```bash
+   ruff check src/ tests/ scripts/ examples/
+   pytest --cov=vipmp_docs_mcp --cov-report=term
+   python scripts/smoke_test.py
+   ```
+   All three must pass. If smoke fails, it usually means a tool broke
+   or a prompt rendered malformed — CI won't catch those because it
+   doesn't run the smoke test (it requires network).
+
+3. Bump `version` in `pyproject.toml` and `__version__` in
+   `src/vipmp_docs_mcp/__init__.py`.
+
+4. Move the `## [Unreleased]` entries in `CHANGELOG.md` under a new
+   `## [X.Y.Z] — YYYY-MM-DD` heading. Update the comparison links at
+   the bottom.
+
+5. Commit, tag, push `main` + tag:
+   ```bash
+   git commit -m "vX.Y.Z — short summary"
+   git tag -a vX.Y.Z -m "vX.Y.Z — short summary"
+   git push origin main
+   git push origin vX.Y.Z
+   ```
+
+6. Create the GitHub release:
+   ```bash
+   gh release create vX.Y.Z --title "..." --latest --notes "..."
+   ```
+   The release notes should reference the changelog entry and include
+   the `uvx` install snippet pinned to `@vX.Y.Z`.
 
 ## Reporting security issues
 

@@ -259,8 +259,13 @@ def resolve_schema(
         return None, ep.docs_path, (
             f"Endpoint {method} {path} is documented at "
             f"{ep.docs_path} but no request schema was extracted from that "
-            "page — there may not be a documented request body, or the "
-            "docs may use a non-standard structure."
+            "page. Try:\n"
+            f"  - `get_vipmp_page(path=\"{ep.docs_path}\")` to read the raw "
+            "docs — the page may not have a Property/Type table, only a "
+            "JSON example.\n"
+            f"  - `get_vipmp_code_examples(docs_path=\"{ep.docs_path}\", language=\"json\")` "
+            "to pull any example bodies Adobe documents there.\n"
+            "  - `rebuild_vipmp_index` if you think the index is stale."
         )
 
     # Heuristic: if multiple schemas, prefer one whose name doesn't suggest

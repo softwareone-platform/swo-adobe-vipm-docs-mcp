@@ -8,6 +8,8 @@ structured extractors, and MCP prompts land in later phases.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
@@ -217,7 +219,14 @@ def get_vipmp_page(path: str) -> str:
     try:
         content = _get_cleaned_content(path)
     except FetchError as exc:
-        return f"{warning}Error fetching '{path}': {exc}"
+        return (
+            f"{warning}Error fetching `{path}`: {exc}\n\n"
+            "**Next steps:**\n"
+            "- Run `refresh_vipmp_sitemap` if Adobe may have renamed the page.\n"
+            "- Check `list_vipmp_docs` for the canonical path.\n"
+            "- If the error is transient (network / 5xx), retry — the fetcher "
+            "retries 3x automatically but repeated failures surface like this."
+        )
 
     entry = _find_by_path(path)
     title = entry["title"] if entry else path
@@ -438,7 +447,13 @@ def list_vipmp_endpoints() -> str:
             endpoints.extend(extract_endpoints(html, docs_path, title))
 
     if not endpoints:
-        return "_(No endpoints found in the current sitemap.)_"
+        return (
+            "_(No endpoints found in the current sitemap.)_\n\n"
+            "This usually means:\n"
+            "- The index is empty — run `rebuild_vipmp_index`.\n"
+            "- The sitemap has drifted — run `refresh_vipmp_sitemap` then "
+            "`rebuild_vipmp_index`."
+        )
 
     # Group by first path segment after /v3/ for readability.
     def group_key(ep) -> str:
@@ -504,7 +519,19 @@ def list_vipmp_error_codes(query: str | None = None) -> str:
         ]
 
     if not codes:
-        return f"_(No error codes matched{' query=' + repr(query) if query else ''}.)_"
+        if query:
+            return (
+                f"_(No error codes matched query={query!r}.)_\n\n"
+                "Try:\n"
+                "- Calling `list_vipmp_error_codes` without a query to see "
+                "everything documented.\n"
+                "- A substring match — e.g. `'1117'`, `'coterm'`, `'customer'`.\n"
+                "- `rebuild_vipmp_index` if you think the index is stale."
+            )
+        return (
+            "_(No error codes in the index.)_\n\n"
+            "Run `rebuild_vipmp_index` to populate from live Adobe docs."
+        )
 
     codes.sort(key=lambda c: (c.code, c.endpoint or "", c.docs_path or ""))
     out = [
@@ -556,7 +583,11 @@ def get_vipmp_schema(resource_name: str | None = None) -> str:
         schemas = [s for s in schemas if needle in s.name.lower()]
 
     if not schemas:
-        return f"_(No schemas matched resource_name={resource_name!r}.)_"
+        return (
+            f"_(No schemas matched resource_name={resource_name!r}.)_\n\n"
+            "Call `get_vipmp_schema` without a filter to see every documented "
+            "resource (Customer, Reseller, etc.)."
+        )
 
     out = [
         f"# VIPMP Resource Schemas ({len(schemas)} resource(s))\n",
@@ -611,7 +642,16 @@ def get_vipmp_code_examples(docs_path: str, language: str | None = None) -> str:
     examples = extract_code_examples(html, language=language)
     if not examples:
         filter_note = f" (language={language!r})" if language else ""
-        return f"_(No code examples found on `{path}`{filter_note}.)_"
+        return (
+            f"_(No code examples found on `{path}`{filter_note}.)_\n\n"
+            "Try:\n"
+            "- `get_vipmp_page(path)` to view the raw page content — some "
+            "pages describe requests in prose without code blocks.\n"
+            "- Drop the `language` filter to see all code blocks regardless "
+            "of language tag.\n"
+            "- `generate_vipmp_request(endpoint, language=...)` to synthesise "
+            "a snippet from the schema if none is documented."
+        )
 
     out = [f"# Code examples from `{path}`\n"]
     if language:
@@ -680,7 +720,7 @@ def rebuild_vipmp_index() -> str:
 )
 def list_vipmp_releases(
     since: str | None = None,
-    section: str | None = None,
+    section: Literal["api_changes", "sandbox", "upcoming", "earlier"] | None = None,
     limit: int = 20,
 ) -> str:
     """
@@ -749,7 +789,15 @@ def list_vipmp_releases(
         if section:
             filters.append(f"section={section}")
         filter_str = f" ({', '.join(filters)})" if filters else ""
-        return f"_(No release entries matched{filter_str}.)_"
+        return (
+            f"_(No release entries matched{filter_str}.)_\n\n"
+            "Try:\n"
+            "- Dropping the filter and calling `list_vipmp_releases()` to "
+            "see every release.\n"
+            "- A broader `since` date — e.g. `since=\"2025-01-01\"`.\n"
+            "- A different `section` — one of `api_changes`, `sandbox`, "
+            "`upcoming`, `earlier`."
+        )
 
     # Sort: dated entries newest-first, undated last.
     entries.sort(
@@ -805,6 +853,90 @@ def list_vipmp_releases(
 
 
 # ---------------------------------------------------------------------------
+# Introspection
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool(
+    title="VIPMP server info",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+def vipmp_server_info() -> str:
+    """
+    Dump diagnostic info about the running server — useful as the first
+    call when debugging "why is this not working" or "what version am I
+    actually on".
+
+    Returns package version, Python version, index age + counts,
+    sitemap size, cache stats, and log file path.
+    """
+    import platform
+    import sys
+    from pathlib import Path
+
+    from . import __version__
+    from .autositemap import SITEMAP_JSON_PATH
+    from .logging_config import LOG_FILE
+
+    idx = get_active_index()
+    cache = get_cache()
+    cache_stats = cache.stats()
+    sitemap = _get_sitemap()
+
+    idx_line = (
+        f"{idx.pages_parsed} pages, "
+        f"{len(idx.endpoints)} endpoints "
+        f"({sum(1 for e in idx.endpoints if e.deprecated)} deprecated), "
+        f"{len(idx.error_codes)} error codes, "
+        f"{len(idx.schemas)} schemas, "
+        f"{len(idx.releases)} releases — "
+        f"built {idx.age_seconds / 3600:.1f}h ago"
+        if idx
+        else "_(no index available — call `rebuild_vipmp_index`)_"
+    )
+
+    sitemap_json_exists = Path(SITEMAP_JSON_PATH).exists()
+
+    lines = [
+        "# VIPMP MCP server diagnostic",
+        "",
+        "## Versions",
+        f"- **Package:** `vipmp-docs-mcp` v{__version__}",
+        f"- **Python:** {sys.version.split()[0]} ({platform.python_implementation()})",
+        f"- **Platform:** {platform.system()} {platform.release()}",
+        "",
+        "## Index",
+        f"- {idx_line}",
+        "",
+        "## Sitemap",
+        f"- **Entries in active sitemap:** {len(sitemap)}",
+        f"- **`sitemap.json` persisted:** "
+        f"{'yes, at `' + str(SITEMAP_JSON_PATH) + '`' if sitemap_json_exists else 'no — using hand-curated fallback'}",
+        "",
+        "## Content cache",
+        f"- **Total entries:** {cache_stats['total']}",
+        f"- **Fresh:** {cache_stats['fresh']}",
+        f"- **Stale:** {cache_stats['stale']}",
+        f"- **TTL:** {cache_stats['ttl_seconds'] // 3600}h",
+        f"- **Cache file:** `{cache_stats['cache_file']}`",
+        "",
+        "## Logging",
+        f"- **Log file:** `{LOG_FILE}`",
+        "",
+        "## Tips",
+        "- Cold-cache searches are slow — call `warm_vipmp_cache` once.",
+        "- Seeing stale data? `rebuild_vipmp_index` refreshes everything.",
+        "- Seeing 404s on known pages? `refresh_vipmp_sitemap` rebuilds from Adobe's sitemap.xml.",
+    ]
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # Endpoint-centric tools (Tier 1)
 # ---------------------------------------------------------------------------
 
@@ -818,7 +950,10 @@ def list_vipmp_releases(
         openWorldHint=False,  # strictly index-backed
     ),
 )
-def describe_vipmp_endpoint(method: str, path: str) -> str:
+def describe_vipmp_endpoint(
+    method: Literal["GET", "POST", "PATCH", "PUT", "DELETE"],
+    path: str,
+) -> str:
     """
     One-shot profile of a VIPMP endpoint. Returns schema, error codes,
     code examples, and any release-note mentions in one call — so Claude
@@ -1031,7 +1166,7 @@ def validate_vipmp_request(endpoint: str, body_json: str) -> str:
 def generate_vipmp_request(
     endpoint: str,
     body_json: str | None = None,
-    language: str = "curl",
+    language: Literal["curl", "powershell", "python", "csharp"] = "curl",
 ) -> str:
     """
     Emit a runnable code snippet for a VIPMP endpoint.
