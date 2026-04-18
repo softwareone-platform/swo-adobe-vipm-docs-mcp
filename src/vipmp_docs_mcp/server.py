@@ -9,6 +9,7 @@ structured extractors, and MCP prompts land in later phases.
 from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 
 from .autositemap import build_sitemap, get_active_sitemap, save_sitemap
 from .cache import get_cache
@@ -94,7 +95,15 @@ def _get_cleaned_content(path: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+@mcp.tool(
+    title="List VIPMP docs sitemap",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
 def list_vipmp_docs() -> str:
     """
     Return the full sitemap of Adobe VIP Marketplace API documentation.
@@ -113,7 +122,15 @@ def list_vipmp_docs() -> str:
     return "\n".join(lines)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Search VIPMP docs",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,  # may fetch pages from developer.adobe.com on cache miss
+    ),
+)
 def search_vipmp_docs(query: str, max_results: int = 5) -> str:
     """
     Search the Adobe VIP Marketplace API documentation by keyword or topic.
@@ -162,7 +179,15 @@ def search_vipmp_docs(query: str, max_results: int = 5) -> str:
     return "\n\n".join(out)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Get VIPMP docs page",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,  # fetches from developer.adobe.com on cache miss
+    ),
+)
 def get_vipmp_page(path: str) -> str:
     """
     Fetch the full content of a specific Adobe VIP Marketplace documentation page.
@@ -189,7 +214,15 @@ def get_vipmp_page(path: str) -> str:
     return f"{warning}# {title}\n**Source:** {BASE_URL}{path}\n**Path:** `{path}`\n\n{content}"
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Warm VIPMP docs cache",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,  # writes to local disk cache
+        destructiveHint=False,  # only adds/refreshes entries
+        idempotentHint=True,
+        openWorldHint=True,  # fetches every sitemap page from developer.adobe.com
+    ),
+)
 def warm_vipmp_cache() -> str:
     """
     Pre-fetch every page in the sitemap so subsequent searches can do
@@ -236,7 +269,15 @@ def warm_vipmp_cache() -> str:
     return "\n".join(lines)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Refresh VIPMP sitemap",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,  # rewrites sitemap.json
+        destructiveHint=False,  # rebuilds, doesn't delete existing data irrecoverably
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
 def refresh_vipmp_sitemap() -> str:
     """
     Rebuild the sitemap from Adobe's published /sitemap.xml. Fetches every
@@ -273,7 +314,15 @@ def refresh_vipmp_sitemap() -> str:
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    title="VIPMP cache stats",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
 def vipmp_cache_stats() -> str:
     """
     Return statistics about the on-disk docs cache — total entries,
@@ -293,7 +342,15 @@ def vipmp_cache_stats() -> str:
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Clear VIPMP docs cache",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=True,  # deletes cache entries (safe to recover via re-fetch, but destructive)
+        idempotentHint=True,  # second call on same target is a no-op
+        openWorldHint=False,
+    ),
+)
 def vipmp_cache_clear(path: str | None = None) -> str:
     """
     Clear the docs cache. Pass a specific doc path to invalidate one entry,
@@ -341,7 +398,16 @@ def _index_source_note() -> str:
     return f"_Served from pre-built index ({freshness}, {idx.pages_parsed} pages parsed)._"
 
 
-@mcp.tool()
+@mcp.tool(
+    title="List VIPMP API endpoints",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        # Index-backed when available; falls back to per-page fetches otherwise.
+        openWorldHint=True,
+    ),
+)
 def list_vipmp_endpoints() -> str:
     """
     Extract every HTTP endpoint (method + path) documented across the whole
@@ -385,7 +451,15 @@ def list_vipmp_endpoints() -> str:
     return "\n".join(out)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="List VIPMP error codes",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
 def list_vipmp_error_codes(query: str | None = None) -> str:
     """
     Extract every error code documented across VIPMP docs — both numeric
@@ -434,7 +508,15 @@ def list_vipmp_error_codes(query: str | None = None) -> str:
     return "\n".join(out)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Get VIPMP resource schema",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,  # fetches /vipmp/docs/references/resources if no index
+    ),
+)
 def get_vipmp_schema(resource_name: str | None = None) -> str:
     """
     Return structured field schemas (name, type, required, description)
@@ -487,7 +569,15 @@ def get_vipmp_schema(resource_name: str | None = None) -> str:
     return "\n".join(out)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Get VIPMP code examples",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,  # always fetches the specific docs page
+    ),
+)
 def get_vipmp_code_examples(docs_path: str, language: str | None = None) -> str:
     """
     Extract code examples (JSON / curl / bash / python / etc.) from a
@@ -522,7 +612,15 @@ def get_vipmp_code_examples(docs_path: str, language: str | None = None) -> str:
     return "\n".join(out)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="Rebuild VIPMP structured index",
+    annotations=ToolAnnotations(
+        readOnlyHint=False,  # writes to ~/.cache/.../index.json
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
 def rebuild_vipmp_index() -> str:
     """
     Rebuild the pre-extracted index of endpoints, error codes, and schemas
@@ -559,7 +657,15 @@ def rebuild_vipmp_index() -> str:
     return "\n".join(parts)
 
 
-@mcp.tool()
+@mcp.tool(
+    title="List VIPMP release notes",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,  # strictly index-backed; never fetches live
+    ),
+)
 def list_vipmp_releases(
     since: str | None = None,
     section: str | None = None,
