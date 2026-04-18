@@ -27,13 +27,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install dependencies
+      - name: Install package (with dev extras)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -e ".[dev]"
 
-      - name: Byte-compile (syntax check)
-        run: python -m compileall -q server.py
+      - name: Lint
+        run: ruff check src/ tests/
 
       - name: Import check
-        run: python -c "import server; print(f'Loaded {len(server.SITEMAP)} sitemap entries')"
+        run: |
+          python -c "from vipmp_docs_mcp import server; print(f'Loaded {len(server._get_sitemap())} sitemap entries')"
+
+      - name: Console script is registered
+        # Smoke-test that entry point resolves. We can't actually invoke it
+        # (mcp.run() blocks on stdio), but `which` proves it installed.
+        run: which vipmp-docs-mcp
+
+      - name: Tests
+        run: pytest -v

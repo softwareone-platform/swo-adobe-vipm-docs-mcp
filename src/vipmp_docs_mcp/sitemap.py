@@ -1,26 +1,27 @@
 """
-Adobe VIP Marketplace Docs MCP Server
+Sitemap of Adobe VIP Marketplace Partner API documentation.
 
-Exposes two tools:
-  - search_vipmp_docs(query)  : keyword search across the sitemap, returns matching pages
-  - get_vipmp_page(path)      : fetch a specific doc page by its path
+Currently hand-curated. Phase 4 will add auto-refresh from the docs nav tree
+and allow loading from a persisted `sitemap.json`.
 
-Pages are fetched on demand from developer.adobe.com and cached in memory (TTL: 1 hour).
+Each entry:
+    path:  Absolute docs path (starts with "/vipmp/docs/")
+    title: Human-readable page title
+    tags:  Extra search terms to improve recall on keyword matches
 """
 
-import re
-import time
-import httpx
-from mcp.server.fastmcp import FastMCP
-from bs4 import BeautifulSoup
+from __future__ import annotations
 
-# ---------------------------------------------------------------------------
-# Sitemap — extracted from the navigation tree on the docs index page.
-# Each entry: (path, title, tags)
-# Tags are used to improve keyword search recall.
-# ---------------------------------------------------------------------------
+from typing import TypedDict
 
-SITEMAP: list[dict] = [
+
+class SitemapEntry(TypedDict):
+    path: str
+    title: str
+    tags: list[str]
+
+
+SITEMAP: list[SitemapEntry] = [
     # Introduction / Release notes
     {
         "path": "/vipmp/docs/",
@@ -331,34 +332,34 @@ SITEMAP: list[dict] = [
         "tags": ["migration", "HVD", "high volume discount", "VIP to VIP MP"],
     },
 
-    # Large Government Agencies (LGA)
+    # Large Government Agencies (LGA) — note: these use trailing-slashless paths in Adobe's docs
     {
         "path": "/vipmp/docs/lga/",
         "title": "Large Government Agencies (LGA) — Overview",
         "tags": ["LGA", "large government agency", "government", "GOV", "discount", "federal", "state", "linked membership", "US", "Canada"],
     },
     {
-        "path": "/vipmp/docs/lga/create",
+        "path": "/vipmp/docs/lga/create/",
         "title": "Create an LGA Customer",
         "tags": ["LGA", "large government agency", "create", "POST", "customer", "FEDERAL", "STATE", "marketSubSegments", "linked membership", "enroll"],
     },
     {
-        "path": "/vipmp/docs/lga/migrate",
+        "path": "/vipmp/docs/lga/migrate/",
         "title": "Migrate LGA Customers from VIP to VIP Marketplace",
         "tags": ["LGA", "large government agency", "migration", "transfer", "VIP", "migrate", "preview", "FRL"],
     },
     {
-        "path": "/vipmp/docs/lga/convert",
+        "path": "/vipmp/docs/lga/convert/",
         "title": "Convert an Existing Government Customer to LGA",
         "tags": ["LGA", "large government agency", "convert", "GOV", "government", "PENDING_UPGRADE", "anniversary date", "AD", "renewal", "PATCH"],
     },
     {
-        "path": "/vipmp/docs/lga/error-codes",
+        "path": "/vipmp/docs/lga/error-codes/",
         "title": "Error Codes — LGA",
         "tags": ["LGA", "large government agency", "error codes", "errors", "1117", "1118", "1147", "1163", "1164", "1167", "1168", "5117"],
     },
     {
-        "path": "/vipmp/docs/lga/references",
+        "path": "/vipmp/docs/lga/references/",
         "title": "LGA References",
         "tags": ["LGA", "large government agency", "references"],
     },
@@ -408,183 +409,32 @@ SITEMAP: list[dict] = [
     },
 ]
 
-BASE_URL = "https://developer.adobe.com"
-CACHE_TTL_SECONDS = 3600  # 1 hour
 
-# In-memory cache: path -> {"content": str, "fetched_at": float}
-_cache: dict[str, dict] = {}
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _fetch_page(path: str) -> str:
-    """Fetch a doc page and return cleaned Markdown-style plain text."""
-    now = time.time()
-    cached = _cache.get(path)
-    if cached and (now - cached["fetched_at"]) < CACHE_TTL_SECONDS:
-        return cached["content"]
-
-    url = BASE_URL + path
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; VIPMPDocsMCP/1.0)",
-        "Accept": "text/html,application/xhtml+xml",
-    }
-    with httpx.Client(timeout=15, follow_redirects=True) as client:
-        response = client.get(url, headers=headers)
-        response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    # Remove nav, footer, script, style, breadcrumb noise
-    for tag in soup.select("nav, footer, script, style, .gatsby-highlight, header"):
-        tag.decompose()
-
-    # Find main content area
-    main = soup.find("main") or soup.find("article") or soup.find("div", class_=re.compile(r"content|main|body", re.I))
-    target = main if main else soup
-
-    # Extract text, preserving some structure
-    lines = []
-    for element in target.find_all(["h1", "h2", "h3", "h4", "h5", "p", "li", "pre", "code", "th", "td"]):
-        tag = element.name
-        text = element.get_text(separator=" ", strip=True)
-        if not text:
-            continue
-        if tag == "h1":
-            lines.append(f"\n# {text}\n")
-        elif tag == "h2":
-            lines.append(f"\n## {text}\n")
-        elif tag == "h3":
-            lines.append(f"\n### {text}\n")
-        elif tag in ("h4", "h5"):
-            lines.append(f"\n#### {text}\n")
-        elif tag == "pre":
-            lines.append(f"\n```\n{text}\n```\n")
-        elif tag == "li":
-            lines.append(f"- {text}")
-        else:
-            lines.append(text)
-
-    content = "\n".join(lines).strip()
-    content = re.sub(r"\n{3,}", "\n\n", content)  # collapse excessive blank lines
-
-    _cache[path] = {"content": content, "fetched_at": now}
-    return content
-
-
-def _score_entry(entry: dict, query: str) -> int:
-    """Simple relevance score: count query term matches in title + tags."""
-    terms = re.findall(r"\w+", query.lower())
-    haystack = (entry["title"] + " " + " ".join(entry["tags"])).lower()
-    return sum(1 for t in terms if t in haystack)
-
-
-# ---------------------------------------------------------------------------
-# MCP server
-# ---------------------------------------------------------------------------
-
-mcp = FastMCP(
-    "vipmp-docs",
-    instructions=(
-        "Use this server to look up Adobe VIP Marketplace Partner API documentation. "
-        "Call search_vipmp_docs first to find relevant pages, then get_vipmp_page to read full content."
-    ),
-)
-
-
-@mcp.tool()
-def list_vipmp_docs() -> str:
+def normalize_path(path: str) -> str:
     """
-    Return the full sitemap of Adobe VIP Marketplace API documentation.
-    Use this to browse all available topics or to find exact page paths.
+    Canonical form: leading slash, NO trailing slash (except the bare root).
+
+    Adobe's docs site is inconsistent: some pages only resolve without a
+    trailing slash, others only with one. We store/compare canonically and
+    let the fetcher try both variants on a 404.
     """
-    lines = ["# Adobe VIP Marketplace Docs — Sitemap\n"]
-    current_section = ""
-    for entry in SITEMAP:
-        # Derive a rough section header from path depth
-        parts = [p for p in entry["path"].strip("/").split("/") if p]
-        section = parts[1] if len(parts) > 1 else "root"
-        if section != current_section:
-            lines.append(f"\n## {section.replace('_', ' ').title()}")
-            current_section = section
-        lines.append(f"- **{entry['title']}** → `{entry['path']}`")
-    return "\n".join(lines)
-
-
-@mcp.tool()
-def search_vipmp_docs(query: str, max_results: int = 5) -> str:
-    """
-    Search the Adobe VIP Marketplace API documentation by keyword or topic.
-    Returns matching page titles, paths, and fetched content for the top results.
-
-    Args:
-        query: Search terms, e.g. "create order", "oauth token", "error codes", "3YC"
-        max_results: Maximum number of pages to return (default 5, max 10)
-    """
-    max_results = min(max_results, 10)
-    scored = [(entry, _score_entry(entry, query)) for entry in SITEMAP]
-    scored.sort(key=lambda x: x[1], reverse=True)
-    top = [(e, s) for e, s in scored if s > 0][:max_results]
-
-    if not top:
-        return (
-            f"No pages matched '{query}'.\n\n"
-            "Try calling list_vipmp_docs() to browse all available topics."
-        )
-
-    results = [f"# Search results for: '{query}'\n"]
-    for entry, score in top:
-        results.append(f"---\n## {entry['title']}\n**Path:** `{entry['path']}`\n")
-        try:
-            content = _fetch_page(entry["path"])
-            # Truncate very long pages to keep responses manageable
-            if len(content) > 6000:
-                content = content[:6000] + "\n\n[...content truncated — call get_vipmp_page for full content...]"
-            results.append(content)
-        except Exception as exc:
-            results.append(f"_(Could not fetch page: {exc})_")
-
-    return "\n\n".join(results)
-
-
-@mcp.tool()
-def get_vipmp_page(path: str) -> str:
-    """
-    Fetch the full content of a specific Adobe VIP Marketplace documentation page.
-
-    Args:
-        path: The doc path, e.g. "/vipmp/docs/order_management/create_order/"
-              Use list_vipmp_docs() or search_vipmp_docs() to find valid paths.
-    """
-    # Normalise path
     if not path.startswith("/"):
         path = "/" + path
-    if not path.endswith("/"):
-        path = path + "/"
-
-    # Check it's a known path (warn but still attempt if unknown)
-    known_paths = {e["path"] for e in SITEMAP}
-    warning = ""
-    if path not in known_paths:
-        warning = (
-            f"⚠️  '{path}' is not in the known sitemap. Attempting fetch anyway.\n\n"
-        )
-
-    try:
-        content = _fetch_page(path)
-        url = BASE_URL + path
-        return f"{warning}# {path}\n**Source:** {url}\n\n{content}"
-    except httpx.HTTPStatusError as exc:
-        return f"{warning}HTTP error fetching '{path}': {exc.response.status_code} {exc.response.reason_phrase}"
-    except Exception as exc:
-        return f"{warning}Error fetching '{path}': {exc}"
+    # Strip trailing slash unless the whole path is just "/".
+    if len(path) > 1 and path.endswith("/"):
+        path = path.rstrip("/")
+    return path
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
+def known_paths() -> set[str]:
+    """Normalized set of known doc paths for membership checks."""
+    return {normalize_path(e["path"]) for e in SITEMAP}
 
-if __name__ == "__main__":
-    mcp.run()
+
+def find_by_path(path: str) -> SitemapEntry | None:
+    """Look up a sitemap entry by path (normalized)."""
+    normalized = normalize_path(path)
+    for entry in SITEMAP:
+        if normalize_path(entry["path"]) == normalized:
+            return entry
+    return None
