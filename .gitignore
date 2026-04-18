@@ -1,0 +1,62 @@
+## Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# pyenv
+.python-version
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+nox/
+.cache
+
+# mypy / ruff / pyright
+.mypy_cache/
+.ruff_cache/
+.pyright_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------
+# Repo-specific
+# ---------------------------------------------------------------
+
+# Claude Code local settings (per-machine)
+.claude/settings.local.json
+
+# Local env overrides
+.env
+.env.local
+.env.*.local
