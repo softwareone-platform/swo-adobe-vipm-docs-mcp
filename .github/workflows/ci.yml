@@ -44,5 +44,12 @@ jobs:
         # (mcp.run() blocks on stdio), but `which` proves it installed.
         run: which vipmp-docs-mcp
 
-      - name: Tests
-        run: pytest -v
+      - name: Tests (with coverage)
+        run: pytest -v --cov=vipmp_docs_mcp --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage report
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-report
+          path: coverage.xml

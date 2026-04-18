@@ -1,5 +1,11 @@
 # Adobe VIP Marketplace Docs MCP Server
 
+[![CI](https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue)](https://www.python.org/)
+[![MCP](https://img.shields.io/badge/MCP-compatible-6E56CF)](https://modelcontextprotocol.io/)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/softwareone-platform/swo-adobe-vipm-docs-mcp?label=release)](https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/releases)
+
 A local [Model Context Protocol](https://modelcontextprotocol.io/) server that turns the [Adobe VIP Marketplace Partner API documentation](https://developer.adobe.com/vipmp/docs/) into searchable, structured tools for Claude Desktop (or any other MCP-aware client).
 
 Built to save SoftwareOne developers from scrolling through Adobe's docs to find the right endpoint, error code, or field definition. Ask Claude instead — it uses this server to look it up.
