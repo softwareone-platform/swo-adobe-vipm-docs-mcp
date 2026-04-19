@@ -6,11 +6,16 @@ import json
 import time
 from pathlib import Path
 
+import pytest
+
+from vipmp_docs_mcp import index as index_module
+from vipmp_docs_mcp import remote_index
 from vipmp_docs_mcp.extractors import Endpoint, ErrorCode, SchemaField, SchemaResource
 from vipmp_docs_mcp.index import (
     INDEX_SCHEMA_VERSION,
     IndexSnapshot,
     load_index,
+    resolve_active_index,
     save_index,
 )
 
@@ -91,6 +96,64 @@ class TestLoadIndex:
         path = tmp_path / "bad.json"
         path.write_text("not json {{{")
         assert load_index(path) is None
+
+
+class TestResolveActiveIndex:
+    """
+    Integration-level tests for the tier chain. Each test redirects every
+    tier's path to a tmp location and asserts which one wins.
+    """
+
+    @pytest.fixture(autouse=True)
+    def isolate_paths(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+        self.user_path = tmp_path / "user-index.json"
+        self.remote_path = tmp_path / "remote-index.json"
+        self.remote_meta = tmp_path / "remote-index.meta.json"
+        self.pkg_path = tmp_path / "pkg-index.json"
+        monkeypatch.setattr(index_module, "USER_INDEX_PATH", self.user_path)
+        monkeypatch.setattr(index_module, "PACKAGE_INDEX_PATH", self.pkg_path)
+        monkeypatch.setattr(remote_index, "REMOTE_INDEX_PATH", self.remote_path)
+        monkeypatch.setattr(remote_index, "REMOTE_INDEX_META_PATH", self.remote_meta)
+        # Disable network — tier resolution should never hit the wire here.
+        monkeypatch.setenv(remote_index.DISABLE_ENV, "1")
+
+    def _write(self, path: Path, snap: IndexSnapshot) -> None:
+        save_index(snap, path)
+
+    def test_user_local_wins_over_remote_and_baseline(self):
+        self._write(self.user_path, _sample_snap())
+        self._write(self.remote_path, _sample_snap())
+        self._write(self.pkg_path, _sample_snap())
+
+        active = resolve_active_index()
+        assert active is not None
+        assert active.source == "user-local"
+        assert active.path == self.user_path
+
+    def test_baseline_used_when_user_and_remote_absent(self):
+        self._write(self.pkg_path, _sample_snap())
+
+        active = resolve_active_index()
+        assert active is not None
+        assert active.source == "package-baseline"
+        assert active.path == self.pkg_path
+
+    def test_remote_wins_over_baseline(self, monkeypatch: pytest.MonkeyPatch):
+        # Re-enable the remote tier and pre-populate its cache file so
+        # ensure_fresh() short-circuits on TTL.
+        monkeypatch.delenv(remote_index.DISABLE_ENV, raising=False)
+        self._write(self.remote_path, _sample_snap())
+        self.remote_meta.write_text(json.dumps({"fetched_at": time.time(), "etag": "x"}))
+        self._write(self.pkg_path, _sample_snap())
+
+        active = resolve_active_index()
+        assert active is not None
+        assert active.source == "github-remote"
+        assert active.path == self.remote_path
+
+    def test_none_when_nothing_available(self):
+        active = resolve_active_index()
+        assert active is None
 
 
 class TestAgeSeconds:

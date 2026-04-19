@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-04-19
+
+### Added
+- **Claude Desktop extension packaging.** The repo now ships as a
+  `.mcpb` bundle via a new `.github/workflows/publish-mcpb.yml` workflow
+  that runs on every `v*` tag push. Uses `server.type: "uv"` so the
+  bundle itself is tiny (~85 kB) — dependencies resolve from
+  `pyproject.toml` via `uv` on the user's machine. Manifest enumerates
+  all 17 tools for the extension UI. Sideloaded `.mcpb` files do not
+  auto-update (that's Anthropic-directory-only), so the workflow
+  enforces tag ↔ pyproject ↔ manifest version parity to keep the
+  artefact and the PyPI release aligned.
+- **GitHub-refreshed remote-index tier.** New
+  `src/vipmp_docs_mcp/remote_index.py` fetches the current
+  `data/index.json` from `main` on raw.githubusercontent.com and uses
+  it when it's fresher than the baseline shipped in the installed
+  wheel. 12-hour TTL, ETag revalidation (304 costs no bandwidth),
+  atomic writes. `resolve_active_index()` in `index.py` now walks four
+  tiers: user-local rebuild → github-remote → package baseline →
+  live-extraction fallback. Merging the daily `refresh-index` PR is now
+  enough to put fresh data on users' machines within 12 h — no PyPI
+  release or `uvx` cache dance required.
+- **`VIPMP_DISABLE_REMOTE_INDEX`** environment variable for
+  deterministic runs (tests, air-gapped environments, forensic
+  debugging). When set to a truthy value, the remote tier is skipped
+  and the package baseline is used directly.
+- **`vipmp_server_info` now reports the active index tier** and the
+  remote-index cache state (fetched-at, TTL, URL, opt-out status) so
+  users can see which source their tool results are coming from.
+
+### Internal
+- `index.py` gains `ActiveIndex` (snapshot + source label + path) and
+  `resolve_active_index()`. `get_active_index()` is retained as a
+  backwards-compatible wrapper — all seven existing callers in
+  `server.py` keep working without changes.
+- Remote-index tier is always stale-OK: any transport error, non-JSON
+  response, or unexpected exception falls back to whatever is on disk
+  and, failing that, to the package baseline. Never raises.
+- Added 21 new tests (17 in `tests/test_remote_index.py` covering
+  opt-out, fresh fetch, 304 revalidation, TTL short-circuit, network
+  failure fallback, and status reporting; 4 in `tests/test_index.py`
+  covering tier priority).
+
 ## [0.6.1] — 2026-04-18
 
 ### Added

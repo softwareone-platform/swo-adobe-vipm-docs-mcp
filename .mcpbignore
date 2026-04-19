@@ -1,0 +1,53 @@
+# Files excluded from the packed .mcpb bundle.
+# Only ship what `uv run` needs at runtime (pyproject.toml + src/) plus
+# the bits required by the MCPB spec (manifest.json) and the usual
+# legal/README boilerplate.
+
+# VCS
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Claude Code worktrees / local settings
+.claude/
+
+# Dev-only directories
+tests/
+scripts/
+examples/
+
+# Dev-only docs (keep README.md + LICENSE + NOTICE)
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+
+# Python build / cache artefacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+*.egg
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local env overrides
+.env
+.env.*

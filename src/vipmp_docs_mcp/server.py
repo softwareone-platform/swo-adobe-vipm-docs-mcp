@@ -27,6 +27,7 @@ from .index import (
     USER_INDEX_PATH,
     build_index,
     get_active_index,
+    resolve_active_index,
     save_index,
 )
 from .logging_config import configure_logging, get_logger
@@ -894,28 +895,54 @@ def vipmp_server_info() -> str:
     """
     import platform
     import sys
+    import time
     from pathlib import Path
 
     from . import __version__
     from .autositemap import SITEMAP_JSON_PATH
     from .logging_config import LOG_FILE
+    from .remote_index import get_status as remote_index_status
 
-    idx = get_active_index()
+    active = resolve_active_index()
     cache = get_cache()
     cache_stats = cache.stats()
     sitemap = _get_sitemap()
 
-    idx_line = (
-        f"{idx.pages_parsed} pages, "
-        f"{len(idx.endpoints)} endpoints "
-        f"({sum(1 for e in idx.endpoints if e.deprecated)} deprecated), "
-        f"{len(idx.error_codes)} error codes, "
-        f"{len(idx.schemas)} schemas, "
-        f"{len(idx.releases)} releases — "
-        f"built {idx.age_seconds / 3600:.1f}h ago"
-        if idx
-        else "_(no index available — call `rebuild_vipmp_index`)_"
-    )
+    if active is not None:
+        idx = active.snapshot
+        idx_line = (
+            f"{idx.pages_parsed} pages, "
+            f"{len(idx.endpoints)} endpoints "
+            f"({sum(1 for e in idx.endpoints if e.deprecated)} deprecated), "
+            f"{len(idx.error_codes)} error codes, "
+            f"{len(idx.schemas)} schemas, "
+            f"{len(idx.releases)} releases — "
+            f"built {idx.age_seconds / 3600:.1f}h ago"
+        )
+        idx_source_line = f"- **Source:** `{active.source}` (`{active.path}`)"
+    else:
+        idx_line = "_(no index available — call `rebuild_vipmp_index`)_"
+        idx_source_line = "- **Source:** _(none — live extraction only)_"
+
+    # Remote-index tier — opt-in freshness booster. Report its state even
+    # if the active source ended up being user-local (still useful for
+    # "is the remote refresh actually happening?" debugging).
+    remote = remote_index_status()
+    if not remote.get("enabled", False):
+        remote_line = f"- **Status:** disabled — {remote.get('reason', 'unknown')}"
+    elif remote.get("cached"):
+        fetched_at = remote.get("fetched_at")
+        age_hours = (time.time() - float(fetched_at)) / 3600 if fetched_at else None
+        age_str = f"{age_hours:.1f}h ago" if age_hours is not None else "unknown"
+        remote_line = (
+            f"- **Status:** cached, last fetched {age_str} "
+            f"(TTL {remote['ttl_seconds'] // 3600}h)"
+        )
+    else:
+        remote_line = (
+            f"- **Status:** enabled, nothing cached yet "
+            f"(TTL {remote['ttl_seconds'] // 3600}h)"
+        )
 
     sitemap_json_exists = Path(SITEMAP_JSON_PATH).exists()
 
@@ -929,6 +956,11 @@ def vipmp_server_info() -> str:
         "",
         "## Index",
         f"- {idx_line}",
+        idx_source_line,
+        "",
+        "## Remote index (GitHub refresh tier)",
+        remote_line,
+        f"- **URL:** `{remote.get('url', 'n/a')}`",
         "",
         "## Sitemap",
         f"- **Entries in active sitemap:** {len(sitemap)}",
