@@ -5,11 +5,13 @@ Lets `list_vipmp_endpoints`, `list_vipmp_error_codes`, `get_vipmp_schema`,
 and `get_vipmp_releases` answer in milliseconds instead of re-extracting
 from HTML on every call.
 
-Three-tier resolution for the active index:
+Resolution chain for the active index:
     1. User-local rebuild (~/.cache/.../index.json) — freshest, if present
-    2. Package-shipped baseline (src/vipmp_docs_mcp/data/index.json) —
-       refreshed weekly by GitHub Actions and published with releases
-    3. None — tools fall back to on-the-fly extraction
+    2. GitHub-refreshed remote (~/.cache/.../remote-index.json) — pulled
+       on demand from `main`, TTL 12h. See remote_index.py.
+    3. Package-shipped baseline (src/vipmp_docs_mcp/data/index.json) —
+       refreshed daily by GitHub Actions and published with releases.
+    4. None — tools fall back to on-the-fly extraction.
 """
 
 from __future__ import annotations
@@ -225,18 +227,57 @@ def load_index(path: Path) -> IndexSnapshot | None:
     return IndexSnapshot.from_dict(data)
 
 
-def get_active_index() -> IndexSnapshot | None:
+@dataclass
+class ActiveIndex:
+    """The loaded index plus metadata about which tier it came from."""
+
+    snapshot: IndexSnapshot
+    source: str  # "user-local" | "github-remote" | "package-baseline"
+    path: Path
+
+
+def resolve_active_index() -> ActiveIndex | None:
     """
-    Return the freshest index available: user-local rebuild first, then
-    the package-shipped baseline, then None.
+    Walk the tier chain and return the first usable index along with its
+    source label. See the module docstring for the tier order.
+
+    The github-remote tier may trigger a network fetch (conditional GET,
+    subject to a 12h TTL). It degrades silently on any failure — the
+    caller always ends up with the package baseline if no fresher source
+    works.
     """
     user = load_index(USER_INDEX_PATH)
     if user is not None:
         log.debug("using user-local index (age=%.0fs)", user.age_seconds)
-        return user
+        return ActiveIndex(user, "user-local", USER_INDEX_PATH)
+
+    # Local import to avoid a circular dependency at module load time —
+    # remote_index doesn't import index, but this keeps the coupling
+    # one-way at runtime as well.
+    from .remote_index import ensure_fresh
+
+    remote_path = ensure_fresh()
+    if remote_path is not None:
+        remote = load_index(remote_path)
+        if remote is not None:
+            log.debug("using github-remote index (age=%.0fs)", remote.age_seconds)
+            return ActiveIndex(remote, "github-remote", remote_path)
+
     pkg = load_index(PACKAGE_INDEX_PATH)
     if pkg is not None:
         log.debug("using package-shipped index (age=%.0fs)", pkg.age_seconds)
-        return pkg
+        return ActiveIndex(pkg, "package-baseline", PACKAGE_INDEX_PATH)
+
     log.debug("no index available; callers will fall back to live extraction")
     return None
+
+
+def get_active_index() -> IndexSnapshot | None:
+    """
+    Return the freshest index snapshot available, or None if no tier
+    yielded a usable index. Thin wrapper over ``resolve_active_index``
+    kept for backwards compatibility with callers that don't need the
+    source label.
+    """
+    active = resolve_active_index()
+    return active.snapshot if active is not None else None

@@ -1,0 +1,92 @@
+name: Publish MCPB bundle
+
+# Packs the repo into a Claude Desktop extension (.mcpb) and attaches it
+# to the GitHub Release for the tag. Bundle uses server type `uv`, so the
+# source tree ships as-is and `uv` resolves dependencies from
+# pyproject.toml at install time on the user's machine — no vendored
+# wheels, no platform-specific builds.
+#
+# Trigger: every `v*` tag push (same trigger as publish-pypi.yml), plus
+# manual via workflow_dispatch for re-packing without a new tag.
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  # Needed to create/update the GitHub Release and upload the .mcpb asset.
+  contents: write
+
+jobs:
+  pack-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Verify manifest version matches tag and pyproject
+        # Three-way check: git tag ↔ pyproject version ↔ manifest version.
+        # Catches the "bumped one, forgot the other" mistake — MCPB users
+        # would otherwise get a bundle labelled with a different version
+        # than the PyPI release it corresponds to.
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          echo "Tag:      $TAG_VERSION"
+          echo "Package:  $PKG_VERSION"
+          echo "Manifest: $MANIFEST_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ] || [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Version mismatch between git tag, pyproject.toml, and manifest.json"
+            exit 1
+          fi
+
+      - name: Install mcpb CLI
+        run: npm install -g @anthropic-ai/mcpb
+
+      - name: Validate manifest
+        run: mcpb validate manifest.json
+
+      - name: Pack bundle
+        id: pack
+        run: |
+          # Explicit output name so the asset is predictable across
+          # runs — `mcpb pack .` otherwise defaults to dirname.mcpb,
+          # which on CI is the checkout directory name.
+          VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          BUNDLE="vipmp-docs-mcp-${VERSION}.mcpb"
+          mcpb pack . "$BUNDLE"
+          if [ ! -f "$BUNDLE" ]; then
+            echo "::error::mcpb pack did not produce $BUNDLE"
+            exit 1
+          fi
+          echo "bundle=$BUNDLE" >> "$GITHUB_OUTPUT"
+          echo "Built: $BUNDLE ($(stat -c%s "$BUNDLE") bytes)"
+
+      - name: Upload bundle as workflow artifact
+        # Always available via the run page, regardless of release step.
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcpb-bundle
+          path: ${{ steps.pack.outputs.bundle }}
+          if-no-files-found: error
+
+      - name: Attach bundle to GitHub Release
+        # Creates the Release if the tag doesn't have one yet, otherwise
+        # updates it. Skipped for workflow_dispatch runs (no tag context).
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.pack.outputs.bundle }}
+          fail_on_unmatched_files: true

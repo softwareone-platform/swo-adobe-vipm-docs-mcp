@@ -1,0 +1,55 @@
+{
+  "manifest_version": "0.4",
+  "name": "vipmp-docs-mcp",
+  "display_name": "Adobe VIP Marketplace Docs",
+  "version": "0.7.0",
+  "description": "MCP server exposing Adobe VIP Marketplace Partner API documentation as searchable tools",
+  "long_description": "Turn Adobe's Partner API docs at developer.adobe.com/vipmp/docs into queryable MCP tools. Search pages, inspect endpoints, validate request bodies against the published schemas, generate runnable curl/PowerShell/Python/C# snippets, and follow release notes — without leaving the assistant. Ships with a pre-built structured index of every endpoint, error code, and schema, refreshed daily from live Adobe docs.",
+  "author": {
+    "name": "SoftwareOne AG",
+    "url": "https://github.com/softwareone-platform"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp"
+  },
+  "homepage": "https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp",
+  "documentation": "https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp#readme",
+  "support": "https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/issues",
+  "license": "Apache-2.0",
+  "keywords": ["adobe", "vipmp", "vip-marketplace", "documentation", "api", "mcp"],
+  "server": {
+    "type": "uv",
+    "entry_point": "src/vipmp_docs_mcp/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "vipmp-docs-mcp"]
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.12"
+    }
+  },
+  "prompts_generated": true,
+  "tools": [
+    { "name": "list_vipmp_docs", "description": "Return the full sitemap of Adobe VIP Marketplace API documentation." },
+    { "name": "search_vipmp_docs", "description": "Search the docs by keyword or topic, ranked by title/tag/content matches." },
+    { "name": "get_vipmp_page", "description": "Fetch the full cleaned content of a specific documentation page." },
+    { "name": "warm_vipmp_cache", "description": "Pre-fetch every documentation page for stronger content-aware search." },
+    { "name": "refresh_vipmp_sitemap", "description": "Rebuild the documentation sitemap from Adobe's live sitemap.xml." },
+    { "name": "vipmp_cache_stats", "description": "Report cache size, freshness, TTL, and on-disk path." },
+    { "name": "vipmp_cache_clear", "description": "Drop one cache entry or wipe the whole cache." },
+    { "name": "list_vipmp_endpoints", "description": "List every REST endpoint (method, path, source page) from the index." },
+    { "name": "list_vipmp_error_codes", "description": "List all numeric and symbolic error codes with triggers." },
+    { "name": "get_vipmp_schema", "description": "Return the field schema for a resource (name, type, required, constraints)." },
+    { "name": "get_vipmp_code_examples", "description": "Pull code blocks off a documentation page, optionally filtered by language." },
+    { "name": "rebuild_vipmp_index", "description": "Rebuild the structured endpoints/error-codes/schemas index from live docs." },
+    { "name": "list_vipmp_releases", "description": "Structured release notes — dated entries grouped by section." },
+    { "name": "vipmp_server_info", "description": "Diagnostic info: version, Python, index age, cache stats, log path." },
+    { "name": "describe_vipmp_endpoint", "description": "One-shot endpoint profile: schema, error codes, release notes, examples." },
+    { "name": "validate_vipmp_request", "description": "Check a JSON request body against the endpoint's published schema." },
+    { "name": "generate_vipmp_request", "description": "Emit a runnable curl / PowerShell / Python / C# snippet for an endpoint." }
+  ]
+}
