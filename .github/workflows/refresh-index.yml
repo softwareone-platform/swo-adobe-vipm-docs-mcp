@@ -133,14 +133,20 @@ jobs:
 
       - name: Enable auto-merge
         # Tell GitHub to merge the PR as soon as required checks pass.
-        # Works because the main-branch ruleset grants github-actions[bot]
-        # a pull-request bypass on the review rule — so once `build (3.12)`
-        # and `build (3.13)` go green, GitHub merges without waiting for a
-        # human approval. If the bypass is ever removed the PR stays open
-        # (harmless — humans can still merge it manually).
+        # Uses REFRESH_INDEX_PAT (a fine-grained PAT owned by a repo admin)
+        # rather than GITHUB_TOKEN because the ruleset on main requires a
+        # review for every PR. The admin role already carries an `always`
+        # bypass on that rule, so a merge call authenticated as the admin
+        # sails through without needing an approver. GITHUB_TOKEN can't
+        # do this — github-actions[bot] is not in the bypass list (and
+        # GitHub's ruleset UI doesn't expose it as an addable actor).
+        #
+        # If the PAT is missing or expired the step fails loudly and the
+        # bot's PR stays open for manual merge — no data loss, just a
+        # pause until the token is renewed.
         if: steps.open_pr.outputs.pull-request-operation == 'created'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.REFRESH_INDEX_PAT }}
         run: |
           gh pr merge "${{ steps.open_pr.outputs.pull-request-number }}" \
             --repo "${{ github.repository }}" \
