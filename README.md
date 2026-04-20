@@ -70,6 +70,20 @@ Pre-baked prompt templates your MCP client can offer directly (no need to rememb
 | `check_feature_status` | `feature` — is it live / in Sandbox / upcoming / not documented? |
 | `check_3yc_eligibility` | `customer_id`, `desired_commit_quantity?` — evaluates 3-Year Commit eligibility |
 
+### Training curriculum
+
+Seven prompts for learning how VIPMP works — intended for new developers and technical product managers alike. Each walkthrough blends business context (why the rule exists, what it means commercially) with the API surface (which endpoints, which schemas, which errors). Prompts draw from Adobe's published docs *and* [`src/vipmp_docs_mcp/content/training-supplement.md`](src/vipmp_docs_mcp/content/training-supplement.md) — a human-authored file where SoftwareOne operational knowledge gets captured. Contributing to the supplement is how you make the whole curriculum smarter for everyone.
+
+| Prompt | Arguments |
+|---|---|
+| `start_vipmp_learning` | `role?`, `goal?` — friendly router that asks what you're trying to learn and points you at the right walkthrough |
+| `learn_customer_lifecycle` | — states, transitions, API surface, common traps |
+| `learn_ordering_flow` | — ordering end-to-end: commercial states + API sequence + error handling |
+| `learn_3yc` | — 3-Year Commit eligibility, commit math, enrollment flow |
+| `learn_subscriptions_and_renewals` | — coterm, auto-renew, proration, mid-term changes |
+| `learn_returns_and_refunds` | — return windows, what qualifies, refund mechanics |
+| `learn_auth_and_sandbox` | — IMS auth, credentials, safe sandbox experimentation |
+
 ## Install
 
 ### With `uvx` (recommended — zero setup, no clone, no git required)

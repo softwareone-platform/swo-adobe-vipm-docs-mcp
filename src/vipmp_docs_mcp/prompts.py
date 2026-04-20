@@ -12,7 +12,28 @@ as the user's next message.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from mcp.server.fastmcp import FastMCP
+
+from .supplement import get_section as _get_supplement_section
+
+
+def _supplement_block(heading: str) -> str:
+    """
+    Render the SWO training-supplement section for ``heading`` as a
+    Markdown block, or an empty string if no section exists / the file
+    is missing. Called by every ``learn_*`` prompt so the assistant gets
+    human-authored context alongside Adobe's published docs.
+    """
+    body = _get_supplement_section(heading)
+    if not body:
+        return (
+            "> _SWO training supplement: no notes yet for this topic. "
+            "Lean on Adobe's published docs and acknowledge that "
+            "operational context is still being written._\n"
+        )
+    return f"**SWO training supplement — {heading}:**\n\n{body}\n\n---\n"
 
 
 def register_prompts(mcp: FastMCP) -> None:
@@ -287,4 +308,322 @@ Please:
    codes I should handle defensively.
 
 Quote the docs directly when stating rules — don't paraphrase limits.
+"""
+
+    # ----------------------------------------------------------------
+    # Training curriculum — onboarding router + six concept walkthroughs.
+    #
+    # These are the "learn how VIPMP works" prompts, designed to serve
+    # both developers (who benefit from business context alongside the
+    # API) and technical product managers (who benefit from seeing the
+    # API surface alongside the business rules). Each walkthrough pulls
+    # a section from the human-authored training supplement at
+    # content/training-supplement.md and interleaves it with Adobe's
+    # published docs fetched via the existing tools.
+    # ----------------------------------------------------------------
+
+    @mcp.prompt()
+    def start_vipmp_learning(
+        role: Literal["developer", "product_manager", "either"] = "either",
+        goal: str | None = None,
+    ) -> str:
+        """
+        Kick off a VIPMP learning session. Asks the learner's role and
+        goal, then routes them to the right walkthrough prompt.
+
+        Args:
+            role: Which hat the learner is wearing. Default "either" —
+                the curriculum serves both developers and technical PMs.
+            goal: Free-text description of what they want to learn or
+                build. Used to route to a specific walkthrough.
+        """
+        goal_line = (
+            f"\n- **Goal:** {goal}"
+            if goal
+            else "\n- **Goal:** (not specified — ask me)"
+        )
+        return f"""I'd like to learn how Adobe VIP Marketplace (VIPMP) works.
+
+- **Role:** {role}{goal_line}
+
+You have six walkthrough prompts available that I can invoke next — each
+covers one area with both business context and the API surface:
+
+1. `learn_customer_lifecycle` — states, transitions, onboarding
+2. `learn_ordering_flow` — placing an order end-to-end
+3. `learn_3yc` — 3-Year Commit eligibility, math, enrollment
+4. `learn_subscriptions_and_renewals` — coterm, auto-renew, proration
+5. `learn_returns_and_refunds` — windows, rules, API sequence
+6. `learn_auth_and_sandbox` — IMS, credentials, safe testing
+
+Please:
+
+1. Based on my goal (above), suggest the **best starting walkthrough**
+   and give a one-sentence reason.
+2. If my goal is empty or vague, ask me two short questions — what I'm
+   trying to build or decide, and how much VIPMP exposure I already
+   have — then pick based on my answers.
+3. After the first walkthrough, suggest what to do next. The order
+   above is the default sequence for a learner starting cold, but
+   don't force it — skip topics that aren't relevant to my goal.
+4. Throughout the session, remember I might be a {role} — frame
+   examples accordingly. A developer wants code; a product manager
+   wants decision criteria; "either" means blend both.
+
+Be patient and concrete. Prefer examples to abstractions. If I ask
+something the docs don't cover cleanly, say so plainly rather than
+guessing.
+"""
+
+    @mcp.prompt()
+    def learn_customer_lifecycle() -> str:
+        """
+        Walkthrough: VIPMP customer lifecycle. Covers the business
+        states a customer passes through, the API transitions between
+        them, and the gotchas that bite real implementations.
+        """
+        return f"""Teach me the VIPMP customer lifecycle — the business
+state machine AND the API that implements it. I want this to serve
+whether I'm about to write code against it or making product decisions
+that depend on it, so don't shy away from either angle.
+
+{_supplement_block("Customer lifecycle")}
+**Teaching flow:**
+
+1. Fetch Adobe's published material first. Call `search_vipmp_docs`
+   with `query="customer lifecycle"` and pull the top 2-3 pages via
+   `get_vipmp_page`.
+2. Explain the commercial states a customer moves through (pending,
+   active, suspended, terminated, whatever Adobe actually documents) —
+   what each means, when it's entered, who causes the transition.
+3. Map each meaningful transition to its API surface. For each:
+   - Endpoint (`describe_vipmp_endpoint` for the detail)
+   - What body fields matter
+   - What response / status-code indicates success vs "accepted but
+     pending"
+4. Surface the real errors: `list_vipmp_error_codes` with
+   `query="customer"` — call out business meaning, not just the code.
+5. Highlight the common traps explicitly. Examples worth checking:
+   LGA vs GOV vs COM segmentation, MEA flag, 3YC carryover,
+   one-way transitions.
+6. End with two short "check my understanding" questions — not a
+   quiz, just enough to surface gaps.
+
+Open with one sentence on where you're starting, then go. If the SWO
+supplement above is still TODO, say so and lean harder on Adobe's
+docs.
+"""
+
+    @mcp.prompt()
+    def learn_ordering_flow() -> str:
+        """
+        Walkthrough: VIPMP ordering flow end-to-end. Covers what an
+        order means commercially, the API sequence to place one, and
+        the failure modes that matter in production.
+        """
+        return f"""Teach me how VIPMP ordering works end-to-end —
+from the commercial meaning of an order to the API sequence to place
+one successfully. Tech + business context both welcome.
+
+{_supplement_block("Ordering flow")}
+**Teaching flow:**
+
+1. Pull Adobe's docs. `search_vipmp_docs` with `query="create order"`
+   and `query="order status"`; follow up with `get_vipmp_page` on the
+   strongest hits.
+2. Explain the commercial lifecycle of an order — what states it
+   passes through, what each state means for the customer and the
+   partner, and when the order is truly "live" vs merely accepted.
+3. Walk the happy-path API sequence:
+   - Prerequisites (customer account state, reseller linkage, etc.)
+   - `POST /v3/orders` — call `describe_vipmp_endpoint` and explain
+     the body shape plus any gotchas with offer IDs or quantities
+   - Polling / webhook model for status — whichever Adobe actually
+     documents
+4. Show a minimum viable request body (ask `get_vipmp_code_examples`
+   for a reference example) and annotate each field with why it
+   matters.
+5. Error handling: `list_vipmp_error_codes` with `query="orders"` —
+   group by "fixable by the partner" vs "requires Adobe / SWO
+   intervention."
+6. End with one scenario-based question: "given customer X with
+   state Y and target Z, walk me through what you'd do." Use it to
+   check the learner mapped business → API correctly.
+
+Be honest when Adobe's docs are ambiguous; note where you'd want
+the SWO supplement to fill the gap.
+"""
+
+    @mcp.prompt()
+    def learn_3yc() -> str:
+        """
+        Walkthrough: 3-Year Commit (3YC). Covers eligibility,
+        commit-quantity math, enrollment flow, and the commercial
+        consequences of under-consumption.
+        """
+        return f"""Teach me about the VIPMP 3-Year Commit (3YC) program
+— what it is commercially, who's eligible, how the commit math works,
+and how a partner enrolls a customer through the API.
+
+{_supplement_block("3YC (3-Year Commit)")}
+**Teaching flow:**
+
+1. Ground it in docs. `search_vipmp_docs` with
+   `query="three year commit 3YC"` — pull the overview page and any
+   API-specific pages.
+2. Business basics first:
+   - What a 3YC is from the customer's perspective (pricing lock,
+     commitment, anniversary date)
+   - Who's eligible (segments, regions, licensing model cutoffs)
+   - What the minimum commit quantity is, and per what unit
+3. The math:
+   - What "commit" actually means — minimum annual consumption?
+     cumulative? per product?
+   - How true-up / anniversary reconciliation works
+   - What happens if the customer under-consumes
+4. The API flow. `describe_vipmp_endpoint` for the 3YC-related
+   endpoints; walk through a realistic enrollment from scratch.
+5. `list_vipmp_error_codes` with `query="3yc"` — flag the ones a
+   partner integration really needs to handle.
+6. Close with a worked example: a hypothetical customer considering
+   3YC with quantity X — would they qualify, is X below any floor,
+   what's the year-1 vs year-3 pricing picture.
+
+Quote documented limits verbatim — don't paraphrase numbers.
+"""
+
+    @mcp.prompt()
+    def learn_subscriptions_and_renewals() -> str:
+        """
+        Walkthrough: subscriptions and renewals. Covers cotermination,
+        auto-renew, proration for mid-term changes, and the API surface
+        that makes it all go.
+        """
+        return f"""Teach me how VIPMP subscriptions and renewals work
+— cotermination, auto-renew behaviour, proration for mid-term changes,
+and the API surface underneath all of it.
+
+{_supplement_block("Subscriptions and renewals")}
+**Teaching flow:**
+
+1. Adobe's docs first. `search_vipmp_docs` with
+   `query="subscription"`, `query="renewal"`, `query="coterm"` —
+   fetch the top hits via `get_vipmp_page`.
+2. Cover the core concepts:
+   - What a subscription is in VIPMP's model (per-product? per-offer?
+     per-customer?) and how it relates to orders
+   - Cotermination: what it means, why Adobe uses it, what
+     anniversary date a new subscription lands on
+   - Auto-renew: the default behaviour, what the partner controls,
+     what happens if it's disabled
+3. Proration and mid-term changes:
+   - Adding seats vs upgrading tier — which endpoints, which bodies
+   - How Adobe prorates charges, in rough terms
+   - When a change creates a new subscription vs modifies the
+     existing one
+4. The renewal window itself:
+   - How early renewals are represented in the API
+   - What "renewal" actions are available pre-window vs in-window vs
+     post-anniversary
+5. `describe_vipmp_endpoint` for the two or three most important
+   subscription endpoints. Show request + expected response.
+6. `list_vipmp_error_codes` with `query="subscription"` and
+   `query="renewal"` — flag the ones that come up during renewal
+   windows specifically.
+7. End with: "walk me through what the API calls look like if a
+   customer wants to add 5 more seats to an active subscription 3
+   months in." Let the learner attempt it.
+
+Be explicit about where Adobe's docs paper over commercial nuance —
+those are exactly the spots the SWO supplement will eventually fill.
+"""
+
+    @mcp.prompt()
+    def learn_returns_and_refunds() -> str:
+        """
+        Walkthrough: returns and refunds. Covers the return window,
+        what qualifies as a return vs cancellation vs downgrade,
+        refund mechanics, and the API sequence for each.
+        """
+        return f"""Teach me how returns and refunds work in VIPMP —
+the commercial rules (return windows, what qualifies, who gets
+refunded) and the API sequence that implements them.
+
+{_supplement_block("Returns and refunds")}
+**Teaching flow:**
+
+1. Adobe's docs. `search_vipmp_docs` with `query="return"` and
+   `query="refund"`; `get_vipmp_page` on the strongest hits.
+2. Clarify terminology upfront — in VIPMP, "return" vs "cancellation"
+   vs "downgrade" have specific meanings. Get them straight before
+   anything else.
+3. The return window:
+   - How long it is, measured from what event
+   - What does and doesn't qualify (fully consumed? partial
+     refund? invoiced yet?)
+   - Whether the partner initiates or the customer
+4. Refund mechanics:
+   - Who processes the refund and on what timeline
+   - Currency and rate quirks (if Adobe documents any)
+   - When a refund is credit vs cash
+5. API sequence for a return:
+   - Which endpoint, which body, which response shape
+   - `describe_vipmp_endpoint` for the return-related call
+   - Expected status-code transitions after the call
+6. `list_vipmp_error_codes` with `query="return"` — classify: past
+   window, already invoiced, already consumed, etc. Each tells the
+   partner something different about what to do next.
+7. Close with one or two edge scenarios a real operator hits — e.g.
+   partial return of a multi-seat order, or a return that crosses a
+   renewal boundary. Walk through the decision.
+
+If Adobe's docs are thin on refund mechanics (they often are — it's
+partly a commercial process, not an API one), say so explicitly.
+"""
+
+    @mcp.prompt()
+    def learn_auth_and_sandbox() -> str:
+        """
+        Walkthrough: authentication, IMS credentials, and safe use of
+        the Adobe VIPMP sandbox. Covers what a partner actually needs
+        to start making API calls without breaking production.
+        """
+        return f"""Teach me how authentication works against the VIPMP
+API and how to use the sandbox safely. I want to make my first call
+without accidentally touching production data.
+
+{_supplement_block("Auth and sandbox")}
+**Teaching flow:**
+
+1. Start with the docs. `search_vipmp_docs` with
+   `query="authentication"` and `query="sandbox"` — `get_vipmp_page`
+   on the identity and sandbox pages.
+2. Authentication model:
+   - Adobe uses OAuth via IMS (Identity Management Services).
+     Explain the relationship between the IMS Organization, the
+     partner, and the service account.
+   - Walk through getting an access token end-to-end: what
+     credentials are needed, how the token is exchanged, token
+     lifetime and refresh.
+3. Environments:
+   - Production vs sandbox URLs and what distinguishes them
+   - Whether credentials are shared or separate
+   - What state exists in sandbox (test customers? shared? reset
+     when?) — if Adobe's docs don't say, say so.
+4. First safe call: suggest a read-only endpoint the learner can
+   hit in sandbox to confirm auth works before doing anything with
+   side effects. `describe_vipmp_endpoint` for it.
+5. Common auth errors: `list_vipmp_error_codes` with
+   `query="authentication"` and `query="token"` — explain what each
+   actually indicates.
+6. Operational guidance — when to call Adobe support vs SWO's
+   platform team vs check the docs again. Lean on the SWO
+   supplement above if it has content; otherwise note the gap.
+7. End with: "describe the minimum you need in place — credentials,
+   env vars, code — to call one endpoint against sandbox." Let the
+   learner list it; correct as needed.
+
+Emphasise that the sandbox is the right place to experiment. Every
+learner should feel comfortable making calls there before touching
+production.
 """
