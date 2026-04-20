@@ -44,8 +44,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Rebuild index
+      - name: Rebuild sitemap + index
         id: rebuild
+        # build_index() already refreshes the sitemap from Adobe's live XML
+        # internally (fix from #4), but we also persist it to the package
+        # data directory here so fresh installs get a current fallback
+        # shipped with the wheel (#6).
         run: |
           python - <<'PY'
           import json
@@ -53,11 +57,28 @@ jobs:
           import time
           from pathlib import Path
 
-          from vipmp_docs_mcp.index import PACKAGE_INDEX_PATH, build_index, save_index
+          from vipmp_docs_mcp.autositemap import (
+              PACKAGE_SITEMAP_PATH,
+              build_sitemap,
+              save_sitemap,
+          )
+          from vipmp_docs_mcp.index import (
+              PACKAGE_INDEX_PATH,
+              build_index,
+              save_index,
+          )
 
-          start = time.time()
+          # 1) Refresh the shipped sitemap fallback from Adobe.
+          sitemap_start = time.time()
+          sitemap_entries = build_sitemap()
+          save_sitemap(sitemap_entries, PACKAGE_SITEMAP_PATH)
+          sitemap_elapsed = time.time() - sitemap_start
+
+          # 2) Rebuild the structured index. build_index() refreshes the
+          # sitemap again internally; cheap on cache hits thanks to ETags.
+          index_start = time.time()
           snap = build_index()
-          elapsed = time.time() - start
+          index_elapsed = time.time() - index_start
 
           save_index(snap, PACKAGE_INDEX_PATH)
 
@@ -68,7 +89,8 @@ jobs:
               fh.write(f"error_codes={len(snap.error_codes)}\n")
               fh.write(f"schemas={len(snap.schemas)}\n")
               fh.write(f"parse_errors={len(snap.parse_errors)}\n")
-              fh.write(f"elapsed_seconds={elapsed:.1f}\n")
+              fh.write(f"sitemap_elapsed_seconds={sitemap_elapsed:.1f}\n")
+              fh.write(f"index_elapsed_seconds={index_elapsed:.1f}\n")
 
           # Emit error list for the PR body.
           Path("parse-errors.txt").write_text(
@@ -78,14 +100,16 @@ jobs:
           )
           PY
 
-      - name: Check if index changed
+      - name: Check if index or sitemap changed
         id: diff
         run: |
-          # Strip the `built_at` timestamp before diffing — otherwise every
-          # run produces a "change". Compare the structural content only.
+          # Strip timestamps before diffing — otherwise every run produces
+          # noise. Compare structural content only.
           git --no-pager diff --quiet \
               -I '^  "built_at":' \
+              -I '^  "generated_at":' \
               src/vipmp_docs_mcp/data/index.json \
+              src/vipmp_docs_mcp/data/sitemap.json \
             && echo "changed=false" >> "$GITHUB_OUTPUT" \
             || echo "changed=true" >> "$GITHUB_OUTPUT"
 
@@ -94,12 +118,12 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: 'chore(index): refresh structured index from Adobe docs'
+          commit-message: 'chore(data): refresh sitemap + structured index from Adobe docs'
           branch: bot/refresh-index
           delete-branch: true
-          title: 'chore(index): refresh structured index from Adobe docs'
+          title: 'chore(data): refresh sitemap + structured index from Adobe docs'
           body: |
-            Automated refresh of `src/vipmp_docs_mcp/data/index.json` from live Adobe docs.
+            Automated refresh of `src/vipmp_docs_mcp/data/sitemap.json` and `src/vipmp_docs_mcp/data/index.json` from live Adobe docs.
 
             **Trigger:** ${{ github.event_name == 'workflow_dispatch' && inputs.reason || 'scheduled (weekly)' }}
 
@@ -113,7 +137,8 @@ jobs:
             | Error codes | ${{ steps.rebuild.outputs.error_codes }} |
             | Schemas | ${{ steps.rebuild.outputs.schemas }} |
             | Parse errors | ${{ steps.rebuild.outputs.parse_errors }} |
-            | Build time | ${{ steps.rebuild.outputs.elapsed_seconds }}s |
+            | Sitemap build time | ${{ steps.rebuild.outputs.sitemap_elapsed_seconds }}s |
+            | Index build time | ${{ steps.rebuild.outputs.index_elapsed_seconds }}s |
 
             ## Parse errors (if any)
 

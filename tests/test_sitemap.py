@@ -1,8 +1,8 @@
-"""Tests for path normalization and sitemap lookup helpers."""
+"""Tests for normalize_path and the CURATED_TAGS metadata."""
 
 from __future__ import annotations
 
-from vipmp_docs_mcp.sitemap import find_by_path, known_paths, normalize_path
+from vipmp_docs_mcp.sitemap import CURATED_TAGS, normalize_path
 
 
 class TestNormalizePath:
@@ -23,26 +23,25 @@ class TestNormalizePath:
         assert normalize_path("x") == "/x"
 
 
-class TestKnownPaths:
-    def test_all_paths_normalized(self):
-        # Every returned path should be in normalized form (leading slash, no trailing).
-        for p in known_paths():
-            assert p.startswith("/")
-            assert p == "/" or not p.endswith("/")
+class TestCuratedTags:
+    def test_has_entries(self):
+        """Regression guard — the dict shouldn't silently empty out."""
+        assert len(CURATED_TAGS) > 50
 
+    def test_keys_are_hyphenated_slug_form(self):
+        """Every key is a bare lowercase slug (hyphens, no underscores,
+        no slashes, no whitespace). ``autositemap.merge_curated_tags``
+        looks up by the last path segment of a live Adobe entry, so any
+        key that doesn't match that shape is dead weight."""
+        for key in CURATED_TAGS:
+            assert key == key.lower()
+            assert "_" not in key
+            assert "/" not in key
+            assert " " not in key
 
-class TestFindByPath:
-    def test_finds_existing(self):
-        entry = find_by_path("/vipmp/docs/lga/")
-        assert entry is not None
-        assert "LGA" in entry["title"] or "Large Government" in entry["title"]
-
-    def test_works_regardless_of_slash(self):
-        with_slash = find_by_path("/vipmp/docs/lga/")
-        without_slash = find_by_path("/vipmp/docs/lga")
-        assert with_slash is not None
-        assert without_slash is not None
-        assert with_slash["path"] == without_slash["path"]
-
-    def test_returns_none_for_unknown(self):
-        assert find_by_path("/vipmp/docs/definitely-not-a-page/") is None
+    def test_values_are_non_empty_lists(self):
+        for key, tags in CURATED_TAGS.items():
+            assert isinstance(tags, list), f"{key!r} tags isn't a list"
+            assert tags, f"{key!r} has no tags — delete the entry instead"
+            for tag in tags:
+                assert isinstance(tag, str) and tag

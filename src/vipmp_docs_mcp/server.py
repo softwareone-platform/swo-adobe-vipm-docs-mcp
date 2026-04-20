@@ -33,7 +33,6 @@ from .index import (
 from .logging_config import configure_logging, get_logger
 from .prompts import register_prompts
 from .search import relevant_sections, search
-from .sitemap import find_by_path as _find_in_hand_curated
 from .sitemap import normalize_path
 
 log = get_logger("server")
@@ -60,13 +59,12 @@ def _get_sitemap():
 
 
 def _find_by_path(path: str):
-    """Find an entry in the active sitemap (may be auto or hand-curated)."""
+    """Find an entry in the active sitemap, or None if absent."""
     normalized = normalize_path(path)
     for entry in _active_sitemap:
         if normalize_path(entry["path"]) == normalized:
             return entry
-    # Fallback: legacy hand-curated list in case the active one is empty.
-    return _find_in_hand_curated(path)
+    return None
 
 
 def _known_paths() -> set[str]:

@@ -3,11 +3,20 @@ Auto-refresh the docs sitemap from Adobe's published sitemap.xml.
 
 Adobe publishes `/sitemap.xml` listing every URL under developer.adobe.com.
 We filter for `/vipmp/docs/` paths, fetch each page for its title, and build
-a fresh `SitemapEntry` list. Tags are derived from path segments + the
-hand-curated tag dictionary in `sitemap_tags.py`.
+a fresh `SitemapEntry` list. Tags come from two sources: light-touch
+derivation from path segments + the human-curated ``CURATED_TAGS`` dict
+in [sitemap.py](./sitemap.py) merged in for richer recall.
 
-The auto-generated sitemap is persisted to `sitemap.json` in the cache dir
-so subsequent server startups don't need to refetch.
+Resolution chain for the active sitemap (see ``get_active_sitemap``):
+
+    1. Per-user persisted sitemap (``~/.cache/.../sitemap.json``) — freshest,
+       written by ``refresh_vipmp_sitemap`` and ``build_index``.
+    2. Package-shipped sitemap (``src/vipmp_docs_mcp/data/sitemap.json``) —
+       regenerated from Adobe by the daily CI refresh workflow, published
+       with each release. Guarantees fresh installs have a working sitemap
+       immediately, without a network round-trip.
+    3. Empty list — last-resort. Callers handle gracefully (search returns
+       nothing, describe tools fall back to on-the-fly extraction).
 """
 
 from __future__ import annotations
@@ -22,13 +31,17 @@ from bs4 import BeautifulSoup
 
 from .fetcher import BASE_URL, FetchError, fetch_page_html
 from .logging_config import CACHE_DIR, get_logger
-from .sitemap import SITEMAP as HAND_CURATED_SITEMAP
-from .sitemap import SitemapEntry, normalize_path
+from .sitemap import CURATED_TAGS, SitemapEntry, normalize_path
 
 log = get_logger("autositemap")
 
 SITEMAP_XML_PATH = "/sitemap.xml"
 SITEMAP_JSON_PATH = CACHE_DIR / "sitemap.json"
+
+# Package-shipped fallback sitemap, regenerated from Adobe by the daily
+# refresh workflow and bundled with the wheel. Fresh installs land here
+# before they've persisted a user-specific sitemap.
+PACKAGE_SITEMAP_PATH = Path(__file__).parent / "data" / "sitemap.json"
 
 # Schema version — bump on breaking changes to the persisted JSON shape.
 SITEMAP_SCHEMA_VERSION = 1
@@ -88,39 +101,22 @@ def _derive_tags(path: str, title: str) -> list[str]:
     return sorted(tags)
 
 
-def _build_curated_tag_index() -> dict[str, list[str]]:
-    """
-    Build a lookup from base path-suffix → curated tags, using the legacy
-    hand-curated SITEMAP. This lets us reuse the richer tags (like "3YC",
-    "HGO", "x-correlation-id") even though Adobe's URLs have changed.
-
-    Key is the last non-empty path segment lowercased with hyphens → e.g.
-    "/vipmp/docs/customer_account/three_year_commit/" keys as "three-year-commit".
-    """
-    index: dict[str, list[str]] = {}
-    for entry in HAND_CURATED_SITEMAP:
-        # Normalize the legacy path segment to hyphen convention.
-        segments = [s for s in entry["path"].strip("/").split("/") if s]
-        if not segments:
-            continue
-        last = segments[-1].replace("_", "-").lower()
-        index[last] = list(entry["tags"])
-    return index
-
-
 def merge_curated_tags(entries: list[SitemapEntry]) -> list[SitemapEntry]:
-    """Merge hand-curated tags onto auto-generated entries where paths line up."""
-    curated = _build_curated_tag_index()
+    """
+    Merge curated tags (``CURATED_TAGS`` in sitemap.py) onto auto-generated
+    entries. Keys on the last non-empty path segment lowercased — e.g. an
+    entry at ``/vipmp/docs/customer-account/three-year-commit`` picks up
+    the tags keyed under ``three-year-commit``.
+    """
     merged = 0
     for entry in entries:
         segments = [s for s in entry["path"].strip("/").split("/") if s]
         if not segments:
             continue
         last = segments[-1].lower()
-        if last in curated:
+        if last in CURATED_TAGS:
             existing = set(entry["tags"])
-            for tag in curated[last]:
-                existing.add(tag)
+            existing.update(CURATED_TAGS[last])
             entry["tags"] = sorted(existing)
             merged += 1
     log.info("merged curated tags onto %d/%d entries", merged, len(entries))
@@ -199,11 +195,23 @@ def load_sitemap(path: Path = SITEMAP_JSON_PATH) -> list[SitemapEntry] | None:
 
 def get_active_sitemap() -> list[SitemapEntry]:
     """
-    Return the sitemap the server should use — persisted auto-generated one
-    if available, hand-curated fallback otherwise.
+    Return the sitemap the server should use, walking the tier chain:
+
+    1. Per-user persisted sitemap (``~/.cache/.../sitemap.json``) — freshest.
+    2. Package-shipped sitemap (``src/vipmp_docs_mcp/data/sitemap.json``) —
+       bundled with the wheel, regenerated daily by CI.
+    3. Empty list — last-resort. The hand-curated path list that used to
+       live here was retired in 0.7.2 (GitHub issue #6) after Adobe
+       migrated from underscore- to hyphen-separated slugs.
     """
-    auto = load_sitemap()
-    if auto:
-        return auto
-    log.info("no persisted sitemap; falling back to hand-curated")
-    return HAND_CURATED_SITEMAP
+    user = load_sitemap(SITEMAP_JSON_PATH)
+    if user:
+        return user
+    package = load_sitemap(PACKAGE_SITEMAP_PATH)
+    if package:
+        log.debug("no per-user sitemap; using package-shipped fallback")
+        return package
+    log.warning("no sitemap available (user cache missing and package "
+                "fallback unreadable) — search and listing tools will "
+                "return empty results until `refresh_vipmp_sitemap` runs")
+    return []

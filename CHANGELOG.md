@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] — 2026-04-20
+
+### Changed
+- **Retired the hand-curated path list in `sitemap.py`** (GitHub issue
+  #6). 46 of the 72 entries used underscore-separated slugs that
+  Adobe migrated off, so the list was drifting unusable. The module
+  now ships only what's still valuable: `SitemapEntry`, `normalize_path`,
+  and `CURATED_TAGS` — a `{last-path-segment: [tags]}` dict that
+  `merge_curated_tags` applies to Adobe-sourced entries for richer
+  search recall. Existing search/listing behaviour is preserved because
+  the tag lookup was already keyed on hyphen-normalised last segments.
+- **`get_active_sitemap` has a new tier chain.** Old: per-user cache
+  → hand-curated list. New: per-user cache → package-shipped
+  `data/sitemap.json` → empty. The middle tier is new — a
+  freshly-generated sitemap ships with every wheel so fresh installs
+  get a current sitemap with zero network on first run. Daily CI
+  refreshes it alongside `data/index.json`.
+
+### Added
+- **`src/vipmp_docs_mcp/data/sitemap.json`** — package-shipped
+  sitemap fallback. 86 entries, hyphen paths, curated tags merged.
+  Regenerated daily by `refresh-index.yml`.
+- **`tests/test_autositemap.py`** — covers the new tier chain
+  (user-cache wins, package fallback, corrupt-cache fallthrough,
+  schema mismatch handling) and `merge_curated_tags` behaviour
+  against `CURATED_TAGS`.
+
+### Removed
+- `sitemap.SITEMAP` (retired — was drifting from Adobe's slug
+  convention and is no longer a reliable fallback).
+- `sitemap.known_paths` and `sitemap.find_by_path` (only caller was
+  the hand-curated fallback in server.py, which was retired too).
+- `autositemap._build_curated_tag_index` (folded into
+  `merge_curated_tags` now that the source is a dict, not a list).
+
+### Internal
+- `server._find_by_path` no longer falls back to the hand-curated list
+  (there isn't one anymore). Simpler; returns `None` when the active
+  sitemap doesn't contain the path, and callers already tolerated that.
+- `refresh-index.yml` now regenerates `data/sitemap.json` before the
+  index rebuild and includes both in the bot-authored PR. Diff
+  detection ignores timestamps on both files.
+
 ## [0.7.1] — 2026-04-20
 
 ### Fixed

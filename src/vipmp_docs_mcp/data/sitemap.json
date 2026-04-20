@@ -1,0 +1,1264 @@
+{
+  "schema_version": 1,
+  "generated_at": 1776687510.118525,
+  "entries": [
+    {
+      "path": "/vipmp/docs",
+      "title": "Introduction",
+      "tags": [
+        "customer",
+        "distributor",
+        "introduction",
+        "order flow",
+        "overview",
+        "reseller",
+        "workflow"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/archive/3yc",
+      "title": "Manage Three-Year Commits",
+      "tags": [
+        "3yc",
+        "archive",
+        "commits",
+        "manage",
+        "three",
+        "year"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/authentication",
+      "title": "Identity management and authentication",
+      "tags": [
+        "access",
+        "auth",
+        "authentication",
+        "credentials",
+        "identity",
+        "management",
+        "oauth",
+        "token"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/authentication/health-check",
+      "title": "Health check",
+      "tags": [
+        "authentication",
+        "check",
+        "connectivity",
+        "health",
+        "health check",
+        "ping",
+        "status"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/authentication/oauth-credentials",
+      "title": "Generate OAuth credentials",
+      "tags": [
+        "authentication",
+        "client id",
+        "client secret",
+        "credentials",
+        "generate",
+        "oauth",
+        "oauth credentials",
+        "token"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account",
+      "title": "Manage customer accounts",
+      "tags": [
+        "account",
+        "accounts",
+        "customer",
+        "customer account",
+        "manage",
+        "overview"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/create-customer-account",
+      "title": "Create customer account",
+      "tags": [
+        "POST",
+        "account",
+        "create",
+        "create customer account",
+        "customer",
+        "customer account",
+        "new customer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/get-customer-account",
+      "title": "Get customer account details",
+      "tags": [
+        "GET",
+        "account",
+        "account details",
+        "customer",
+        "customer account",
+        "details",
+        "get",
+        "get customer account",
+        "retrieve"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/get-customer-list",
+      "title": "Get customer list",
+      "tags": [
+        "GET",
+        "account",
+        "all customers",
+        "customer",
+        "customer account",
+        "get",
+        "get customer list",
+        "list",
+        "pagination"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/get-licenses",
+      "title": "Get licenses pending partner order",
+      "tags": [
+        "GET",
+        "account",
+        "customer",
+        "customer account",
+        "customer licenses",
+        "get",
+        "get licenses",
+        "licenses",
+        "order",
+        "partner",
+        "partner order",
+        "pending"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/high-growth",
+      "title": "Manage High Growth Offers",
+      "tags": [
+        "HGO",
+        "account",
+        "customer",
+        "customer account",
+        "growth",
+        "growth offer",
+        "high",
+        "high growth",
+        "manage",
+        "offers"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/high-growth-apis",
+      "title": "Manage High Growth Offers through APIs",
+      "tags": [
+        "API",
+        "HGO",
+        "account",
+        "apis",
+        "customer",
+        "customer account",
+        "growth",
+        "high",
+        "high growth",
+        "high growth apis",
+        "manage",
+        "offers",
+        "through"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/high-growth-scenarios",
+      "title": "High Growth Offer scenarios",
+      "tags": [
+        "HGO",
+        "account",
+        "customer",
+        "customer account",
+        "examples",
+        "growth",
+        "high",
+        "high growth",
+        "high growth scenarios",
+        "offer",
+        "scenarios"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/linked-membership",
+      "title": "Manage Linked Memberships",
+      "tags": [
+        "account",
+        "consolidation",
+        "customer",
+        "customer account",
+        "link",
+        "linked",
+        "linked membership",
+        "manage",
+        "membership",
+        "memberships"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/market-segment",
+      "title": "Manage market segments",
+      "tags": [
+        "account",
+        "customer",
+        "customer account",
+        "manage",
+        "market",
+        "market segment",
+        "segment",
+        "segments"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/three-year-commit",
+      "title": "Manage Three-Year Commits",
+      "tags": [
+        "3YC",
+        "account",
+        "commit",
+        "commitment",
+        "commits",
+        "customer",
+        "customer account",
+        "manage",
+        "price lock",
+        "three",
+        "three year commit",
+        "year"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/customer-account/update-customer-account",
+      "title": "Update customer account",
+      "tags": [
+        "PATCH",
+        "PUT",
+        "account",
+        "customer",
+        "customer account",
+        "modify",
+        "update",
+        "update customer account"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/deployment-management",
+      "title": "Manage deployments",
+      "tags": [
+        "deployment",
+        "deployment management",
+        "deployments",
+        "manage",
+        "management",
+        "overview"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/deployment-management/create-deployment",
+      "title": "Create deployments",
+      "tags": [
+        "POST",
+        "create",
+        "create deployment",
+        "deployment",
+        "deployment management",
+        "deployments",
+        "management"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/deployment-management/get-deployment",
+      "title": "Get deployment details",
+      "tags": [
+        "GET",
+        "deployment",
+        "deployment management",
+        "details",
+        "get",
+        "get deployment",
+        "management"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/deployment-management/update-deployment",
+      "title": "Update a deployment of customer",
+      "tags": [
+        "PATCH",
+        "PUT",
+        "customer",
+        "deployment",
+        "deployment management",
+        "management",
+        "modify",
+        "update",
+        "update deployment"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/flex-discounts",
+      "title": "Manage Flexible Discounts",
+      "tags": [
+        "discount",
+        "discounts",
+        "flex",
+        "flex discount",
+        "flex discounts",
+        "flexible",
+        "flexible discounts",
+        "manage"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "tags": [
+        "API",
+        "apis",
+        "discounts",
+        "flex",
+        "flex discounts",
+        "flexible",
+        "manage",
+        "mid-term",
+        "upgrade",
+        "using"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/flex-discounts/error-codes",
+      "title": "Error codes specific to Flexible Discounts",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "discounts",
+        "error",
+        "error codes",
+        "errors",
+        "flex",
+        "flex discounts",
+        "flexible",
+        "large government agency",
+        "specific"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/flex-discounts/flex-discount-apis",
+      "title": "Flexible Discount API",
+      "tags": [
+        "api",
+        "apis",
+        "discount",
+        "discounts",
+        "flex",
+        "flex discount apis",
+        "flex discounts",
+        "flexible"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga",
+      "title": "Manage Large Government Agencies",
+      "tags": [
+        "Canada",
+        "GOV",
+        "LGA",
+        "US",
+        "agencies",
+        "discount",
+        "federal",
+        "government",
+        "large",
+        "large government agency",
+        "lga",
+        "linked membership",
+        "manage",
+        "state"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga/convert",
+      "title": "Convert an existing government customer to LGA",
+      "tags": [
+        "AD",
+        "GOV",
+        "LGA",
+        "PATCH",
+        "PENDING_UPGRADE",
+        "anniversary date",
+        "convert",
+        "customer",
+        "existing",
+        "government",
+        "large government agency",
+        "lga",
+        "renewal"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga/create",
+      "title": "Create an LGA customer",
+      "tags": [
+        "FEDERAL",
+        "LGA",
+        "POST",
+        "STATE",
+        "create",
+        "customer",
+        "enroll",
+        "large government agency",
+        "lga",
+        "linked membership",
+        "marketSubSegments"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga/error-codes",
+      "title": "Error codes specific to LGA",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "error",
+        "error codes",
+        "errors",
+        "large government agency",
+        "lga",
+        "specific"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga/migrate",
+      "title": "Migrate LGA customers from VIP to VIP Marketplace",
+      "tags": [
+        "FRL",
+        "LGA",
+        "VIP",
+        "customers",
+        "from",
+        "large government agency",
+        "lga",
+        "marketplace",
+        "migrate",
+        "migration",
+        "preview",
+        "transfer",
+        "vip"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/lga/references",
+      "title": "References",
+      "tags": [
+        "LGA",
+        "large government agency",
+        "lga",
+        "references"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/manage-pricing",
+      "title": "Access Price Lists",
+      "tags": [
+        "3YC",
+        "POST",
+        "access",
+        "currency",
+        "lists",
+        "manage",
+        "manage pricing",
+        "offers",
+        "price",
+        "price list",
+        "pricelist",
+        "pricing",
+        "three-year commit"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/market-segments",
+      "title": "Manage market segments",
+      "tags": [
+        "commercial",
+        "education",
+        "government",
+        "manage",
+        "market",
+        "market segments",
+        "segment",
+        "segments"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/mid-term",
+      "title": "Mid-term upgrades",
+      "tags": [
+        "mid",
+        "mid term",
+        "mid-term",
+        "term",
+        "upgrade",
+        "upgrades",
+        "upsize"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/mid-term/apis",
+      "title": "Manage mid-term upgrades through APIs",
+      "tags": [
+        "API",
+        "apis",
+        "manage",
+        "mid",
+        "mid term",
+        "mid-term",
+        "term",
+        "through",
+        "upgrade",
+        "upgrades"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/mid-term/error-codes",
+      "title": "Error codes specific to mid-term upgrade",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "error",
+        "error codes",
+        "errors",
+        "large government agency",
+        "mid",
+        "mid term",
+        "specific",
+        "term",
+        "upgrade"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/mid-term/faq",
+      "title": "Frequently asked questions",
+      "tags": [
+        "FAQ",
+        "asked",
+        "faq",
+        "frequently",
+        "mid",
+        "mid term",
+        "mid-term",
+        "questions",
+        "term",
+        "upgrade"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/migration",
+      "title": "Migrate from VIP to VIP-MP",
+      "tags": [
+        "VIP",
+        "classic VIP",
+        "from",
+        "migrate",
+        "migration",
+        "transfer",
+        "vip"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/migration/get-transfer-details",
+      "title": "Get transfer details",
+      "tags": [
+        "GET",
+        "details",
+        "get",
+        "get transfer details",
+        "migration",
+        "transfer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/migration/migrate-hvd",
+      "title": "Migrate High Volume Discount customers from VIP to VIP Marketplace",
+      "tags": [
+        "HVD",
+        "VIP to VIP MP",
+        "customers",
+        "discount",
+        "from",
+        "high",
+        "high volume discount",
+        "hvd",
+        "marketplace",
+        "migrate",
+        "migrate hvd",
+        "migration",
+        "vip",
+        "volume"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/migration/preview-offers",
+      "title": "Preview offers",
+      "tags": [
+        "eligibility",
+        "migration",
+        "offers",
+        "preview",
+        "preview offers"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/migration/transfer-subscription",
+      "title": "Transfer subscriptions",
+      "tags": [
+        "POST",
+        "migration",
+        "subscription",
+        "subscriptions",
+        "transfer",
+        "transfer subscription"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/notification-management",
+      "title": "Manage notifications",
+      "tags": [
+        "callback",
+        "event",
+        "manage",
+        "management",
+        "notification",
+        "notification management",
+        "notifications",
+        "push",
+        "webhook"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management",
+      "title": "Manage orders",
+      "tags": [
+        "cancel",
+        "manage",
+        "management",
+        "order",
+        "order management",
+        "orders",
+        "overview"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management/create-order",
+      "title": "Create order",
+      "tags": [
+        "POST",
+        "create",
+        "create order",
+        "management",
+        "new order",
+        "order",
+        "order management",
+        "purchase"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management/get-order",
+      "title": "Get order details",
+      "tags": [
+        "GET",
+        "details",
+        "get",
+        "get order",
+        "management",
+        "order",
+        "order management",
+        "retrieve"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management/invoice",
+      "title": "Pricing and invoicing data",
+      "tags": [
+        "data",
+        "invoice",
+        "invoicing",
+        "management",
+        "order",
+        "order management",
+        "pricing"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management/order-scenarios",
+      "title": "Order creation scenarios",
+      "tags": [
+        "creation",
+        "examples",
+        "management",
+        "new",
+        "order",
+        "order management",
+        "order scenarios",
+        "renewal",
+        "return",
+        "scenarios",
+        "use cases"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/order-management/update-order",
+      "title": "Update order",
+      "tags": [
+        "PATCH",
+        "PUT",
+        "cancel",
+        "management",
+        "modify",
+        "order",
+        "order management",
+        "update",
+        "update order"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/recommendations",
+      "title": "Manage Recommendations",
+      "tags": [
+        "cross-sell",
+        "manage",
+        "recommendations",
+        "upsell"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/recommendations/apis",
+      "title": "Manage Recommendations using APIs",
+      "tags": [
+        "API",
+        "apis",
+        "manage",
+        "mid-term",
+        "recommendations",
+        "upgrade",
+        "using"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/recommendations/error-codes",
+      "title": "Error codes specific to Recommendations",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "error",
+        "error codes",
+        "errors",
+        "large government agency",
+        "recommendations",
+        "specific"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/recommendations/recommendations-apis",
+      "title": "Recommendations API",
+      "tags": [
+        "api",
+        "apis",
+        "recommendations",
+        "recommendations apis"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references",
+      "title": "References",
+      "tags": [
+        "LGA",
+        "large government agency",
+        "references"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/api-headers",
+      "title": "Request header",
+      "tags": [
+        "api",
+        "api headers",
+        "authorization",
+        "content-type",
+        "header",
+        "headers",
+        "references",
+        "request",
+        "request headers",
+        "x-api-key"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/error-handling",
+      "title": "Status codes and error handling",
+      "tags": [
+        "codes",
+        "error",
+        "error codes",
+        "error handling",
+        "errors",
+        "handling",
+        "references",
+        "status",
+        "status codes",
+        "troubleshooting"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/idempotency",
+      "title": "Idempotency – Correlation ID Header",
+      "tags": [
+        "correlation",
+        "correlation id",
+        "duplicate requests",
+        "header",
+        "idempotency",
+        "references",
+        "x-correlation-id"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/resources",
+      "title": "Resources and fields",
+      "tags": [
+        "data model",
+        "fields",
+        "object reference",
+        "references",
+        "resources",
+        "schema"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/status-codes",
+      "title": "HTTP status codes",
+      "tags": [
+        "200",
+        "400",
+        "404",
+        "500",
+        "HTTP status codes",
+        "codes",
+        "error",
+        "http",
+        "references",
+        "response codes",
+        "status",
+        "status codes"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/supported-locales",
+      "title": "Supported Countries and Locales",
+      "tags": [
+        "countries",
+        "currency",
+        "locales",
+        "references",
+        "region",
+        "supported",
+        "supported locales"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/references/validations",
+      "title": "Validations and regular expressions",
+      "tags": [
+        "expressions",
+        "field validation",
+        "format",
+        "references",
+        "regex",
+        "regular",
+        "regular expressions",
+        "validation",
+        "validations"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/release-notes",
+      "title": "Release notes",
+      "tags": [
+        "changelog",
+        "notes",
+        "recent",
+        "release",
+        "release notes",
+        "updates"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/release-notes/fy24",
+      "title": "2024 releases",
+      "tags": [
+        "2024",
+        "fy24",
+        "notes",
+        "release",
+        "release notes",
+        "releases"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/release-notes/upcoming-releases",
+      "title": "Upcoming releases",
+      "tags": [
+        "future",
+        "notes",
+        "release",
+        "release notes",
+        "releases",
+        "roadmap",
+        "upcoming",
+        "upcoming releases"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/renewals/auto-renewals",
+      "title": "Manage auto-renewals using APIs",
+      "tags": [
+        "apis",
+        "auto",
+        "auto renewals",
+        "manage",
+        "renewals",
+        "using"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/renewals/error-codes",
+      "title": "Error codes specific to early renewals",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "early",
+        "error",
+        "error codes",
+        "errors",
+        "large government agency",
+        "renewals",
+        "specific"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/renewals/manual-renewals",
+      "title": "Manage manual renewals using APIs",
+      "tags": [
+        "apis",
+        "manage",
+        "manual",
+        "manual renewals",
+        "renewals",
+        "using"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/renewals/overview",
+      "title": "Manage renewals",
+      "tags": [
+        "manage",
+        "overview",
+        "renewals"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-account",
+      "title": "Manage reseller accounts",
+      "tags": [
+        "account",
+        "accounts",
+        "distributor",
+        "manage",
+        "partner",
+        "reseller",
+        "reseller account"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-account/create-reseller-account",
+      "title": "Create a reseller account",
+      "tags": [
+        "POST",
+        "account",
+        "create",
+        "create reseller account",
+        "new reseller",
+        "reseller",
+        "reseller account"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-account/get-reseller-account",
+      "title": "Get reseller account details",
+      "tags": [
+        "GET",
+        "account",
+        "account details",
+        "details",
+        "get",
+        "get reseller account",
+        "reseller",
+        "reseller account",
+        "retrieve"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-account/get-reseller-list",
+      "title": "Get reseller list",
+      "tags": [
+        "GET",
+        "account",
+        "all resellers",
+        "get",
+        "get reseller list",
+        "list",
+        "pagination",
+        "reseller",
+        "reseller account"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-account/update-reseller-account",
+      "title": "Update a reseller account",
+      "tags": [
+        "PATCH",
+        "PUT",
+        "account",
+        "modify",
+        "reseller",
+        "reseller account",
+        "update",
+        "update reseller account"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-change",
+      "title": "Reseller change process",
+      "tags": [
+        "change",
+        "change reseller",
+        "process",
+        "reseller",
+        "reseller change",
+        "reseller transfer",
+        "transfer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-change/commit-transfer",
+      "title": "Commit a reseller transfer",
+      "tags": [
+        "POST",
+        "change",
+        "commit",
+        "commit transfer",
+        "reseller",
+        "reseller change",
+        "reseller transfer",
+        "transfer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-change/get-transfer",
+      "title": "Get reseller transfer details",
+      "tags": [
+        "GET",
+        "change",
+        "details",
+        "get",
+        "get transfer",
+        "reseller",
+        "reseller change",
+        "reseller transfer",
+        "transfer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/reseller-change/preview-transfer",
+      "title": "Preview a reseller transfer",
+      "tags": [
+        "GET",
+        "change",
+        "preview",
+        "preview transfer",
+        "reseller",
+        "reseller change",
+        "reseller transfer",
+        "transfer"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/resources",
+      "title": "Manage resources",
+      "tags": [
+        "data model",
+        "fields",
+        "manage",
+        "object reference",
+        "resources",
+        "schema"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/resources/processes",
+      "title": "Manage business processes",
+      "tags": [
+        "business",
+        "manage",
+        "processes",
+        "resources"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/resources/workflows",
+      "title": "Manage operational workflows",
+      "tags": [
+        "manage",
+        "operational",
+        "resources",
+        "workflows"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/subscription-management",
+      "title": "Manage subscriptions",
+      "tags": [
+        "auto-renewal",
+        "manage",
+        "management",
+        "overview",
+        "subscription",
+        "subscription management",
+        "subscriptions"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/subscription-management/create-subscription",
+      "title": "Create subscription",
+      "tags": [
+        "POST",
+        "create",
+        "create subscription",
+        "management",
+        "subscription",
+        "subscription management"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/subscription-management/get-details",
+      "title": "Get details of a specific subscription",
+      "tags": [
+        "GET",
+        "details",
+        "get",
+        "get details",
+        "management",
+        "single",
+        "specific",
+        "subscription",
+        "subscription management"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/subscription-management/get-details-for-customers",
+      "title": "Get details of a customer's subscriptions",
+      "tags": [
+        "GET",
+        "all",
+        "customer",
+        "customer subscriptions",
+        "customers",
+        "details",
+        "for",
+        "get",
+        "get details for customers",
+        "list",
+        "management",
+        "subscription",
+        "subscription management",
+        "subscriptions"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/subscription-management/update-subscription",
+      "title": "Update subscription",
+      "tags": [
+        "PATCH",
+        "PUT",
+        "auto-renewal",
+        "management",
+        "modify",
+        "quantity",
+        "subscription",
+        "subscription management",
+        "update",
+        "update subscription"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/support",
+      "title": "Support",
+      "tags": [
+        "contact",
+        "help",
+        "support"
+      ]
+    }
+  ]
+}

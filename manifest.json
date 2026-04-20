@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "vipmp-docs-mcp",
   "display_name": "Adobe VIP Marketplace Docs",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "MCP server exposing Adobe VIP Marketplace Partner API documentation as searchable tools",
   "long_description": "Turn Adobe's Partner API docs at developer.adobe.com/vipmp/docs into queryable MCP tools. Search pages, inspect endpoints, validate request bodies against the published schemas, generate runnable curl/PowerShell/Python/C# snippets, and follow release notes — without leaving the assistant. Ships with a pre-built structured index of every endpoint, error code, and schema, refreshed daily from live Adobe docs.",
   "author": {
