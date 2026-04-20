@@ -39,6 +39,14 @@ from .sitemap import normalize_path
 log = get_logger("server")
 
 
+# Threshold below which `vipmp_server_info` flags the active index as
+# suspiciously incomplete. Healthy rebuilds against the current Adobe
+# sitemap carry several hundred endpoints. Anything below this count
+# almost always means the build ran against a stale path list and
+# mostly 404'd. See GitHub issue #4.
+STALE_INDEX_ENDPOINT_THRESHOLD = 30
+
+
 # Active sitemap: auto-generated (from Adobe's sitemap.xml, persisted to
 # ~/.cache/.../sitemap.json) if available, else hand-curated fallback.
 # Mutable so `refresh_vipmp_sitemap` can swap in a fresh copy at runtime
@@ -919,6 +927,17 @@ def vipmp_server_info() -> str:
             f"{len(idx.releases)} releases — "
             f"built {idx.age_seconds / 3600:.1f}h ago"
         )
+        # Flag obviously-broken indexes explicitly. Healthy builds carry
+        # hundreds of endpoints; anything below the threshold almost always
+        # means the sitemap was stale or mostly 404'd at build time
+        # (see GitHub issue #4). Surfacing it in server_info means users
+        # spot the regression without having to know to cross-check.
+        if len(idx.endpoints) < STALE_INDEX_ENDPOINT_THRESHOLD:
+            idx_line = (
+                f"**⚠️ index looks incomplete** ({len(idx.endpoints)} endpoints; "
+                f"healthy builds carry hundreds). Call `rebuild_vipmp_index` to "
+                f"regenerate against the current Adobe sitemap. Details: " + idx_line
+            )
         idx_source_line = f"- **Source:** `{active.source}` (`{active.path}`)"
     else:
         idx_line = "_(no index available — call `rebuild_vipmp_index`)_"
