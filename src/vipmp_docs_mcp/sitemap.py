@@ -1,13 +1,23 @@
 """
-Sitemap of Adobe VIP Marketplace Partner API documentation.
+Hand-authored metadata that complements Adobe's live sitemap.
 
-Currently hand-curated. Phase 4 will add auto-refresh from the docs nav tree
-and allow loading from a persisted `sitemap.json`.
+Originally this module held a full hand-curated list of doc paths. That list
+drifted once Adobe migrated their slug convention from underscores to
+hyphens — see GitHub issue #6. The path list is now retired and replaced by
+two narrow data structures:
 
-Each entry:
-    path:  Absolute docs path (starts with "/vipmp/docs/")
-    title: Human-readable page title
-    tags:  Extra search terms to improve recall on keyword matches
+* ``SitemapEntry`` — the TypedDict shape every other module expects for a
+  sitemap entry, preserved here as a shared vocabulary.
+* ``CURATED_TAGS`` — a ``{last-path-segment: [tags, ...]}`` dict used by
+  ``autositemap.merge_curated_tags`` to add semantic tags (e.g. "3YC",
+  "LGA", "HGO") onto entries Adobe sources. The live sitemap arrives
+  from Adobe's ``/sitemap.xml`` via [autositemap.py](./autositemap.py);
+  the tags below are what we contribute on top.
+
+Adding entries here improves search recall by giving pages extra keywords
+the title alone doesn't carry. Keys must match the page's final path
+segment (hyphens, lowercase). Tag ordering is irrelevant — search treats
+them as a set.
 """
 
 from __future__ import annotations
@@ -21,393 +31,82 @@ class SitemapEntry(TypedDict):
     tags: list[str]
 
 
-SITEMAP: list[SitemapEntry] = [
-    # Introduction / Release notes
-    {
-        "path": "/vipmp/docs/",
-        "title": "Introduction",
-        "tags": ["overview", "introduction", "workflow", "order flow", "distributor", "reseller", "customer"],
-    },
-    {
-        "path": "/vipmp/docs/release_notes/",
-        "title": "Release Notes — Recent",
-        "tags": ["release notes", "changelog", "recent", "updates"],
-    },
-    {
-        "path": "/vipmp/docs/release_notes/upcoming_releases/",
-        "title": "Release Notes — Upcoming",
-        "tags": ["release notes", "upcoming", "roadmap", "future"],
-    },
-
-    # Authentication
-    {
-        "path": "/vipmp/docs/authentication/",
-        "title": "API Authentication and Access",
-        "tags": ["authentication", "auth", "access", "oauth", "credentials", "token"],
-    },
-    {
-        "path": "/vipmp/docs/authentication/health_check/",
-        "title": "Health Check",
-        "tags": ["health check", "ping", "status", "connectivity"],
-    },
-    {
-        "path": "/vipmp/docs/authentication/oauth_credentials/",
-        "title": "Generate OAuth Credentials",
-        "tags": ["oauth", "credentials", "token", "client id", "client secret", "authentication"],
-    },
-
-    # Reseller accounts
-    {
-        "path": "/vipmp/docs/reseller_account/",
-        "title": "Reseller Accounts — Overview",
-        "tags": ["reseller", "account", "partner", "distributor"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_account/create_reseller_account/",
-        "title": "Create a Reseller Account",
-        "tags": ["reseller", "create", "POST", "account", "new reseller"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_account/get_reseller_account/",
-        "title": "Get Reseller Account Details",
-        "tags": ["reseller", "get", "GET", "account details", "retrieve"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_account/get_reseller_list/",
-        "title": "Get Reseller List",
-        "tags": ["reseller", "list", "GET", "all resellers", "pagination"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_account/update_reseller_account/",
-        "title": "Update a Reseller Account",
-        "tags": ["reseller", "update", "PATCH", "PUT", "modify"],
-    },
-
-    # Customer accounts
-    {
-        "path": "/vipmp/docs/customer_account/",
-        "title": "Customer Accounts — Overview",
-        "tags": ["customer", "account", "overview"],
-    },
-    {
-        "path": "/vipmp/docs/market_segments/",
-        "title": "Market Segments",
-        "tags": ["market segments", "commercial", "education", "government", "segment"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/create_customer_account/",
-        "title": "Create Customer Account",
-        "tags": ["customer", "create", "POST", "new customer", "account"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/get_customer_account/",
-        "title": "Get Customer Account Details",
-        "tags": ["customer", "get", "GET", "account details", "retrieve"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/get_customer_list/",
-        "title": "Get Customer List",
-        "tags": ["customer", "list", "GET", "all customers", "pagination"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/update_customer_account/",
-        "title": "Update Customer Account",
-        "tags": ["customer", "update", "PATCH", "PUT", "modify"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/get_licenses/",
-        "title": "Get Licenses Pending Partner Order",
-        "tags": ["licenses", "pending", "GET", "customer licenses", "partner order"],
-    },
-
-    # Deployments
-    {
-        "path": "/vipmp/docs/deployment_management/",
-        "title": "Deployments — Overview",
-        "tags": ["deployment", "overview"],
-    },
-    {
-        "path": "/vipmp/docs/deployment_management/create_deployment/",
-        "title": "Create Deployment",
-        "tags": ["deployment", "create", "POST"],
-    },
-    {
-        "path": "/vipmp/docs/deployment_management/get_deployment/",
-        "title": "Get Deployment Details",
-        "tags": ["deployment", "get", "GET", "details"],
-    },
-    {
-        "path": "/vipmp/docs/deployment_management/update_deployment/",
-        "title": "Update a Deployment",
-        "tags": ["deployment", "update", "PATCH", "PUT", "modify"],
-    },
-
-    # Orders
-    {
-        "path": "/vipmp/docs/order_management/",
-        "title": "Orders — Overview",
-        "tags": ["order", "overview", "cancel"],
-    },
-    {
-        "path": "/vipmp/docs/order_management/create_order/",
-        "title": "Create Order",
-        "tags": ["order", "create", "POST", "new order", "purchase"],
-    },
-    {
-        "path": "/vipmp/docs/order_management/order_scenarios/",
-        "title": "Order Creation Scenarios",
-        "tags": ["order", "scenarios", "examples", "use cases", "new", "renewal", "return"],
-    },
-    {
-        "path": "/vipmp/docs/order_management/get_order/",
-        "title": "Get Order Details",
-        "tags": ["order", "get", "GET", "details", "retrieve"],
-    },
-    {
-        "path": "/vipmp/docs/order_management/update_order/",
-        "title": "Update Order",
-        "tags": ["order", "update", "PATCH", "PUT", "cancel", "modify"],
-    },
-
-    # Subscriptions
-    {
-        "path": "/vipmp/docs/subscription_management/",
-        "title": "Subscriptions — Overview",
-        "tags": ["subscription", "overview", "auto-renewal"],
-    },
-    {
-        "path": "/vipmp/docs/subscription_management/create_subscription/",
-        "title": "Create Subscription",
-        "tags": ["subscription", "create", "POST"],
-    },
-    {
-        "path": "/vipmp/docs/subscription_management/get_details/",
-        "title": "Get Details of a Specific Subscription",
-        "tags": ["subscription", "get", "GET", "details", "single"],
-    },
-    {
-        "path": "/vipmp/docs/subscription_management/get_details_for_customers/",
-        "title": "Get All Subscriptions for a Customer",
-        "tags": ["subscription", "list", "GET", "customer subscriptions", "all"],
-    },
-    {
-        "path": "/vipmp/docs/subscription_management/update_subscription/",
-        "title": "Update Subscription",
-        "tags": ["subscription", "update", "PATCH", "PUT", "auto-renewal", "quantity", "modify"],
-    },
-
-    # Pricing & Notifications
-    {
-        "path": "/vipmp/docs/manage_pricing/",
-        "title": "Price Lists",
-        "tags": ["price list", "pricing", "pricelist", "POST", "currency", "offers", "3YC", "three-year commit"],
-    },
-    {
-        "path": "/vipmp/docs/notification_management/",
-        "title": "Notifications",
-        "tags": ["notification", "webhook", "event", "callback", "push"],
-    },
-
-    # Operational workflows
-    {
-        "path": "/vipmp/docs/customer_account/three_year_commit/",
-        "title": "Three-Year Commits (3YC)",
-        "tags": ["3YC", "three year commit", "commitment", "price lock"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/linked_membership/",
-        "title": "Linked Memberships",
-        "tags": ["linked membership", "membership", "link", "consolidation"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/high_growth/",
-        "title": "High Growth Offers — Overview",
-        "tags": ["high growth", "HGO", "offers", "growth offer"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/high_growth_scenarios/",
-        "title": "High Growth Offer Scenarios",
-        "tags": ["high growth", "HGO", "scenarios", "examples"],
-    },
-    {
-        "path": "/vipmp/docs/customer_account/high_growth_apis/",
-        "title": "Manage High Growth Offers through APIs",
-        "tags": ["high growth", "HGO", "API", "manage"],
-    },
-    {
-        "path": "/vipmp/docs/recommendations/",
-        "title": "Recommendations — Overview",
-        "tags": ["recommendations", "upsell", "cross-sell"],
-    },
-    {
-        "path": "/vipmp/docs/recommendations/apis/",
-        "title": "Manage Recommendations using APIs",
-        "tags": ["recommendations", "API", "manage"],
-    },
-    {
-        "path": "/vipmp/docs/recommendations/error_codes/",
-        "title": "Error Codes — Recommendations",
-        "tags": ["recommendations", "error codes", "errors"],
-    },
-    {
-        "path": "/vipmp/docs/flex_discounts/",
-        "title": "Flexible Discounts — Overview",
-        "tags": ["flexible discounts", "flex discount", "discount"],
-    },
-    {
-        "path": "/vipmp/docs/flex_discounts/apis/",
-        "title": "Manage Flexible Discounts using APIs",
-        "tags": ["flexible discounts", "API", "manage"],
-    },
-    {
-        "path": "/vipmp/docs/flex_discounts/error_codes/",
-        "title": "Error Codes — Flexible Discounts",
-        "tags": ["flexible discounts", "error codes", "errors"],
-    },
-    {
-        "path": "/vipmp/docs/mid_term/",
-        "title": "Mid-Term Upgrades — Overview",
-        "tags": ["mid-term", "upgrade", "mid term", "upsize"],
-    },
-    {
-        "path": "/vipmp/docs/mid_term/apis/",
-        "title": "Manage Mid-Term Upgrades through APIs",
-        "tags": ["mid-term", "upgrade", "API", "manage"],
-    },
-    {
-        "path": "/vipmp/docs/mid_term/error_codes/",
-        "title": "Error Codes — Mid-Term Upgrades",
-        "tags": ["mid-term", "upgrade", "error codes", "errors"],
-    },
-    {
-        "path": "/vipmp/docs/mid_term/faq/",
-        "title": "Mid-Term Upgrades FAQ",
-        "tags": ["mid-term", "upgrade", "FAQ", "questions"],
-    },
-
-    # Business processes
-    {
-        "path": "/vipmp/docs/reseller_change/",
-        "title": "Reseller Change Process — Overview",
-        "tags": ["reseller change", "transfer", "reseller transfer", "change reseller"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_change/preview_transfer/",
-        "title": "Preview a Reseller Transfer",
-        "tags": ["reseller transfer", "preview", "GET"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_change/commit_transfer/",
-        "title": "Commit a Reseller Transfer",
-        "tags": ["reseller transfer", "commit", "POST"],
-    },
-    {
-        "path": "/vipmp/docs/reseller_change/get_transfer/",
-        "title": "Get Reseller Transfer Details",
-        "tags": ["reseller transfer", "get", "GET", "details"],
-    },
-    {
-        "path": "/vipmp/docs/migration/",
-        "title": "Migrate to VIP Marketplace — Overview",
-        "tags": ["migration", "VIP", "transfer", "migrate", "classic VIP"],
-    },
-    {
-        "path": "/vipmp/docs/migration/preview_offers/",
-        "title": "Preview Offers (Migration)",
-        "tags": ["migration", "preview", "offers", "eligibility"],
-    },
-    {
-        "path": "/vipmp/docs/migration/transfer_subscription/",
-        "title": "Transfer Subscriptions (Migration)",
-        "tags": ["migration", "transfer", "subscription", "POST"],
-    },
-    {
-        "path": "/vipmp/docs/migration/get_transfer_details/",
-        "title": "Get Transfer Details (Migration)",
-        "tags": ["migration", "transfer", "get", "GET", "details"],
-    },
-    {
-        "path": "/vipmp/docs/migration/migrate_hvd/",
-        "title": "Migrate High Volume Discount (HVD) Customers",
-        "tags": ["migration", "HVD", "high volume discount", "VIP to VIP MP"],
-    },
-
-    # Large Government Agencies (LGA) — note: these use trailing-slashless paths in Adobe's docs
-    {
-        "path": "/vipmp/docs/lga/",
-        "title": "Large Government Agencies (LGA) — Overview",
-        "tags": ["LGA", "large government agency", "government", "GOV", "discount", "federal", "state", "linked membership", "US", "Canada"],
-    },
-    {
-        "path": "/vipmp/docs/lga/create/",
-        "title": "Create an LGA Customer",
-        "tags": ["LGA", "large government agency", "create", "POST", "customer", "FEDERAL", "STATE", "marketSubSegments", "linked membership", "enroll"],
-    },
-    {
-        "path": "/vipmp/docs/lga/migrate/",
-        "title": "Migrate LGA Customers from VIP to VIP Marketplace",
-        "tags": ["LGA", "large government agency", "migration", "transfer", "VIP", "migrate", "preview", "FRL"],
-    },
-    {
-        "path": "/vipmp/docs/lga/convert/",
-        "title": "Convert an Existing Government Customer to LGA",
-        "tags": ["LGA", "large government agency", "convert", "GOV", "government", "PENDING_UPGRADE", "anniversary date", "AD", "renewal", "PATCH"],
-    },
-    {
-        "path": "/vipmp/docs/lga/error-codes/",
-        "title": "Error Codes — LGA",
-        "tags": ["LGA", "large government agency", "error codes", "errors", "1117", "1118", "1147", "1163", "1164", "1167", "1168", "5117"],
-    },
-    {
-        "path": "/vipmp/docs/lga/references/",
-        "title": "LGA References",
-        "tags": ["LGA", "large government agency", "references"],
-    },
-
-    # References
-    {
-        "path": "/vipmp/docs/references/api_headers/",
-        "title": "API Request Headers",
-        "tags": ["headers", "request headers", "x-api-key", "authorization", "content-type"],
-    },
-    {
-        "path": "/vipmp/docs/references/idempotency/",
-        "title": "Idempotency — Correlation ID Header",
-        "tags": ["idempotency", "correlation id", "x-correlation-id", "duplicate requests"],
-    },
-    {
-        "path": "/vipmp/docs/references/status_codes/",
-        "title": "HTTP Status Codes",
-        "tags": ["HTTP status codes", "200", "400", "404", "500", "error", "response codes"],
-    },
-    {
-        "path": "/vipmp/docs/references/error_handling/",
-        "title": "Status Codes and Error Handling",
-        "tags": ["error handling", "error codes", "status codes", "errors", "troubleshooting"],
-    },
-    {
-        "path": "/vipmp/docs/references/supported_locales/",
-        "title": "Supported Countries and Locales",
-        "tags": ["countries", "locales", "currency", "region", "supported"],
-    },
-    {
-        "path": "/vipmp/docs/references/resources/",
-        "title": "Resources and Fields",
-        "tags": ["resources", "fields", "schema", "data model", "object reference"],
-    },
-    {
-        "path": "/vipmp/docs/references/validations/",
-        "title": "Validations and Regular Expressions",
-        "tags": ["validation", "regex", "regular expressions", "field validation", "format"],
-    },
-
-    # Support
-    {
-        "path": "/vipmp/docs/support/",
-        "title": "Support",
-        "tags": ["support", "help", "contact"],
-    },
-]
+# Last-path-segment → semantic tags. Consumed by
+# ``autositemap.merge_curated_tags`` to enrich live Adobe-sourced entries.
+#
+# When multiple pages share a last segment (e.g. ``.../flex-discounts/apis/``
+# and ``.../mid-term/apis/``) only one tag list can win per key; the order
+# below is the order that used to be encoded implicitly in the old SITEMAP
+# list (last-wins, preserved for behaviour parity).
+CURATED_TAGS: dict[str, list[str]] = {
+    "api-headers": ["authorization", "content-type", "headers", "request headers", "x-api-key"],
+    "apis": ["API", "manage", "mid-term", "upgrade"],
+    "authentication": ["access", "auth", "authentication", "credentials", "oauth", "token"],
+    "commit-transfer": ["POST", "commit", "reseller transfer"],
+    "convert": ["AD", "GOV", "LGA", "PATCH", "PENDING_UPGRADE", "anniversary date", "convert", "government", "large government agency", "renewal"],
+    "create": ["FEDERAL", "LGA", "POST", "STATE", "create", "customer", "enroll", "large government agency", "linked membership", "marketSubSegments"],
+    "create-customer-account": ["POST", "account", "create", "customer", "new customer"],
+    "create-deployment": ["POST", "create", "deployment"],
+    "create-order": ["POST", "create", "new order", "order", "purchase"],
+    "create-reseller-account": ["POST", "account", "create", "new reseller", "reseller"],
+    "create-subscription": ["POST", "create", "subscription"],
+    "customer-account": ["account", "customer", "overview"],
+    "deployment-management": ["deployment", "overview"],
+    "docs": ["customer", "distributor", "introduction", "order flow", "overview", "reseller", "workflow"],
+    "error-codes": ["1117", "1118", "1147", "1163", "1164", "1167", "1168", "5117", "LGA", "error codes", "errors", "large government agency"],
+    "error-handling": ["error codes", "error handling", "errors", "status codes", "troubleshooting"],
+    "faq": ["FAQ", "mid-term", "questions", "upgrade"],
+    "flex-discounts": ["discount", "flex discount", "flexible discounts"],
+    "get-customer-account": ["GET", "account details", "customer", "get", "retrieve"],
+    "get-customer-list": ["GET", "all customers", "customer", "list", "pagination"],
+    "get-deployment": ["GET", "deployment", "details", "get"],
+    "get-details": ["GET", "details", "get", "single", "subscription"],
+    "get-details-for-customers": ["GET", "all", "customer subscriptions", "list", "subscription"],
+    "get-licenses": ["GET", "customer licenses", "licenses", "partner order", "pending"],
+    "get-order": ["GET", "details", "get", "order", "retrieve"],
+    "get-reseller-account": ["GET", "account details", "get", "reseller", "retrieve"],
+    "get-reseller-list": ["GET", "all resellers", "list", "pagination", "reseller"],
+    "get-transfer": ["GET", "details", "get", "reseller transfer"],
+    "get-transfer-details": ["GET", "details", "get", "migration", "transfer"],
+    "health-check": ["connectivity", "health check", "ping", "status"],
+    "high-growth": ["HGO", "growth offer", "high growth", "offers"],
+    "high-growth-apis": ["API", "HGO", "high growth", "manage"],
+    "high-growth-scenarios": ["HGO", "examples", "high growth", "scenarios"],
+    "idempotency": ["correlation id", "duplicate requests", "idempotency", "x-correlation-id"],
+    "lga": ["Canada", "GOV", "LGA", "US", "discount", "federal", "government", "large government agency", "linked membership", "state"],
+    "linked-membership": ["consolidation", "link", "linked membership", "membership"],
+    "manage-pricing": ["3YC", "POST", "currency", "offers", "price list", "pricelist", "pricing", "three-year commit"],
+    "market-segments": ["commercial", "education", "government", "market segments", "segment"],
+    "mid-term": ["mid term", "mid-term", "upgrade", "upsize"],
+    "migrate": ["FRL", "LGA", "VIP", "large government agency", "migrate", "migration", "preview", "transfer"],
+    "migrate-hvd": ["HVD", "VIP to VIP MP", "high volume discount", "migration"],
+    "migration": ["VIP", "classic VIP", "migrate", "migration", "transfer"],
+    "notification-management": ["callback", "event", "notification", "push", "webhook"],
+    "oauth-credentials": ["authentication", "client id", "client secret", "credentials", "oauth", "token"],
+    "order-management": ["cancel", "order", "overview"],
+    "order-scenarios": ["examples", "new", "order", "renewal", "return", "scenarios", "use cases"],
+    "preview-offers": ["eligibility", "migration", "offers", "preview"],
+    "preview-transfer": ["GET", "preview", "reseller transfer"],
+    "recommendations": ["cross-sell", "recommendations", "upsell"],
+    "references": ["LGA", "large government agency", "references"],
+    "release-notes": ["changelog", "recent", "release notes", "updates"],
+    "reseller-account": ["account", "distributor", "partner", "reseller"],
+    "reseller-change": ["change reseller", "reseller change", "reseller transfer", "transfer"],
+    "resources": ["data model", "fields", "object reference", "resources", "schema"],
+    "status-codes": ["200", "400", "404", "500", "HTTP status codes", "error", "response codes"],
+    "subscription-management": ["auto-renewal", "overview", "subscription"],
+    "support": ["contact", "help", "support"],
+    "supported-locales": ["countries", "currency", "locales", "region", "supported"],
+    "three-year-commit": ["3YC", "commitment", "price lock", "three year commit"],
+    "transfer-subscription": ["POST", "migration", "subscription", "transfer"],
+    "upcoming-releases": ["future", "release notes", "roadmap", "upcoming"],
+    "update-customer-account": ["PATCH", "PUT", "customer", "modify", "update"],
+    "update-deployment": ["PATCH", "PUT", "deployment", "modify", "update"],
+    "update-order": ["PATCH", "PUT", "cancel", "modify", "order", "update"],
+    "update-reseller-account": ["PATCH", "PUT", "modify", "reseller", "update"],
+    "update-subscription": ["PATCH", "PUT", "auto-renewal", "modify", "quantity", "subscription", "update"],
+    "validations": ["field validation", "format", "regex", "regular expressions", "validation"],
+}
 
 
 def normalize_path(path: str) -> str:
@@ -424,17 +123,3 @@ def normalize_path(path: str) -> str:
     if len(path) > 1 and path.endswith("/"):
         path = path.rstrip("/")
     return path
-
-
-def known_paths() -> set[str]:
-    """Normalized set of known doc paths for membership checks."""
-    return {normalize_path(e["path"]) for e in SITEMAP}
-
-
-def find_by_path(path: str) -> SitemapEntry | None:
-    """Look up a sitemap entry by path (normalized)."""
-    normalized = normalize_path(path)
-    for entry in SITEMAP:
-        if normalize_path(entry["path"]) == normalized:
-            return entry
-    return None
