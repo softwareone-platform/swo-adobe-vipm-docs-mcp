@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-04-20
+
+### Fixed
+- **`rebuild_vipmp_index` crashed with "asyncio.run() cannot be called
+  from a running event loop"** when invoked as an MCP tool (GitHub
+  issue #4). The inner `asyncio.run` in `build_index()` assumed no
+  surrounding event loop, which is true for CI scripts and the REPL
+  but false for every MCP client (VS Code, Claude Desktop, etc.) where
+  the server runs inside an active loop. Now guarded: if a loop is
+  already running, the parallel fetch is isolated in a short-lived
+  thread with its own fresh loop.
+- **CI-built indexes were mostly empty** because the hand-curated
+  fallback in `sitemap.py` still uses underscore-separated paths
+  (`/vipmp/docs/reseller_account/…`) while Adobe's live docs have
+  migrated to hyphens (`/vipmp/docs/reseller-account/…`). GitHub
+  Actions runners have no persisted `sitemap.json` on first use, so
+  `build_index()` fell back to the stale list → mostly-404 fetches →
+  5-endpoint indexes. The github-remote tier then shipped those to
+  every user. `build_index()` now refreshes the sitemap from Adobe's
+  live XML before fetching pages; if Adobe is unreachable it falls
+  back as before. Follow-up: retire or update the underscore paths
+  in `sitemap.py` — tracked separately.
+
+### Added
+- **Stale-index warning in `vipmp_server_info`.** When the active
+  index has fewer than 30 endpoints (healthy builds carry hundreds),
+  the diagnostic now leads with a `⚠️ index looks incomplete` banner
+  and tells the user to run `rebuild_vipmp_index`. Balint's report
+  (issue #4) was slow to diagnose partly because `5 endpoints`
+  didn't obviously read as broken.
+
+### Internal
+- New regression test: `build_index()` is now exercised from inside
+  `asyncio.run(...)` (pytest-asyncio auto-mode) so the loop-nesting
+  bug can't re-land silently. Added a second test covering the
+  best-effort sitemap refresh: if Adobe's XML is unreachable, the
+  build completes against the currently-active sitemap.
+
 ## [0.7.0] — 2026-04-19
 
 ### Added

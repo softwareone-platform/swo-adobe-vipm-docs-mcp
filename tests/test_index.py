@@ -14,6 +14,7 @@ from vipmp_docs_mcp.extractors import Endpoint, ErrorCode, SchemaField, SchemaRe
 from vipmp_docs_mcp.index import (
     INDEX_SCHEMA_VERSION,
     IndexSnapshot,
+    build_index,
     load_index,
     resolve_active_index,
     save_index,
@@ -96,6 +97,90 @@ class TestLoadIndex:
         path = tmp_path / "bad.json"
         path.write_text("not json {{{")
         assert load_index(path) is None
+
+
+class TestBuildIndexFromAsyncContext:
+    """
+    Regression for GitHub issue #4 — `build_index()` must work when
+    invoked from an already-running event loop (how MCP tool handlers
+    call it). Before 0.7.1 the inner `asyncio.run()` crashed with
+    "cannot be called from a running event loop".
+
+    This test is `async def`, so pytest-asyncio runs it inside an event
+    loop. If the nesting guard regresses, it'll reappear here before it
+    ships.
+    """
+
+    async def test_build_index_runs_inside_event_loop(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        from vipmp_docs_mcp import autositemap
+        from vipmp_docs_mcp import fetcher as fetcher_module
+
+        fake_sitemap = [
+            {"path": "/vipmp/docs/x", "title": "X", "tags": []},
+            {"path": "/vipmp/docs/y", "title": "Y", "tags": []},
+        ]
+
+        # Stub the sitemap refresh path — no network, returns a tiny sitemap.
+        monkeypatch.setattr(autositemap, "build_sitemap", lambda *a, **k: fake_sitemap)
+        monkeypatch.setattr(autositemap, "save_sitemap", lambda *a, **k: None)
+        monkeypatch.setattr(
+            index_module, "get_active_sitemap", lambda: fake_sitemap
+        )
+
+        # Stub the parallel fetch. `build_index` imports async_fetch_many from
+        # `vipmp_docs_mcp.fetcher`, so patch at the source module.
+        async def fake_fetch_many(paths, **_):
+            return dict.fromkeys(paths, "<html><body>vipmp</body></html>")
+
+        monkeypatch.setattr(fetcher_module, "async_fetch_many", fake_fetch_many)
+
+        # Stub the release-notes fetch (called with a sync fetch_page_html).
+        monkeypatch.setattr(
+            index_module,
+            "fetch_page_html",
+            lambda *a, **k: "<html><body></body></html>",
+        )
+
+        # The test itself: this is an async function, so we're inside a
+        # running event loop. Before the fix, build_index() raised
+        # RuntimeError from its inner asyncio.run() call.
+        snap = build_index()
+        assert snap is not None
+        assert snap.source_sitemap_size == len(fake_sitemap)
+
+    async def test_build_index_tolerates_sitemap_refresh_failure(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        """If Adobe's sitemap.xml is unreachable, build_index falls back to
+        whatever get_active_sitemap returns rather than raising."""
+        from vipmp_docs_mcp import autositemap
+        from vipmp_docs_mcp import fetcher as fetcher_module
+
+        def fail_refresh(*a, **k):
+            raise RuntimeError("Adobe unreachable")
+
+        fake_sitemap = [{"path": "/vipmp/docs/x", "title": "X", "tags": []}]
+
+        monkeypatch.setattr(autositemap, "build_sitemap", fail_refresh)
+        monkeypatch.setattr(
+            index_module, "get_active_sitemap", lambda: fake_sitemap
+        )
+
+        async def fake_fetch_many(paths, **_):
+            return dict.fromkeys(paths, "<html><body>vipmp</body></html>")
+
+        monkeypatch.setattr(fetcher_module, "async_fetch_many", fake_fetch_many)
+        monkeypatch.setattr(
+            index_module,
+            "fetch_page_html",
+            lambda *a, **k: "<html><body></body></html>",
+        )
+
+        snap = build_index()
+        assert snap is not None
+        assert snap.source_sitemap_size == 1
 
 
 class TestResolveActiveIndex:
