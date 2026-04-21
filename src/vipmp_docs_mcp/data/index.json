@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "built_at": 1776770069.4306934,
+  "built_at": 1776786828.417863,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -219,9 +219,9 @@
     },
     {
       "code": "1153",
-      "reason": "When the group Id is provided in enrolment API request but the account and Linked member group are not part of same distributor.",
+      "reason": "When the group Id is provided in enrollment API request but the account and Linked member group are not part of the same distributor.",
       "endpoint": "POST /v3/customers/{customer_id}/linked_membership/enroll/{linked_membership_id}",
-      "response": "400 BAD REQUEST\n\"message\": Invalid group id\",\n\"additionalDetails\": [“Account and Linked Account group are not part of same distributor”]",
+      "response": "400 BAD REQUEST\n\"message\": Invalid group id\",\n\"additionalDetails\": [“Account and Linked Account group are not part of the same distributor”]",
       "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
@@ -303,7 +303,7 @@
     },
     {
       "code": "1168",
-      "reason": "When market subsegment is neither federal or state for LGA customer.",
+      "reason": "When market subsegment is neither federal nor state for LGA customer.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Market subsegment not allowed for Large Government Agency\",\n\"additionalDetails\": []",
       "docs_path": "/vipmp/docs/lga/error-codes"
@@ -555,7 +555,7 @@
     },
     {
       "code": "NOT_A_WORLDWIDE_PURCHASER",
-      "reason": "Customer is WorldWide, but Parnter is not tagged as WorldWide.",
+      "reason": "Customer is WorldWide, but Partner is not tagged as WorldWide.",
       "endpoint": null,
       "response": null,
       "docs_path": "/vipmp/docs/references/error-handling"
@@ -672,7 +672,7 @@
           "name": "tags",
           "type": "String",
           "required": null,
-          "description": "Special label on thhe customer. Example: HVD_MIGRATED_CUSTOMER",
+          "description": "Special label on the customer. Example: HVD_MIGRATED_CUSTOMER",
           "constraints": "Max: 40 characters",
           "deprecated": false
         },
@@ -846,7 +846,7 @@
           "name": "tags",
           "type": "String",
           "required": null,
-          "description": "Special label on thhe customer. Example: HVD_MIGRATED_CUSTOMER",
+          "description": "Special label on the customer. Example: HVD_MIGRATED_CUSTOMER",
           "constraints": "Max: 40 characters",
           "deprecated": false
         },
