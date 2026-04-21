@@ -140,13 +140,13 @@ def _get_cleaned_content(path: str) -> str:
         openWorldHint=False,
     ),
 )
-def test_tool_1() -> str:
+def test_tool_2() -> str:
     """
     Trivial tool whose only purpose is to let the developer see which
     build of the server is running in Claude Desktop. The number on the
     name is bumped on every commit that requires a restart to test.
     """
-    return "test_tool_1 — this build is live"
+    return "test_tool_2 — this build is live"
 
 
 # ---------------------------------------------------------------------------

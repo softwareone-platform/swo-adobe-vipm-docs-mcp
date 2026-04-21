@@ -411,6 +411,11 @@ state machine AND the API that implements it. I want this to serve
 whether I'm about to write code against it or making product decisions
 that depend on it, so don't shy away from either angle.
 
+**Open with a short actor-hierarchy tree** — distributor → reseller
+→ customer → subscriptions/orders — regardless of the learner's role.
+Every newcomer benefits from that anchor before any API detail;
+developers too, not just product managers.
+
 {_ADOBE_SOLE_SOURCE_DIRECTIVE}
 
 **Teaching flow:**
