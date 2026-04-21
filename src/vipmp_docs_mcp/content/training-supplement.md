@@ -36,7 +36,34 @@ sentence you add here pays off on every future invocation.
 
 ## Customer lifecycle
 
-_TODO. Worth capturing here:_
+### `globalSalesEnabled` — creating a customer outside the distributor's region
+
+- Boolean flag on `POST /v3/customers`. When `true`, the customer's address
+  can be in a country the distributor doesn't normally cover.
+- **Normal rule:** the customer's country must fall within the distributor's
+  geographic region. Creation fails otherwise.
+- **What `globalSalesEnabled: true` does:** waives that geographic check.
+  Adobe-commercial — the flag is part of the API contract, not an SWO
+  convention.
+- **Segment:** Commercial (COM) only. EDU and GOV customers can't use it.
+- **Example.** A customer registered in Morocco can be created under a
+  United States distributor. Without the flag, the same request is
+  rejected.
+- **Mutability:**
+  - **Enabling** (`false` → `true`): unrestricted. Toggle anytime via the
+    Update Customer API.
+  - **Disabling** (`true` → `false`): only while the customer has no active
+    subscriptions in deployment locations created under the customer. See
+    the Deployments API for how deployment locations relate to subscription
+    geography.
+- **Gotcha:** don't default to `true`. The geographic rule exists for tax
+  and compliance reasons; waiving it needs a real commercial justification
+  (multinational master agreement, subsidiary billing consolidation, etc.).
+  Confirm with the deal owner before setting it.
+
+---
+
+_More topics to capture in this section (TODO):_
 
 - _What does "active" vs "pending" vs "suspended" mean commercially?_
 - _Typical SWO flow when onboarding a new reseller's first customer._

@@ -36,6 +36,10 @@ class TestSupplementBlock:
         assert "Real SWO content here." in out
         # Separator so the LLM can see where supplement ends.
         assert "---" in out
+        # Weaving directive — without this the LLM treats the block as
+        # ambient context and skips the content in its walkthrough.
+        # Lock it in so a helpful-looking refactor doesn't strip it.
+        assert "required material" in out.lower() or "weave" in out.lower()
 
     def test_empty_or_missing_section_produces_placeholder(
         self, supplement_file: Path

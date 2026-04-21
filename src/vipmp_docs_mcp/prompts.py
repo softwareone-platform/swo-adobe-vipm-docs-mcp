@@ -22,9 +22,18 @@ from .supplement import get_section as _get_supplement_section
 def _supplement_block(heading: str) -> str:
     """
     Render the SWO training-supplement section for ``heading`` as a
-    Markdown block, or an empty string if no section exists / the file
-    is missing. Called by every ``learn_*`` prompt so the assistant gets
-    human-authored context alongside Adobe's published docs.
+    Markdown block for inclusion in a walkthrough prompt, or a short
+    placeholder if no section exists / the file is missing.
+
+    The populated block ends with a directive that tells the assistant
+    to *weave* the supplement content into its walkthrough at the
+    natural moment — not summarise it at the end. Without that directive
+    the assistant tends to read the block as ambient context and skip
+    it, because the structured "Teaching flow" list in the calling
+    prompt dominates its attention. Weaving is the whole point of the
+    supplement: it's the commercial / operational context Adobe's docs
+    don't cover, and it has to land inside the relevant step of the
+    walkthrough to teach anything.
     """
     body = _get_supplement_section(heading)
     if not body:
@@ -33,7 +42,18 @@ def _supplement_block(heading: str) -> str:
             "Lean on Adobe's published docs and acknowledge that "
             "operational context is still being written._\n"
         )
-    return f"**SWO training supplement — {heading}:**\n\n{body}\n\n---\n"
+    return (
+        f"**SWO training supplement — {heading}:**\n\n"
+        f"{body}\n\n"
+        f"_Every topic in the supplement above is required material for "
+        f"the walkthrough. Introduce each one at the step where a real "
+        f"learner would first encounter it — e.g. a flag that affects "
+        f"customer creation belongs in the create step, not as a closing "
+        f"footnote. The supplement captures the commercial and "
+        f"operational context Adobe's reference docs don't cover; if you "
+        f"skip it, the learner doesn't hear the tribal knowledge this "
+        f"curriculum exists to teach._\n\n---\n"
+    )
 
 
 def register_prompts(mcp: FastMCP) -> None:
