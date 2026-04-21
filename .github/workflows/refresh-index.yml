@@ -118,6 +118,17 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
+          # Use the same admin PAT the merge step uses, not GITHUB_TOKEN.
+          # GitHub blocks commits/PRs authored via GITHUB_TOKEN from
+          # triggering downstream workflows — meaning the ci.yml
+          # `pull_request` jobs never ran on bot PRs, the required
+          # `build (3.12)` / `build (3.13)` checks stayed perpetually
+          # missing, and `gh pr merge --auto` arm-and-forever-waited.
+          # Authoring as the PAT owner (a repo admin) makes the bot PR
+          # look like a normal user PR, CI fires, and auto-merge
+          # completes. Also inherits the admin role's ruleset bypass,
+          # so the "required review" rule doesn't block either.
+          token: ${{ secrets.REFRESH_INDEX_PAT }}
           commit-message: 'chore(data): refresh sitemap + structured index from Adobe docs'
           branch: bot/refresh-index
           delete-branch: true
