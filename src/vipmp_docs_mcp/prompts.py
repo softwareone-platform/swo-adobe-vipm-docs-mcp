@@ -12,6 +12,7 @@ as the user's next message.
 
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
@@ -25,15 +26,13 @@ def _supplement_block(heading: str) -> str:
     Markdown block for inclusion in a walkthrough prompt, or a short
     placeholder if no section exists / the file is missing.
 
-    Keeps the integration note short and suggestive rather than
-    prescriptive. An earlier version of this helper included a long
-    "REQUIRED ... MUST weave ..." directive — which reliably nudged
-    the assistant to at least *mention* the supplement, but also
-    flattened the walkthrough into rule-following and stripped out the
-    hierarchy framing and business warmth that made the first outputs
-    work. The one-line hint below is enough to reframe the block as
-    content, not preamble, without over-constraining the LLM's
-    pedagogical instincts.
+    Ends with an auto-extracted "Topics to weave" checklist of the
+    supplement's H3 subheadings. Empirically — two iterations in —
+    the LLM ignores supplement prose when it's just a block of text
+    above the teaching flow, but covers named items from a bulleted
+    checklist reliably. "globalSalesEnabled" on its own line near the
+    flow instructions is stickier than the same fact buried in a
+    paragraph of bullet context.
     """
     body = _get_supplement_section(heading)
     if not body:
@@ -42,12 +41,23 @@ def _supplement_block(heading: str) -> str:
             "Lean on Adobe's published docs and acknowledge that "
             "operational context is still being written._\n"
         )
+
+    # Each H3 subsection in the supplement is a concrete topic to cover.
+    # Emit them as a short checklist below the content.
+    topics = re.findall(r"^###\s+(.+?)\s*$", body, re.MULTILINE)
+    topics_block = ""
+    if topics:
+        topic_lines = "\n".join(f"- {t}" for t in topics)
+        topics_block = (
+            f"\n\n_Topics from the supplement to weave into the walkthrough "
+            f"(each at the step where a learner would first encounter it):_\n\n"
+            f"{topic_lines}\n"
+        )
+
     return (
-        f"**SWO training supplement — {heading}** "
-        f"_(weave into the walkthrough at the step where a learner "
-        f"would first encounter each item — this is content, not "
-        f"background):_\n\n"
-        f"{body}\n\n---\n"
+        f"**SWO training supplement — {heading}:**\n\n"
+        f"{body}"
+        f"{topics_block}\n\n---\n"
     )
 
 
@@ -401,6 +411,11 @@ guessing.
 state machine AND the API that implements it. I want this to serve
 whether I'm about to write code against it or making product decisions
 that depend on it, so don't shy away from either angle.
+
+**Open with the big picture.** One short paragraph placing the
+customer inside VIPMP's partner model — distributor → reseller →
+customer → orders and subscriptions — before any API detail. A
+newcomer needs that map to make sense of everything after.
 
 {_supplement_block("Customer lifecycle")}
 **Teaching flow:**

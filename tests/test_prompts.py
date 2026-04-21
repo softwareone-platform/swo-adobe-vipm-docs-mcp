@@ -25,7 +25,9 @@ def supplement_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
 
 
 class TestSupplementBlock:
-    def test_populated_section_included(self, supplement_file: Path):
+    def test_populated_section_renders_content_and_separator(
+        self, supplement_file: Path
+    ):
         supplement_file.write_text(
             "## Customer lifecycle\n\nReal SWO content here.\n",
             encoding="utf-8",
@@ -36,10 +38,37 @@ class TestSupplementBlock:
         assert "Real SWO content here." in out
         # Separator so the LLM can see where supplement ends.
         assert "---" in out
-        # Weaving directive — without this the LLM treats the block as
-        # ambient context and skips the content in its walkthrough.
-        # Lock it in so a helpful-looking refactor doesn't strip it.
-        assert "required material" in out.lower() or "weave" in out.lower()
+
+    def test_h3_subheadings_become_topic_checklist(self, supplement_file: Path):
+        """H3 subsections in the supplement should surface as a named
+        checklist below the content. The LLM ignores supplement prose
+        above the teaching flow but covers named items from a
+        bulleted list reliably — that's the whole reason this extraction
+        exists. Lock it in so a refactor can't strip it silently."""
+        supplement_file.write_text(
+            "## Customer lifecycle\n\n"
+            "### `globalSalesEnabled` — cross-region\n\nbullets\n\n"
+            "### Deployment locations gotcha\n\nmore bullets\n",
+            encoding="utf-8",
+        )
+        out = prompts._supplement_block("Customer lifecycle")
+        assert "Topics from the supplement" in out
+        assert "weave" in out.lower()
+        # Both H3 names surface as checklist items.
+        assert "`globalSalesEnabled` — cross-region" in out
+        assert "Deployment locations gotcha" in out
+
+    def test_no_h3_subheadings_skips_checklist(self, supplement_file: Path):
+        """If the supplement section has no H3s (e.g. a short intro-only
+        stub), we render the content plainly — no empty checklist
+        header."""
+        supplement_file.write_text(
+            "## Customer lifecycle\n\nJust a sentence.\n",
+            encoding="utf-8",
+        )
+        out = prompts._supplement_block("Customer lifecycle")
+        assert "Topics from the supplement" not in out
+        assert "Just a sentence." in out
 
     def test_empty_or_missing_section_produces_placeholder(
         self, supplement_file: Path
