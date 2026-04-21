@@ -121,6 +121,35 @@ def _get_cleaned_content(path: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Dev-only cache-freshness probe.
+#
+# The suffix on the tool name is bumped on every commit that requires a
+# Claude Desktop restart to test. If Claude shows `test_tool_3` but the
+# current worktree has `test_tool_4`, the restart didn't pick up the
+# latest code. Keep it here at the top of the file so it's easy to
+# find-and-rename on each iteration.
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool(
+    title="Dev cache-freshness probe (bumped on each commit)",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+def test_tool_1() -> str:
+    """
+    Trivial tool whose only purpose is to let the developer see which
+    build of the server is running in Claude Desktop. The number on the
+    name is bumped on every commit that requires a restart to test.
+    """
+    return "test_tool_1 — this build is live"
+
+
+# ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
 
