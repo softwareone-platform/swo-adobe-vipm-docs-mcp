@@ -25,15 +25,15 @@ def _supplement_block(heading: str) -> str:
     Markdown block for inclusion in a walkthrough prompt, or a short
     placeholder if no section exists / the file is missing.
 
-    The populated block ends with a directive that tells the assistant
-    to *weave* the supplement content into its walkthrough at the
-    natural moment — not summarise it at the end. Without that directive
-    the assistant tends to read the block as ambient context and skip
-    it, because the structured "Teaching flow" list in the calling
-    prompt dominates its attention. Weaving is the whole point of the
-    supplement: it's the commercial / operational context Adobe's docs
-    don't cover, and it has to land inside the relevant step of the
-    walkthrough to teach anything.
+    Keeps the integration note short and suggestive rather than
+    prescriptive. An earlier version of this helper included a long
+    "REQUIRED ... MUST weave ..." directive — which reliably nudged
+    the assistant to at least *mention* the supplement, but also
+    flattened the walkthrough into rule-following and stripped out the
+    hierarchy framing and business warmth that made the first outputs
+    work. The one-line hint below is enough to reframe the block as
+    content, not preamble, without over-constraining the LLM's
+    pedagogical instincts.
     """
     body = _get_supplement_section(heading)
     if not body:
@@ -43,16 +43,11 @@ def _supplement_block(heading: str) -> str:
             "operational context is still being written._\n"
         )
     return (
-        f"**SWO training supplement — {heading}:**\n\n"
-        f"{body}\n\n"
-        f"_Every topic in the supplement above is required material for "
-        f"the walkthrough. Introduce each one at the step where a real "
-        f"learner would first encounter it — e.g. a flag that affects "
-        f"customer creation belongs in the create step, not as a closing "
-        f"footnote. The supplement captures the commercial and "
-        f"operational context Adobe's reference docs don't cover; if you "
-        f"skip it, the learner doesn't hear the tribal knowledge this "
-        f"curriculum exists to teach._\n\n---\n"
+        f"**SWO training supplement — {heading}** "
+        f"_(weave into the walkthrough at the step where a learner "
+        f"would first encounter each item — this is content, not "
+        f"background):_\n\n"
+        f"{body}\n\n---\n"
     )
 
 
