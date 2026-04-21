@@ -57,6 +57,14 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 | `refresh_vipmp_sitemap()` | Rebuild the sitemap from Adobe's published `/sitemap.xml`. Run when you're seeing 404s or think the sitemap has drifted. |
 | `rebuild_vipmp_index()` | Rebuild the pre-extracted index of endpoints/error codes/schemas (~60s). Run to refresh the data behind the structured tools between package updates. |
 
+### SoftwareOne operational tips
+| Tool | What it does |
+|---|---|
+| `get_vipmp_tips(topic)` | Return SoftwareOne-authored operational tips for a topic — commercial rules, gotchas, and field-experience notes Adobe's reference docs don't cover. Topic matching is case-insensitive and punctuation-tolerant. |
+| `list_vipmp_tip_topics()` | List topics for which tips are available — useful as a discovery call ("what tips do you have?") before asking for a specific one. |
+
+Tips content lives in [`src/vipmp_docs_mcp/content/tips.md`](src/vipmp_docs_mcp/content/tips.md). Editing that file is how you grow the operational context the server surfaces — every H2 heading becomes a topic.
+
 ## Prompts
 
 Pre-baked prompt templates your MCP client can offer directly (no need to remember which tools to chain):
@@ -69,6 +77,20 @@ Pre-baked prompt templates your MCP client can offer directly (no need to rememb
 | `summarize_recent_changes` | `since?`, `area?` — release digest grouped by theme, flags breaking/deprecations |
 | `check_feature_status` | `feature` — is it live / in Sandbox / upcoming / not documented? |
 | `check_3yc_eligibility` | `customer_id`, `desired_commit_quantity?` — evaluates 3-Year Commit eligibility |
+
+### Training curriculum
+
+Seven prompts for learning how VIPMP works — intended for new developers and technical product managers alike. Each walkthrough is **grounded in Adobe's live docs** — you can cite every claim back to the official reference. SoftwareOne-specific operational context (commercial rules, gotchas, field-experience notes) lives in the separate **tips** surface: call `get_vipmp_tips("customer lifecycle")` (or any other topic) to reach it, and the walkthroughs signpost this at the end.
+
+| Prompt | Arguments |
+|---|---|
+| `start_vipmp_learning` | `role?`, `goal?` — friendly router that asks what you're trying to learn and points you at the right walkthrough |
+| `learn_customer_lifecycle` | — states, transitions, API surface, common traps |
+| `learn_ordering_flow` | — ordering end-to-end: commercial states + API sequence + error handling |
+| `learn_3yc` | — 3-Year Commit eligibility, commit math, enrollment flow |
+| `learn_subscriptions_and_renewals` | — coterm, auto-renew, proration, mid-term changes |
+| `learn_returns_and_refunds` | — return windows, what qualifies, refund mechanics |
+| `learn_auth_and_sandbox` | — IMS auth, credentials, safe sandbox experimentation |
 
 ## Install
 

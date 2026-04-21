@@ -16,6 +16,12 @@ venv/
 env/
 ENV/
 
+# uv lockfile — generated locally by `uv sync` / `uv run` in dev
+# worktrees. The project doesn't ship a committed lock (CI uses pip
+# against pyproject.toml); adding one silently would change the
+# workflow for contributors.
+uv.lock
+
 # pyenv
 .python-version
 
