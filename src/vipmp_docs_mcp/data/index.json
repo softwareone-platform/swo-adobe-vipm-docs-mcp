@@ -1,243 +1,118 @@
 {
   "schema_version": 4,
-  "built_at": 1776575806.792373,
-  "source_sitemap_size": 72,
-  "pages_parsed": 15,
-  "parse_errors": [
-    {
-      "path": "/vipmp/docs/release_notes/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/release_notes"
-    },
-    {
-      "path": "/vipmp/docs/release_notes/upcoming_releases/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/release_notes/upcoming_releases"
-    },
-    {
-      "path": "/vipmp/docs/authentication/health_check/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/authentication/health_check"
-    },
-    {
-      "path": "/vipmp/docs/authentication/oauth_credentials/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/authentication/oauth_credentials"
-    },
-    {
-      "path": "/vipmp/docs/reseller_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_account"
-    },
-    {
-      "path": "/vipmp/docs/reseller_account/create_reseller_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_account/create_reseller_account"
-    },
-    {
-      "path": "/vipmp/docs/reseller_account/get_reseller_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_account/get_reseller_account"
-    },
-    {
-      "path": "/vipmp/docs/reseller_account/get_reseller_list/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_account/get_reseller_list"
-    },
-    {
-      "path": "/vipmp/docs/reseller_account/update_reseller_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_account/update_reseller_account"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account"
-    },
-    {
-      "path": "/vipmp/docs/market_segments/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/market_segments"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/create_customer_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/create_customer_account"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/get_customer_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/get_customer_account"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/get_customer_list/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/get_customer_list"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/update_customer_account/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/update_customer_account"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/get_licenses/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/get_licenses"
-    },
-    {
-      "path": "/vipmp/docs/deployment_management/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/deployment_management"
-    },
-    {
-      "path": "/vipmp/docs/deployment_management/create_deployment/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/deployment_management/create_deployment"
-    },
-    {
-      "path": "/vipmp/docs/deployment_management/get_deployment/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/deployment_management/get_deployment"
-    },
-    {
-      "path": "/vipmp/docs/deployment_management/update_deployment/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/deployment_management/update_deployment"
-    },
-    {
-      "path": "/vipmp/docs/order_management/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/order_management"
-    },
-    {
-      "path": "/vipmp/docs/order_management/create_order/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/order_management/create_order"
-    },
-    {
-      "path": "/vipmp/docs/order_management/order_scenarios/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/order_management/order_scenarios"
-    },
-    {
-      "path": "/vipmp/docs/order_management/get_order/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/order_management/get_order"
-    },
-    {
-      "path": "/vipmp/docs/order_management/update_order/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/order_management/update_order"
-    },
-    {
-      "path": "/vipmp/docs/subscription_management/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/subscription_management"
-    },
-    {
-      "path": "/vipmp/docs/subscription_management/create_subscription/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/subscription_management/create_subscription"
-    },
-    {
-      "path": "/vipmp/docs/subscription_management/get_details/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/subscription_management/get_details"
-    },
-    {
-      "path": "/vipmp/docs/subscription_management/get_details_for_customers/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/subscription_management/get_details_for_customers"
-    },
-    {
-      "path": "/vipmp/docs/subscription_management/update_subscription/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/subscription_management/update_subscription"
-    },
-    {
-      "path": "/vipmp/docs/manage_pricing/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/manage_pricing"
-    },
-    {
-      "path": "/vipmp/docs/notification_management/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/notification_management"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/three_year_commit/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/three_year_commit"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/linked_membership/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/linked_membership"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/high_growth/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/high_growth"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/high_growth_scenarios/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/high_growth_scenarios"
-    },
-    {
-      "path": "/vipmp/docs/customer_account/high_growth_apis/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/customer_account/high_growth_apis"
-    },
-    {
-      "path": "/vipmp/docs/recommendations/error_codes/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/recommendations/error_codes"
-    },
-    {
-      "path": "/vipmp/docs/flex_discounts/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/flex_discounts"
-    },
-    {
-      "path": "/vipmp/docs/flex_discounts/apis/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/flex_discounts/apis"
-    },
-    {
-      "path": "/vipmp/docs/flex_discounts/error_codes/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/flex_discounts/error_codes"
-    },
-    {
-      "path": "/vipmp/docs/mid_term/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/mid_term"
-    },
-    {
-      "path": "/vipmp/docs/mid_term/apis/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/mid_term/apis"
-    },
-    {
-      "path": "/vipmp/docs/mid_term/error_codes/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/mid_term/error_codes"
-    },
-    {
-      "path": "/vipmp/docs/mid_term/faq/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/mid_term/faq"
-    },
-    {
-      "path": "/vipmp/docs/reseller_change/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_change"
-    },
-    {
-      "path": "/vipmp/docs/reseller_change/preview_transfer/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_change/preview_transfer"
-    },
-    {
-      "path": "/vipmp/docs/reseller_change/commit_transfer/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_change/commit_transfer"
-    },
-    {
-      "path": "/vipmp/docs/reseller_change/get_transfer/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/reseller_change/get_transfer"
-    },
-    {
-      "path": "/vipmp/docs/migration/preview_offers/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/migration/preview_offers"
-    },
-    {
-      "path": "/vipmp/docs/migration/transfer_subscription/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/migration/transfer_subscription"
-    },
-    {
-      "path": "/vipmp/docs/migration/get_transfer_details/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/migration/get_transfer_details"
-    },
-    {
-      "path": "/vipmp/docs/migration/migrate_hvd/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/migration/migrate_hvd"
-    },
-    {
-      "path": "/vipmp/docs/references/api_headers/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/references/api_headers"
-    },
-    {
-      "path": "/vipmp/docs/references/status_codes/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/references/status_codes"
-    },
-    {
-      "path": "/vipmp/docs/references/error_handling/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/references/error_handling"
-    },
-    {
-      "path": "/vipmp/docs/references/supported_locales/",
-      "error": "HTTP 404 Not Found for /vipmp/docs/references/supported_locales"
-    }
-  ],
+  "built_at": 1776770069.4306934,
+  "source_sitemap_size": 86,
+  "pages_parsed": 86,
+  "parse_errors": [],
   "endpoints": [
     {
       "method": "POST",
+      "path": "/v3/customers",
+      "docs_path": "/vipmp/docs/customer-account/create-customer-account",
+      "title": "Create customer account",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "<env root url>/v3/resellers/<reseller_id>/customers",
+      "docs_path": "/vipmp/docs/customer-account/get-customer-list",
+      "title": "Get customer list",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "/v3/flex-discounts",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "/v3/customers/<customer-id>/flex-discounts",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/customers/<customer-id>/orders",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "/v3/customers/<customer-id>/orders/<order-id>",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "/v3/customers/<customer-id>/orders",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/customers/<customer-id>/orders",
+      "docs_path": "/vipmp/docs/flex-discounts/apis",
+      "title": "Manage Flexible Discounts using APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/pricelist",
+      "docs_path": "/vipmp/docs/manage-pricing",
+      "title": "Access Price Lists",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "<env root url>/v3/customers/{{customerId}}/orders",
+      "docs_path": "/vipmp/docs/mid-term/apis",
+      "title": "Manage mid-term upgrades through APIs",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/customers/<customer-id>/orders",
+      "docs_path": "/vipmp/docs/order-management/order-scenarios",
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/customers/<customer-id>/orders",
+      "docs_path": "/vipmp/docs/order-management/order-scenarios",
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "<env root url>/v3/customers/{{customerId}}/orders",
+      "docs_path": "/vipmp/docs/order-management/order-scenarios",
+      "title": "Order creation scenarios",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
       "path": "/v3/recommendations",
-      "docs_path": "/vipmp/docs/recommendations/apis/",
+      "docs_path": "/vipmp/docs/recommendations/apis",
       "title": "Manage Recommendations using APIs",
       "deprecated": false,
       "deprecation_note": null
@@ -245,7 +120,7 @@
     {
       "method": "POST",
       "path": "/v3/customers/<customerId>/orders",
-      "docs_path": "/vipmp/docs/recommendations/apis/",
+      "docs_path": "/vipmp/docs/recommendations/apis",
       "title": "Manage Recommendations using APIs",
       "deprecated": false,
       "deprecation_note": null
@@ -253,7 +128,7 @@
     {
       "method": "POST",
       "path": "/v3/customers/<customerId>/orders",
-      "docs_path": "/vipmp/docs/recommendations/apis/",
+      "docs_path": "/vipmp/docs/recommendations/apis",
       "title": "Manage Recommendations using APIs",
       "deprecated": false,
       "deprecation_note": null
@@ -261,7 +136,7 @@
     {
       "method": "GET",
       "path": "/v3/customers/<customerId>/subscriptions",
-      "docs_path": "/vipmp/docs/recommendations/apis/",
+      "docs_path": "/vipmp/docs/recommendations/apis",
       "title": "Manage Recommendations using APIs",
       "deprecated": false,
       "deprecation_note": null
@@ -269,10 +144,34 @@
     {
       "method": "GET",
       "path": "/v3/customers/<customerId>/orders",
-      "docs_path": "/vipmp/docs/recommendations/apis/",
+      "docs_path": "/vipmp/docs/recommendations/apis",
       "title": "Manage Recommendations using APIs",
       "deprecated": false,
       "deprecation_note": null
+    },
+    {
+      "method": "GET",
+      "path": "<env root url>/v3/resellers",
+      "docs_path": "/vipmp/docs/reseller-account/get-reseller-list",
+      "title": "Get reseller list",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "POST",
+      "path": "/v3/customers/<customer-id>/subscriptions",
+      "docs_path": "/vipmp/docs/subscription-management/create-subscription",
+      "title": "Create subscription",
+      "deprecated": false,
+      "deprecation_note": null
+    },
+    {
+      "method": "PATCH",
+      "path": "/v3/customers/<customer-id>/subscriptions/<subscription-id>",
+      "docs_path": "/vipmp/docs/subscription-management/update-subscription",
+      "title": "Update subscription",
+      "deprecated": true,
+      "deprecation_note": "If it is lower, then licenses will be removed at renewal"
     }
   ],
   "error_codes": [
@@ -281,206 +180,569 @@
       "reason": "When the coterm date exceeds 23 months for LGA customer.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Some Fields are Invalid.\"\n\"additionalDetails\": [\"Invalid coterm date for Large Government Agency\"]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1118",
       "reason": "When the group country does not match with the account country for enrollment.",
       "endpoint": "POST /v3/customers/{customer_id}/linked_membership/enroll/{linked_membership_id}",
       "response": "400 BAD REQUEST\n\"message\": \"Invalid Address\",\n\"additionalDetails\": [\"Account country does not match with the linked account group country\"]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1118",
       "reason": "When the country is invalid.",
       "endpoint": "GET /v3/linked_membership_groups",
       "response": "400 BAD REQUEST\n\"message\": \"Invalid Address\",\n\"additionalDetails\": [ \"Invalid Country\"]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1118",
       "reason": "When country is null/empty.",
       "endpoint": "GET /v3/linked_membership_groups",
       "response": "400 BAD REQUEST\n\"message\": \"Invalid Address\",\n\"additionalDetails\": [ \"Country cannot be null or empty]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1143",
       "reason": "When no linked account group is found with specified query parameters.",
       "endpoint": "GET /v3/linked_membership_groups",
       "response": "404 NOT FOUND\n\"message\": \"Linked Account Group Not Found\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1147",
       "reason": "When the customer requests both LGA and 3YC benefits.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"3YC Customer not allowed\",\n\"additionalDetails\": [\"3YC Customer not allowed for Large Government Agency\"]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1153",
       "reason": "When the group Id is provided in enrolment API request but the account and Linked member group are not part of same distributor.",
       "endpoint": "POST /v3/customers/{customer_id}/linked_membership/enroll/{linked_membership_id}",
       "response": "400 BAD REQUEST\n\"message\": Invalid group id\",\n\"additionalDetails\": [“Account and Linked Account group are not part of same distributor”]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1163",
       "reason": "If the customer account is LGA enabled for linked membership group request and the market segment for the customer is not GOV.",
       "endpoint": "PATCH /v3/customers/{customer-id}",
       "response": "400 BAD REQUEST\n\"message\": \"Market segment not allowed for Large Government Agency\",\n\"additionalDetails\": [ ]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1163",
       "reason": "When the linked membership create request LGA flag as true but market segment is not GOV.",
       "endpoint": "POST /v1/account_groups",
       "response": "400 BAD REQUEST\n\"message\": \"Market segment not allowed for Large Government Agency\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1163",
       "reason": "When market segment is not 'GOV'/'GV'.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Market segment not allowed for Large Government Agency\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1164",
       "reason": "When LGA customer is trying to migrate under non-LGA distributor.",
       "endpoint": "POST/v3/memberships/{membership-id}/transfers",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for partner\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1164",
       "reason": "If the update request is to enable LGA for customer and create linked membership group in same request and the distributor for the customer is not LGA eligible.",
       "endpoint": "PATCH /v3/customers/{customer-id}",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for partner\",\n\"additionalDetails\": [ ]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1164",
       "reason": "When associated partner is not allowed to sell LGA offers.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for partner\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1164",
       "reason": "When LGA customer is trying to do reseller-change under non-LGA distributor.",
       "endpoint": "PATCH /v3/customers/{customer-id}/reseller-changes",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for partner\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1165",
       "reason": "When the group Id is provided in enrolment API request but the account is not LGA for the account ID from the request.",
       "endpoint": "POST /v3/customers/{customer_id}/linked_membership/enroll/{linked_membership_id}",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for customer\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1166",
       "reason": "When the group Id is provided in enrolment API request but the group is not LGA.",
       "endpoint": "POST /v3/customers/{customer_id}/linked_membership/enroll/{linked_membership_id}",
       "response": "400 BAD REQUEST\n\"message\": \"Large Government Agency is not enabled for linked account group\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1167",
       "reason": "When the update account request is called for distributor outside of the US or Canada to enable LGA.",
       "endpoint": "PATCH /v3/customers/{customer-id}",
       "response": "400 BAD REQUEST\n\"message\": \"Invalid country for Large Government Agency\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1167",
       "reason": "- This occurs when a distributor outside the US or Canada is being authorized to sell LGA offers.\n- When trying to create LGA customer outside of the US or Canada.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Invalid country for Large Government Agency\",\n\"additionalDetails\": [ ]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1168",
       "reason": "When market subsegment is neither federal or state for LGA customer.",
       "endpoint": "POST /v3/customers",
       "response": "400 BAD REQUEST\n\"message\": \"Market subsegment not allowed for Large Government Agency\",\n\"additionalDetails\": []",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1169",
       "reason": "",
       "endpoint": "PATCH /v3/customers/{customer-id}\nPOST v2/orders",
       "response": "400 BAD_REQUEST\n“message”: “This offer is not allowed for Large Government Agency",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "1170",
       "reason": "",
       "endpoint": "PATCH /v3/customers/{customer-id}\nPOST v2/orders",
       "response": "400 BAD_REQUEST\n“message”: “Invalid quantity for Large Government Agency \"",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "2129",
       "reason": "When Customer tries to place an order with 06 to 09 levels but customer is not an LGA customer.",
       "endpoint": "POST v2/orders",
       "response": "400 BAD REQUEST\n\"message\": \"Customer is not eligible to purchase the Offer ID\",\n\"additionalDetails\": [\n\"Reason: Not an LGA Customer\" ]",
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "INVALID_LM_MIGRATION_LEVEL",
       "reason": "Linked Member level is not equal to 01 - 04 or 06-09.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "OWNER_MEMBER_COUNTRY_MISMATCH",
       "reason": "Member country in the Linked Membership (LM) is not same as that of the LM owner country.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "LGA_LM_MARKET_SEGMENT_MISMATCH",
       "reason": "Customer market segment and Linked Membership market segment are not the same.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "INVALID_LGA_MARKET_SEGMENT",
       "reason": "Linked Member Group Market Segment is not GOV.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "NOT_LGA PARTNER",
       "reason": "Partner country is not US/CA.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "INSUFFICIENT_LGA_MOQ",
       "reason": "MOQ is < 100 and ( Considering FRL SKU's presence)",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
     },
     {
       "code": "LGA_QTY_LEVEL_MISMATCH",
       "reason": "MOQ does not fall between respective level cap quantities.",
       "endpoint": null,
       "response": null,
-      "docs_path": "/vipmp/docs/lga/error-codes/"
+      "docs_path": "/vipmp/docs/lga/error-codes"
+    },
+    {
+      "code": "INELIGIBLE_SWITCH",
+      "reason": "The order includes products that are incompatible with each other or with a product the customer already has.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INELIGIBLE_ADD_ON",
+      "reason": "Customer is attempting to purchase an add-on product without the base product.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INELIGIBLE_CONSUMED",
+      "reason": "RETURN order only: customer is attempting to return a consumable product that has already been consumed.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INELIGIBLE_MARKET_SEGMENT",
+      "reason": "The order includes an item that belongs to a market segment that either the reseller or the customer do not belong to.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "CUSTOMER_NOT_ELIGIBLE_FOR_PURCHASE",
+      "reason": "Customer is purchasing the offer multiple times in the same term.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INVALID_COUNTRY",
+      "reason": "Customer is not in a valid country for this distributor",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "BAD_MARKET_SEGMENT",
+      "reason": "Customer’s market segment is either not supported for this distributor or for VIPMP",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INACTIVE",
+      "reason": "VIP Account is inactive",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "EXTENDED_TERM_3YC",
+      "reason": "Customer’s contract term length is not supported by VIPMP",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "OPEN_PURCHASE_AUTH",
+      "reason": "Customer has open purchase authorization(s)",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "CONTRACT_NOT_ACCEPTED",
+      "reason": "Customer’s VIP contract has not been accepted",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "IN_WINDOW_PARTIAL_RENEWAL",
+      "reason": "Customer is in the renewal window prior to their anniversary date and they have partially renewed.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "RETURNABLE_PURCHASE",
+      "reason": "Customer has order(s) still in the return window",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "NO_TARGET_SKU",
+      "reason": "Customer has product(s) that are not valid VIPMP product(s)",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "UNBILLED_ORDER",
+      "reason": "Customer has unbilled order items",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "UNPAID_INVOICE",
+      "reason": "Customer has open/unpaid invoice(s)",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "LINK_MEMBERSHIP_CHECK",
+      "reason": "Customer is part of linked membership",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "HAS_UNPROCESSED_ORDERS",
+      "reason": "There is some internal issue for the customer",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "NOT_A_FULL_RENEWAL_IN_RENEWAL_WINDOW",
+      "reason": "The customer is in the renewal window prior to their anniversary date, and they have partially renewed.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "LICENSE_WITHOUT_SALE_AQO_REFERENCED",
+      "reason": "There is some internal issue for the customer",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "SRC_DST_OFFER_IDS_HAS_PA_MISMATCH",
+      "reason": "There is some internal issue for the customer",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "3YC_LINKED_MEMBERSHIP",
+      "reason": "Customer is part of linked membership and has active 3YC.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "HVD_CUSTOMER",
+      "reason": "Customer is not eligible for transfer.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INVALID_PRICE_LEVEL_LM_MIGRATION",
+      "reason": "Customer’s Price Level is greater than 04 and has Linked Membership.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "LM_OWNER_NOT_MIGRATED",
+      "reason": "Group member is trying to migrate to VMP prior to Group Owner migration.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "NOT_A_WORLDWIDE_PURCHASER",
+      "reason": "Customer is WorldWide, but Parnter is not tagged as WorldWide.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "3YC_DISCOUNT_LEVEL_MISMATCH",
+      "reason": "Customer’s discount level is greater than the level determined by MCQ.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "HVD_CUSTOMER",
+      "reason": "Customer is not eligible for transfer.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "MINIMUM_HVD_QTY_NOT_MET",
+      "reason": "Customer is not eligible for transfer.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INVALID_LM_MIGRATION_LEVEL",
+      "reason": "Linked Member level is not equal to 01 - 04 or 06-09.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "OWNER_MEMBER_COUNTRY_MISMATCH",
+      "reason": "Member country in the Linked Membership (LM) is not same as that of the LM owner country.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "LGA_LM_MARKET_SEGMENT_MISMATCH",
+      "reason": "Customer market segment and Linked Membership market segment are not the same.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INVALID_LGA_MARKET_SEGMENT",
+      "reason": "Linked Member Group Market Segment is not GOV.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "NOT_LGA PARTNER",
+      "reason": "Partner country is not US/CA.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "INSUFFICIENT_LGA_MOQ",
+      "reason": "MOQ is < 100 and ( Considering FRL SKU's presence)",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "LGA_QTY_LEVEL_MISMATCH",
+      "reason": "MOQ does not fall between respective level cap quantities.",
+      "endpoint": null,
+      "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
     }
   ],
   "schemas": [
+    {
+      "name": "Customer (top-level resource)",
+      "level": 3,
+      "fields": [
+        {
+          "name": "externalReferenceId",
+          "type": "String",
+          "required": false,
+          "description": "Marketplace’s ID for customer. ID does not need to be unique.",
+          "constraints": "Max: 35 characters",
+          "deprecated": false
+        },
+        {
+          "name": "customerId (read only)",
+          "type": "String",
+          "required": null,
+          "description": "Unique ID for customer created upon account creation",
+          "constraints": "Max: 40 characters",
+          "deprecated": false
+        },
+        {
+          "name": "resellerId",
+          "type": "String",
+          "required": null,
+          "description": "ID of reseller tied to customer",
+          "constraints": "Max: 40 characters",
+          "deprecated": false
+        },
+        {
+          "name": "globalSalesEnabled",
+          "type": "String",
+          "required": null,
+          "description": "Global status of a customer",
+          "constraints": "Max: 40 characters",
+          "deprecated": false
+        },
+        {
+          "name": "tags",
+          "type": "String",
+          "required": null,
+          "description": "Special label on thhe customer. Example: HVD_MIGRATED_CUSTOMER",
+          "constraints": "Max: 40 characters",
+          "deprecated": false
+        },
+        {
+          "name": "linkedMembership",
+          "type": "linkedMembership resource",
+          "required": null,
+          "description": "Information about the linked membership",
+          "constraints": null,
+          "deprecated": false
+        },
+        {
+          "name": "companyProfile",
+          "type": "CompanyProfile resource",
+          "required": null,
+          "description": "Information about the customer",
+          "constraints": null,
+          "deprecated": false
+        },
+        {
+          "name": "discounts",
+          "type": "discounts resource",
+          "required": null,
+          "description": "Details of the discount applicable to the customer, including the discount level.",
+          "constraints": null,
+          "deprecated": false
+        },
+        {
+          "name": "benefits",
+          "type": "benefits resource",
+          "required": null,
+          "description": "Details of the benefits applied to the customer account and its corresponding status. For example, the type parameter indicates LARGE_GOVERNMENT_AGENCY if the customer is an LGA customer.",
+          "constraints": null,
+          "deprecated": false
+        },
+        {
+          "name": "cotermDate (read only)",
+          "type": "String (date)",
+          "required": null,
+          "description": "Date that renewal order is to be placed. Should be one year after the first order is provisioned (if a 1-yr term) and gets updated upon each renewal order.",
+          "constraints": "10 characters",
+          "deprecated": false
+        },
+        {
+          "name": "creationDate (read only)",
+          "type": "String (datetime)",
+          "required": null,
+          "description": "Date and time of account creation in UTC",
+          "constraints": null,
+          "deprecated": false
+        },
+        {
+          "name": "status (read only)",
+          "type": "String",
+          "required": null,
+          "description": "Status code of customer account",
+          "constraints": "4 characters",
+          "deprecated": false
+        },
+        {
+          "name": "links (read only)",
+          "type": "Links resource",
+          "required": null,
+          "description": "Deep links to get customer account details",
+          "constraints": null,
+          "deprecated": false
+        }
+      ],
+      "docs_path": "/vipmp/docs/customer-account/create-customer-account"
+    },
     {
       "name": "Reseller (top-level resource)",
       "level": 2,
@@ -542,7 +804,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Customer (top-level resource)",
@@ -653,7 +915,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "linkedMembership",
@@ -700,7 +962,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Deployment (top-level resource)",
@@ -747,7 +1009,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "CompanyProfile",
@@ -786,7 +1048,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Address",
@@ -849,7 +1111,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Contact",
@@ -888,7 +1150,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Order (top-level resource)",
@@ -1007,7 +1269,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "eligibleOffers",
@@ -1062,7 +1324,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "lineItem",
@@ -1205,7 +1467,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "recommendations",
@@ -1244,7 +1506,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Subscription (top-level resource)",
@@ -1315,7 +1577,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "autoRenewal",
@@ -1354,7 +1616,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Notification (top-level resource)",
@@ -1409,7 +1671,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "NotificationItem",
@@ -1448,7 +1710,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "AutoRenewal",
@@ -1471,7 +1733,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     },
     {
       "name": "Links",
@@ -1526,7 +1788,7 @@
           "deprecated": false
         }
       ],
-      "docs_path": "/vipmp/docs/references/resources/"
+      "docs_path": "/vipmp/docs/references/resources"
     }
   ],
   "releases": [
