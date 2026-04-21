@@ -50,6 +50,8 @@
     { "name": "vipmp_server_info", "description": "Diagnostic info: version, Python, index age, cache stats, log path." },
     { "name": "describe_vipmp_endpoint", "description": "One-shot endpoint profile: schema, error codes, release notes, examples." },
     { "name": "validate_vipmp_request", "description": "Check a JSON request body against the endpoint's published schema." },
-    { "name": "generate_vipmp_request", "description": "Emit a runnable curl / PowerShell / Python / C# snippet for an endpoint." }
+    { "name": "generate_vipmp_request", "description": "Emit a runnable curl / PowerShell / Python / C# snippet for an endpoint." },
+    { "name": "get_vipmp_tips", "description": "Return SoftwareOne operational tips for a topic — commercial rules, gotchas, and field notes not in Adobe's reference docs." },
+    { "name": "list_vipmp_tip_topics", "description": "List the topics for which SoftwareOne tips are available." }
   ]
 }

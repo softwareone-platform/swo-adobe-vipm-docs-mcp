@@ -1,23 +1,25 @@
-# VIPMP Training Supplement
+# VIPMP Tips
 
-Human-authored context that complements Adobe's published API docs.
+Human-authored operational tips that complement Adobe's published API
+docs. Surfaced through the `get_vipmp_tips(topic)` MCP tool when a user
+explicitly asks for tips on a topic.
 
 Adobe's documentation is a strong API reference but a shallow training
 resource. It tells you *what* an endpoint does; it rarely tells you
 *why* the rule exists, when it matters in practice, what breaks in
 production, or how the commercial side of SoftwareOne's business
-interprets it. This file is where that tribal knowledge gets captured
-so the MCP server's training prompts can surface it during onboarding.
+interprets it. This file captures that tribal knowledge so it's
+accessible from an MCP client as SWO-specific context, separate from
+Adobe's official docs (which the `learn_*` walkthroughs cover).
 
 ## How this file is used
 
-Each `## H2` below corresponds to one `learn_*` prompt in
-[prompts.py](../prompts.py). When a learner invokes one of those
-prompts (e.g. `learn_customer_lifecycle`), the prompt pulls the
-matching section from this file and hands it to the assistant
-alongside Adobe's live docs. Empty sections are handled gracefully
-— the assistant falls back to published material — but every
-sentence you add here pays off on every future invocation.
+Each `## H2` below is a topic. When a user asks the assistant for tips
+on a topic (e.g. *"give me tips on the customer lifecycle"*), the
+assistant calls `get_vipmp_tips("Customer lifecycle")` which returns
+the matching section verbatim. The `learn_*` walkthrough prompts do
+NOT pull from this file — they stay grounded in Adobe's live docs so
+walkthroughs are citable. Tips are where SWO-contributed content lives.
 
 ## How to contribute
 

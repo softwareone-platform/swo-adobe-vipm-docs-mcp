@@ -8,56 +8,45 @@ questions.
 
 Each prompt below returns a Markdown string. The client will inject it
 as the user's next message.
+
+The training-curriculum walkthroughs (``learn_*``) ground every claim in
+Adobe's live docs only — the user-visible promise is that a walkthrough
+is citable against the official API reference. SoftwareOne-specific
+operational tips live in a separate surface (``get_vipmp_tips`` tool),
+fetched explicitly when a user asks. Each walkthrough closes with a
+signpost pointing at that tool so learners discover it.
 """
 
 from __future__ import annotations
 
-import re
 from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
 
-from .supplement import get_section as _get_supplement_section
+# Shared pieces for the training-curriculum walkthroughs. Centralising
+# these means every ``learn_*`` prompt makes the same promise (Adobe
+# docs are the sole source) and the same signpost (tips live in a
+# separate tool), without repeating seven near-identical paragraphs.
+
+_ADOBE_SOLE_SOURCE_DIRECTIVE = (
+    "Ground every claim in the Adobe docs you've fetched during this "
+    "walkthrough. If Adobe's docs are silent on a point, say so plainly "
+    "— don't fill gaps from prior knowledge. A learner should be able "
+    "to cite anything you teach back to the official reference."
+)
 
 
-def _supplement_block(heading: str) -> str:
-    """
-    Render the SWO training-supplement section for ``heading`` as a
-    Markdown block for inclusion in a walkthrough prompt, or a short
-    placeholder if no section exists / the file is missing.
-
-    Ends with an auto-extracted "Topics to weave" checklist of the
-    supplement's H3 subheadings. Empirically — two iterations in —
-    the LLM ignores supplement prose when it's just a block of text
-    above the teaching flow, but covers named items from a bulleted
-    checklist reliably. "globalSalesEnabled" on its own line near the
-    flow instructions is stickier than the same fact buried in a
-    paragraph of bullet context.
-    """
-    body = _get_supplement_section(heading)
-    if not body:
-        return (
-            "> _SWO training supplement: no notes yet for this topic. "
-            "Lean on Adobe's published docs and acknowledge that "
-            "operational context is still being written._\n"
-        )
-
-    # Each H3 subsection in the supplement is a concrete topic to cover.
-    # Emit them as a short checklist below the content.
-    topics = re.findall(r"^###\s+(.+?)\s*$", body, re.MULTILINE)
-    topics_block = ""
-    if topics:
-        topic_lines = "\n".join(f"- {t}" for t in topics)
-        topics_block = (
-            f"\n\n_Topics from the supplement to weave into the walkthrough "
-            f"(each at the step where a learner would first encounter it):_\n\n"
-            f"{topic_lines}\n"
-        )
-
+def _tips_signpost(topic: str) -> str:
+    """Closing line for every walkthrough — surfaces the tips tool so
+    learners discover SWO-specific context without it being forced into
+    the Adobe-sourced walkthrough itself."""
     return (
-        f"**SWO training supplement — {heading}:**\n\n"
-        f"{body}"
-        f"{topics_block}\n\n---\n"
+        f"After the walkthrough, close with one sentence: "
+        f'*"For SoftwareOne operational tips on this topic, ask me for '
+        f"'{topic} tips' — they cover commercial rules, gotchas, and "
+        f'field-experience notes that Adobe\'s docs don\'t."* '
+        f"This is how learners find tips content without it polluting "
+        f"the Adobe-grounded walkthrough."
     )
 
 
@@ -338,13 +327,16 @@ Quote the docs directly when stating rules — don't paraphrase limits.
     # ----------------------------------------------------------------
     # Training curriculum — onboarding router + six concept walkthroughs.
     #
-    # These are the "learn how VIPMP works" prompts, designed to serve
-    # both developers (who benefit from business context alongside the
-    # API) and technical product managers (who benefit from seeing the
-    # API surface alongside the business rules). Each walkthrough pulls
-    # a section from the human-authored training supplement at
-    # content/training-supplement.md and interleaves it with Adobe's
-    # published docs fetched via the existing tools.
+    # Every walkthrough grounds its teaching in Adobe's live docs. SWO-
+    # specific operational tips live in a separate tool — `get_vipmp_tips`
+    # — and walkthroughs close by signposting that tool. This split
+    # emerged after several attempts to weave SWO-contributed content
+    # INTO walkthrough prompts: LLMs consistently treated injected prose
+    # as ambient context and wrote around it. Separating by user intent
+    # (walkthrough = Adobe content I can cite; tips = SWO tribal
+    # knowledge) matches how real learners ask questions, and lets the
+    # LLM's natural pedagogy produce strong Adobe-grounded walkthroughs
+    # without fighting it.
     # ----------------------------------------------------------------
 
     @mcp.prompt()
@@ -372,7 +364,7 @@ Quote the docs directly when stating rules — don't paraphrase limits.
 - **Role:** {role}{goal_line}
 
 You have six walkthrough prompts available that I can invoke next — each
-covers one area with both business context and the API surface:
+teaches one area, grounded in Adobe's live docs:
 
 1. `learn_customer_lifecycle` — states, transitions, onboarding
 2. `learn_ordering_flow` — placing an order end-to-end
@@ -380,6 +372,12 @@ covers one area with both business context and the API surface:
 4. `learn_subscriptions_and_renewals` — coterm, auto-renew, proration
 5. `learn_returns_and_refunds` — windows, rules, API sequence
 6. `learn_auth_and_sandbox` — IMS, credentials, safe testing
+
+There's also a separate tips surface for SoftwareOne-specific operational
+context that Adobe's docs don't cover — commercial rules, gotchas,
+field-experience notes. Reach it via `get_vipmp_tips("<topic>")`, or by
+asking me for "tips on X" once you're past the basics. Tips complement
+the walkthroughs; they don't replace them.
 
 Please:
 
@@ -397,7 +395,7 @@ Please:
 
 Be patient and concrete. Prefer examples to abstractions. If I ask
 something the docs don't cover cleanly, say so plainly rather than
-guessing.
+guessing — and point me at `get_vipmp_tips` if SWO might have context.
 """
 
     @mcp.prompt()
@@ -405,29 +403,15 @@ guessing.
         """
         Walkthrough: VIPMP customer lifecycle. Covers the business
         states a customer passes through, the API transitions between
-        them, and the gotchas that bite real implementations.
+        them, and the gotchas that bite real implementations. Grounded
+        in Adobe's live docs.
         """
         return f"""Teach me the VIPMP customer lifecycle — the business
 state machine AND the API that implements it. I want this to serve
 whether I'm about to write code against it or making product decisions
 that depend on it, so don't shy away from either angle.
 
-**Open with the big picture.** Before any API detail, render this
-ASCII tree exactly, under a "The big picture" heading:
-
-```
-Distributor (Adobe partner, e.g. SoftwareOne)
-  └── Reseller
-        └── Customer
-              └── Subscriptions / Orders
-```
-
-Then one short paragraph explaining where the learner's integration
-sits in that tree — typically as the reseller, making calls on behalf
-of customers, with the distributor (SoftwareOne) as the party holding
-Adobe's partner contract above. This tree is the ACTOR hierarchy,
-not the lifecycle — keep it distinct from state diagrams later in
-the walkthrough.
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
 
 **Teaching flow:**
 
@@ -439,19 +423,9 @@ the walkthrough.
    what each means, when it's entered, who causes the transition.
 3. Map each meaningful transition to its API surface. For each:
    - Endpoint (`describe_vipmp_endpoint` for the detail)
-   - What body fields matter — covering both Adobe's documented fields
-     **and the SWO-contributed topics in the supplement block below**.
-     Each supplement topic has a natural home: a flag that affects
-     customer creation goes into the create step; a rule about
-     mutability goes into the Update Customer step. Before closing out
-     step 3, double-check every named topic in the supplement has
-     appeared somewhere in the walkthrough. If any is missing, add it
-     at its natural home.
+   - What body fields matter
    - What response / status-code indicates success vs "accepted but
      pending"
-
-{_supplement_block("Customer lifecycle")}
-
 4. Surface the real errors: `list_vipmp_error_codes` with
    `query="customer"` — call out business meaning, not just the code.
 5. Highlight the common traps explicitly. Examples worth checking:
@@ -460,8 +434,7 @@ the walkthrough.
 6. End with two short "check my understanding" questions — not a
    quiz, just enough to surface gaps.
 
-Open with one sentence on where you're starting, then go. If the SWO
-supplement is still TODO, say so and lean harder on Adobe's docs.
+{_tips_signpost("customer lifecycle")}
 """
 
     @mcp.prompt()
@@ -469,13 +442,15 @@ supplement is still TODO, say so and lean harder on Adobe's docs.
         """
         Walkthrough: VIPMP ordering flow end-to-end. Covers what an
         order means commercially, the API sequence to place one, and
-        the failure modes that matter in production.
+        the failure modes that matter in production. Grounded in
+        Adobe's live docs.
         """
         return f"""Teach me how VIPMP ordering works end-to-end —
 from the commercial meaning of an order to the API sequence to place
 one successfully. Tech + business context both welcome.
 
-{_supplement_block("Ordering flow")}
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
+
 **Teaching flow:**
 
 1. Pull Adobe's docs. `search_vipmp_docs` with `query="create order"`
@@ -500,8 +475,7 @@ one successfully. Tech + business context both welcome.
    state Y and target Z, walk me through what you'd do." Use it to
    check the learner mapped business → API correctly.
 
-Be honest when Adobe's docs are ambiguous; note where you'd want
-the SWO supplement to fill the gap.
+{_tips_signpost("ordering flow")}
 """
 
     @mcp.prompt()
@@ -509,13 +483,14 @@ the SWO supplement to fill the gap.
         """
         Walkthrough: 3-Year Commit (3YC). Covers eligibility,
         commit-quantity math, enrollment flow, and the commercial
-        consequences of under-consumption.
+        consequences of under-consumption. Grounded in Adobe's live docs.
         """
         return f"""Teach me about the VIPMP 3-Year Commit (3YC) program
 — what it is commercially, who's eligible, how the commit math works,
 and how a partner enrolls a customer through the API.
 
-{_supplement_block("3YC (3-Year Commit)")}
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
+
 **Teaching flow:**
 
 1. Ground it in docs. `search_vipmp_docs` with
@@ -540,6 +515,8 @@ and how a partner enrolls a customer through the API.
    what's the year-1 vs year-3 pricing picture.
 
 Quote documented limits verbatim — don't paraphrase numbers.
+
+{_tips_signpost("3YC")}
 """
 
     @mcp.prompt()
@@ -547,13 +524,14 @@ Quote documented limits verbatim — don't paraphrase numbers.
         """
         Walkthrough: subscriptions and renewals. Covers cotermination,
         auto-renew, proration for mid-term changes, and the API surface
-        that makes it all go.
+        that makes it all go. Grounded in Adobe's live docs.
         """
         return f"""Teach me how VIPMP subscriptions and renewals work
 — cotermination, auto-renew behaviour, proration for mid-term changes,
 and the API surface underneath all of it.
 
-{_supplement_block("Subscriptions and renewals")}
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
+
 **Teaching flow:**
 
 1. Adobe's docs first. `search_vipmp_docs` with
@@ -584,8 +562,7 @@ and the API surface underneath all of it.
    customer wants to add 5 more seats to an active subscription 3
    months in." Let the learner attempt it.
 
-Be explicit about where Adobe's docs paper over commercial nuance —
-those are exactly the spots the SWO supplement will eventually fill.
+{_tips_signpost("subscriptions and renewals")}
 """
 
     @mcp.prompt()
@@ -593,13 +570,15 @@ those are exactly the spots the SWO supplement will eventually fill.
         """
         Walkthrough: returns and refunds. Covers the return window,
         what qualifies as a return vs cancellation vs downgrade,
-        refund mechanics, and the API sequence for each.
+        refund mechanics, and the API sequence for each. Grounded in
+        Adobe's live docs.
         """
         return f"""Teach me how returns and refunds work in VIPMP —
 the commercial rules (return windows, what qualifies, who gets
 refunded) and the API sequence that implements them.
 
-{_supplement_block("Returns and refunds")}
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
+
 **Teaching flow:**
 
 1. Adobe's docs. `search_vipmp_docs` with `query="return"` and
@@ -629,6 +608,8 @@ refunded) and the API sequence that implements them.
 
 If Adobe's docs are thin on refund mechanics (they often are — it's
 partly a commercial process, not an API one), say so explicitly.
+
+{_tips_signpost("returns and refunds")}
 """
 
     @mcp.prompt()
@@ -636,13 +617,15 @@ partly a commercial process, not an API one), say so explicitly.
         """
         Walkthrough: authentication, IMS credentials, and safe use of
         the Adobe VIPMP sandbox. Covers what a partner actually needs
-        to start making API calls without breaking production.
+        to start making API calls without breaking production. Grounded
+        in Adobe's live docs.
         """
         return f"""Teach me how authentication works against the VIPMP
 API and how to use the sandbox safely. I want to make my first call
 without accidentally touching production data.
 
-{_supplement_block("Auth and sandbox")}
+{_ADOBE_SOLE_SOURCE_DIRECTIVE}
+
 **Teaching flow:**
 
 1. Start with the docs. `search_vipmp_docs` with
@@ -666,14 +649,9 @@ without accidentally touching production data.
 5. Common auth errors: `list_vipmp_error_codes` with
    `query="authentication"` and `query="token"` — explain what each
    actually indicates.
-6. Operational guidance — when to call Adobe support vs SWO's
-   platform team vs check the docs again. Lean on the SWO
-   supplement above if it has content; otherwise note the gap.
-7. End with: "describe the minimum you need in place — credentials,
+6. End with: "describe the minimum you need in place — credentials,
    env vars, code — to call one endpoint against sandbox." Let the
    learner list it; correct as needed.
 
-Emphasise that the sandbox is the right place to experiment. Every
-learner should feel comfortable making calls there before touching
-production.
+{_tips_signpost("auth and sandbox")}
 """

@@ -1,93 +1,104 @@
 """
 Tests for the prompt module.
 
-Scope kept narrow: the prompt bodies themselves are essentially copy,
-and unit-testing their full string output would just be testing the
-test fixtures. We test the _supplement_block helper — the one piece
-of real logic that sits in prompts.py — across its populated and
-empty branches.
+Scope kept narrow: prompt bodies are essentially copy, and full-text
+assertions would just echo the fixtures. What's worth locking in is
+that each walkthrough prompt actually renders (no unresolved refs
+after the supplement→tips refactor) and that the Adobe-sole-source
+promise and the tips signpost — the two invariants that justify
+keeping walkthroughs separate from tips — are present.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import ClassVar
 
-import pytest
+from mcp.server.fastmcp import FastMCP
 
-from vipmp_docs_mcp import prompts, supplement
-
-
-@pytest.fixture
-def supplement_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
-    path = tmp_path / "training-supplement.md"
-    monkeypatch.setattr(supplement, "SUPPLEMENT_PATH", path)
-    return path
+from vipmp_docs_mcp.prompts import register_prompts
 
 
-class TestSupplementBlock:
-    def test_populated_section_renders_content_and_separator(
-        self, supplement_file: Path
-    ):
-        supplement_file.write_text(
-            "## Customer lifecycle\n\nReal SWO content here.\n",
-            encoding="utf-8",
-        )
-        out = prompts._supplement_block("Customer lifecycle")
-        assert "SWO training supplement" in out
-        assert "Customer lifecycle" in out
-        assert "Real SWO content here." in out
-        # Separator so the LLM can see where supplement ends.
-        assert "---" in out
+def _rendered_prompts() -> dict[str, str]:
+    """Register all prompts on a throwaway FastMCP instance and return
+    {prompt_name: rendered_body} for every walkthrough (no-arg prompts
+    only — the parameterised ones are exercised by their callers)."""
+    mcp = FastMCP("test")
+    register_prompts(mcp)
 
-    def test_h3_subheadings_become_topic_checklist(self, supplement_file: Path):
-        """H3 subsections in the supplement should surface as a named
-        checklist below the content. The LLM ignores supplement prose
-        above the teaching flow but covers named items from a
-        bulleted list reliably — that's the whole reason this extraction
-        exists. Lock it in so a refactor can't strip it silently."""
-        supplement_file.write_text(
-            "## Customer lifecycle\n\n"
-            "### `globalSalesEnabled` — cross-region\n\nbullets\n\n"
-            "### Deployment locations gotcha\n\nmore bullets\n",
-            encoding="utf-8",
-        )
-        out = prompts._supplement_block("Customer lifecycle")
-        assert "Topics from the supplement" in out
-        assert "weave" in out.lower()
-        # Both H3 names surface as checklist items.
-        assert "`globalSalesEnabled` — cross-region" in out
-        assert "Deployment locations gotcha" in out
+    # FastMCP exposes prompts via a private registry; we pull the
+    # callables out, call each no-arg prompt, and collect the string.
+    # The no-arg prompts are the six walkthroughs; the router takes
+    # optional args which we can pass defaults to.
+    import asyncio
+    out: dict[str, str] = {}
+    prompts_list = asyncio.run(mcp.list_prompts())
+    for p in prompts_list:
+        # Skip parameterised prompts (they need inputs we'd have to invent).
+        if p.arguments and any(a.required for a in p.arguments):
+            continue
+        try:
+            result = asyncio.run(mcp.get_prompt(p.name, arguments={}))
+            out[p.name] = "\n".join(
+                m.content.text
+                for m in result.messages
+                if hasattr(m.content, "text")
+            )
+        except Exception:
+            pass
+    return out
 
-    def test_no_h3_subheadings_skips_checklist(self, supplement_file: Path):
-        """If the supplement section has no H3s (e.g. a short intro-only
-        stub), we render the content plainly — no empty checklist
-        header."""
-        supplement_file.write_text(
-            "## Customer lifecycle\n\nJust a sentence.\n",
-            encoding="utf-8",
-        )
-        out = prompts._supplement_block("Customer lifecycle")
-        assert "Topics from the supplement" not in out
-        assert "Just a sentence." in out
 
-    def test_empty_or_missing_section_produces_placeholder(
-        self, supplement_file: Path
-    ):
-        # File exists but section doesn't.
-        supplement_file.write_text(
-            "## Some other topic\n\nunrelated\n",
-            encoding="utf-8",
-        )
-        out = prompts._supplement_block("Customer lifecycle")
-        assert "no notes yet" in out.lower()
-        # Placeholder stays short — it's a hint to the LLM, not content.
-        assert len(out) < 500
+class TestWalkthroughInvariants:
+    """
+    The six learn_* walkthroughs all promise:
+      1. Ground claims in Adobe's live docs only (sole-source).
+      2. Point at the tips tool at the end (signpost).
 
-    def test_missing_file_produces_placeholder(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ):
-        monkeypatch.setattr(
-            supplement, "SUPPLEMENT_PATH", tmp_path / "not-there.md"
-        )
-        out = prompts._supplement_block("Customer lifecycle")
-        assert "no notes yet" in out.lower()
+    If either invariant drops off any walkthrough, learners either
+    lose the citability guarantee (claim 1) or fail to discover the
+    tips surface (claim 2).
+    """
+
+    WALKTHROUGH_NAMES: ClassVar[set[str]] = {
+        "learn_customer_lifecycle",
+        "learn_ordering_flow",
+        "learn_3yc",
+        "learn_subscriptions_and_renewals",
+        "learn_returns_and_refunds",
+        "learn_auth_and_sandbox",
+    }
+
+    def test_all_walkthroughs_render(self):
+        rendered = _rendered_prompts()
+        missing = self.WALKTHROUGH_NAMES - rendered.keys()
+        assert not missing, f"these walkthroughs didn't render: {missing}"
+
+    def test_every_walkthrough_promises_adobe_sole_source(self):
+        rendered = _rendered_prompts()
+        for name in self.WALKTHROUGH_NAMES:
+            body = rendered[name]
+            assert "Ground every claim" in body, (
+                f"{name} is missing the Adobe-sole-source directive"
+            )
+
+    def test_every_walkthrough_signposts_get_vipmp_tips(self):
+        rendered = _rendered_prompts()
+        for name in self.WALKTHROUGH_NAMES:
+            body = rendered[name]
+            assert "tips" in body.lower(), (
+                f"{name} is missing any mention of tips"
+            )
+            # Each signpost uses the phrase "ask me for '<topic> tips'"
+            # — locks in the specific framing so a refactor can't
+            # silently drop it.
+            assert "ask me for" in body.lower(), (
+                f"{name} is missing the 'ask me for <topic> tips' signpost"
+            )
+
+    def test_router_mentions_tips_surface(self):
+        """The onboarding router should hint that the tips surface exists,
+        so new learners know about it before they pick a walkthrough."""
+        rendered = _rendered_prompts()
+        body = rendered.get("start_vipmp_learning", "")
+        assert body, "start_vipmp_learning didn't render"
+        assert "get_vipmp_tips" in body

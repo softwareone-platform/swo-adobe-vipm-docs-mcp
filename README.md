@@ -57,6 +57,14 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 | `refresh_vipmp_sitemap()` | Rebuild the sitemap from Adobe's published `/sitemap.xml`. Run when you're seeing 404s or think the sitemap has drifted. |
 | `rebuild_vipmp_index()` | Rebuild the pre-extracted index of endpoints/error codes/schemas (~60s). Run to refresh the data behind the structured tools between package updates. |
 
+### SoftwareOne operational tips
+| Tool | What it does |
+|---|---|
+| `get_vipmp_tips(topic)` | Return SoftwareOne-authored operational tips for a topic — commercial rules, gotchas, and field-experience notes Adobe's reference docs don't cover. Topic matching is case-insensitive and punctuation-tolerant. |
+| `list_vipmp_tip_topics()` | List topics for which tips are available — useful as a discovery call ("what tips do you have?") before asking for a specific one. |
+
+Tips content lives in [`src/vipmp_docs_mcp/content/tips.md`](src/vipmp_docs_mcp/content/tips.md). Editing that file is how you grow the operational context the server surfaces — every H2 heading becomes a topic.
+
 ## Prompts
 
 Pre-baked prompt templates your MCP client can offer directly (no need to remember which tools to chain):
@@ -72,7 +80,7 @@ Pre-baked prompt templates your MCP client can offer directly (no need to rememb
 
 ### Training curriculum
 
-Seven prompts for learning how VIPMP works — intended for new developers and technical product managers alike. Each walkthrough blends business context (why the rule exists, what it means commercially) with the API surface (which endpoints, which schemas, which errors). Prompts draw from Adobe's published docs *and* [`src/vipmp_docs_mcp/content/training-supplement.md`](src/vipmp_docs_mcp/content/training-supplement.md) — a human-authored file where SoftwareOne operational knowledge gets captured. Contributing to the supplement is how you make the whole curriculum smarter for everyone.
+Seven prompts for learning how VIPMP works — intended for new developers and technical product managers alike. Each walkthrough is **grounded in Adobe's live docs** — you can cite every claim back to the official reference. SoftwareOne-specific operational context (commercial rules, gotchas, field-experience notes) lives in the separate **tips** surface: call `get_vipmp_tips("customer lifecycle")` (or any other topic) to reach it, and the walkthroughs signpost this at the end.
 
 | Prompt | Arguments |
 |---|---|

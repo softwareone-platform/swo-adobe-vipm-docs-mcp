@@ -886,6 +886,106 @@ def list_vipmp_releases(
 
 
 # ---------------------------------------------------------------------------
+# Tips — human-authored SoftwareOne operational context
+#
+# Tips are the SWO-specific complement to Adobe's live docs: commercial
+# rules, gotchas, and field-experience notes Adobe's reference docs
+# don't cover. They live in ``content/tips.md`` in the package and are
+# surfaced only when the user explicitly asks — the training
+# walkthroughs (`learn_*` prompts) stay grounded in Adobe's docs so
+# they remain citable.
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool(
+    title="Get VIPMP tips for a topic",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+def get_vipmp_tips(topic: str) -> str:
+    """
+    Return SoftwareOne-authored operational tips for ``topic`` — rules,
+    gotchas, and field notes that complement Adobe's reference docs.
+
+    Topic matching is case-insensitive and punctuation-tolerant: "customer
+    lifecycle", "Customer Lifecycle", and "customer_lifecycle" all
+    resolve to the same section. Use `list_vipmp_tip_topics` to see what
+    topics exist.
+
+    Args:
+        topic: The topic to fetch tips for (e.g. "customer lifecycle",
+            "ordering flow", "3YC", "auth and sandbox").
+
+    Returns the raw tips markdown verbatim. Empty-topic and
+    missing-topic cases return a short placeholder message rather
+    than an error, so the assistant can explain gracefully when a
+    topic has no tips yet.
+    """
+    from .tips import get_tip_section, list_tip_topics
+
+    body = get_tip_section(topic)
+    if body:
+        return (
+            f"# SoftwareOne tips — {topic}\n\n"
+            f"Tribal knowledge that complements Adobe's reference docs.\n\n"
+            f"{body}\n"
+        )
+
+    # Topic not found (or empty). Give the user the list of known topics
+    # so they can pick one — much more useful than a bare "not found".
+    known = list_tip_topics()
+    if not known:
+        return (
+            "No tips are available yet — the tips file is empty or missing. "
+            "Fall back to `search_vipmp_docs` or `get_vipmp_page` for the "
+            "Adobe-documented surface of this topic."
+        )
+    topics_list = "\n".join(f"- {t}" for t in known)
+    return (
+        f"No tips found for {topic!r}. Known topics with tips available:\n\n"
+        f"{topics_list}\n\n"
+        f"Pick one of the above, or ask me to help if none match — it may "
+        f"be that this topic is Adobe-only and the walkthrough (`learn_*`) "
+        f"prompts are the right surface."
+    )
+
+
+@mcp.tool(
+    title="List VIPMP tip topics",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+)
+def list_vipmp_tip_topics() -> str:
+    """
+    Return the list of topics for which SoftwareOne tips are available.
+
+    Each entry maps to an H2 section in the tips file; call
+    `get_vipmp_tips(topic)` to read one. Useful as a discovery call —
+    "what tips do you have?" — before narrowing to a specific topic.
+    """
+    from .tips import list_tip_topics
+
+    topics = list_tip_topics()
+    if not topics:
+        return (
+            "_(no tips available — the tips file is empty or missing)_"
+        )
+    lines = ["# VIPMP tip topics", ""]
+    lines.extend(f"- {t}" for t in topics)
+    lines.append("")
+    lines.append("Call `get_vipmp_tips(topic)` with any of the above.")
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # Introspection
 # ---------------------------------------------------------------------------
 
