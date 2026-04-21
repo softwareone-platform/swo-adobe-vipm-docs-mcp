@@ -417,7 +417,6 @@ customer inside VIPMP's partner model — distributor → reseller →
 customer → orders and subscriptions — before any API detail. A
 newcomer needs that map to make sense of everything after.
 
-{_supplement_block("Customer lifecycle")}
 **Teaching flow:**
 
 1. Fetch Adobe's published material first. Call `search_vipmp_docs`
@@ -428,9 +427,19 @@ newcomer needs that map to make sense of everything after.
    what each means, when it's entered, who causes the transition.
 3. Map each meaningful transition to its API surface. For each:
    - Endpoint (`describe_vipmp_endpoint` for the detail)
-   - What body fields matter
+   - What body fields matter — covering both Adobe's documented fields
+     **and the SWO-contributed topics in the supplement block below**.
+     Each supplement topic has a natural home: a flag that affects
+     customer creation goes into the create step; a rule about
+     mutability goes into the Update Customer step. Before closing out
+     step 3, double-check every named topic in the supplement has
+     appeared somewhere in the walkthrough. If any is missing, add it
+     at its natural home.
    - What response / status-code indicates success vs "accepted but
      pending"
+
+{_supplement_block("Customer lifecycle")}
+
 4. Surface the real errors: `list_vipmp_error_codes` with
    `query="customer"` — call out business meaning, not just the code.
 5. Highlight the common traps explicitly. Examples worth checking:
@@ -440,8 +449,7 @@ newcomer needs that map to make sense of everything after.
    quiz, just enough to surface gaps.
 
 Open with one sentence on where you're starting, then go. If the SWO
-supplement above is still TODO, say so and lean harder on Adobe's
-docs.
+supplement is still TODO, say so and lean harder on Adobe's docs.
 """
 
     @mcp.prompt()
