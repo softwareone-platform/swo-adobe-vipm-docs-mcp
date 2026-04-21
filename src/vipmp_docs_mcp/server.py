@@ -38,12 +38,21 @@ from .sitemap import normalize_path
 log = get_logger("server")
 
 
-# Threshold below which `vipmp_server_info` flags the active index as
-# suspiciously incomplete. Healthy rebuilds against the current Adobe
-# sitemap carry several hundred endpoints. Anything below this count
-# almost always means the build ran against a stale path list and
-# mostly 404'd. See GitHub issue #4.
-STALE_INDEX_ENDPOINT_THRESHOLD = 30
+# Fraction of the source sitemap that must fail to parse before
+# `vipmp_server_info` flags the active index as suspiciously
+# incomplete. The real regression in #4 surfaced as 57/72 pages
+# failing (~79% failure rate) because CI was building against the
+# stale hand-curated underscore paths that Adobe had migrated off.
+# A healthy build against Adobe's live sitemap parses every page
+# (0% failure). A small number of parse errors is normal when Adobe
+# publishes a new page the parser hasn't seen yet; 25% gives us
+# headroom for that without hiding real regressions.
+#
+# Prior versions used an absolute endpoint-count threshold (30),
+# which false-flagged every healthy build — Adobe's Partner API
+# legitimately exposes ~21 endpoints, not hundreds. This is the
+# replacement heuristic.
+STALE_INDEX_FAILURE_FRACTION = 0.25
 
 
 # Active sitemap: auto-generated (from Adobe's sitemap.xml, persisted to
@@ -925,16 +934,20 @@ def vipmp_server_info() -> str:
             f"{len(idx.releases)} releases — "
             f"built {idx.age_seconds / 3600:.1f}h ago"
         )
-        # Flag obviously-broken indexes explicitly. Healthy builds carry
-        # hundreds of endpoints; anything below the threshold almost always
-        # means the sitemap was stale or mostly 404'd at build time
-        # (see GitHub issue #4). Surfacing it in server_info means users
-        # spot the regression without having to know to cross-check.
-        if len(idx.endpoints) < STALE_INDEX_ENDPOINT_THRESHOLD:
+        # Flag obviously-broken indexes explicitly. The real regression in
+        # #4 surfaced as most pages failing to parse (57 of 72) because CI
+        # was building against the stale hand-curated underscore paths
+        # Adobe had migrated off. That's what we catch here — a high
+        # parse-failure rate is the reliable signal, not endpoint count
+        # (Adobe's Partner API only has ~21 endpoints to begin with).
+        total_pages = idx.source_sitemap_size or 1
+        failure_rate = len(idx.parse_errors) / total_pages
+        if failure_rate >= STALE_INDEX_FAILURE_FRACTION:
             idx_line = (
-                f"**⚠️ index looks incomplete** ({len(idx.endpoints)} endpoints; "
-                f"healthy builds carry hundreds). Call `rebuild_vipmp_index` to "
-                f"regenerate against the current Adobe sitemap. Details: " + idx_line
+                f"**⚠️ index looks incomplete** "
+                f"({len(idx.parse_errors)}/{total_pages} pages failed to parse). "
+                f"Call `rebuild_vipmp_index` to regenerate against the current "
+                f"Adobe sitemap. Details: " + idx_line
             )
         idx_source_line = f"- **Source:** `{active.source}` (`{active.path}`)"
     else:
