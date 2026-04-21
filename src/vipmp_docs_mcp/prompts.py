@@ -412,10 +412,22 @@ state machine AND the API that implements it. I want this to serve
 whether I'm about to write code against it or making product decisions
 that depend on it, so don't shy away from either angle.
 
-**Open with the big picture.** One short paragraph placing the
-customer inside VIPMP's partner model — distributor → reseller →
-customer → orders and subscriptions — before any API detail. A
-newcomer needs that map to make sense of everything after.
+**Open with the big picture.** Before any API detail, render this
+ASCII tree exactly, under a "The big picture" heading:
+
+```
+Distributor (Adobe partner, e.g. SoftwareOne)
+  └── Reseller
+        └── Customer
+              └── Subscriptions / Orders
+```
+
+Then one short paragraph explaining where the learner's integration
+sits in that tree — typically as the reseller, making calls on behalf
+of customers, with the distributor (SoftwareOne) as the party holding
+Adobe's partner contract above. This tree is the ACTOR hierarchy,
+not the lifecycle — keep it distinct from state diagrams later in
+the walkthrough.
 
 **Teaching flow:**
 
