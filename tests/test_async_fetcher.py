@@ -85,3 +85,15 @@ class TestAsyncFetchMany:
         )
         results = asyncio.run(async_fetch_many(["/login"]))
         assert isinstance(results["/login"], FetchError)
+
+    def test_transient_5xx_is_retried(self, httpx_mock: HTTPXMock):
+        # First two responses 503, then 200 — the async path should retry
+        # under the same policy as the sync path and end up succeeding.
+        url = f"{BASE_URL}/flaky"
+        httpx_mock.add_response(url=url, status_code=503)
+        httpx_mock.add_response(url=url, status_code=503)
+        httpx_mock.add_response(url=url, html=REAL_PAGE_HTML)
+
+        results = asyncio.run(async_fetch_many(["/flaky"]))
+        assert isinstance(results["/flaky"], str)
+        assert "vipmp content" in results["/flaky"]

@@ -126,6 +126,34 @@ class DocsCache:
         self._load()
         return self._entries.get(normalize_path(path))
 
+    def put(self, path: str, content: str, *, etag: str | None = None) -> None:
+        """
+        Store cleaned content for a path and atomically persist to disk.
+
+        Public counterpart to `get_or_fetch`'s internal write — used by
+        callers that already have the cleaned content in hand and want
+        to seed the cache without reaching into private state.
+        """
+        self._load()
+        self._entries[normalize_path(path)] = CacheEntry(
+            content=content, etag=etag, fetched_at=time.time()
+        )
+        self._save()
+
+    def put_many(self, entries: dict[str, str]) -> None:
+        """
+        Store many `{path: cleaned_content}` pairs and persist with one
+        atomic write at the end. Used by the parallel warmup so we
+        don't fsync once per page.
+        """
+        self._load()
+        now = time.time()
+        for path, content in entries.items():
+            self._entries[normalize_path(path)] = CacheEntry(
+                content=content, etag=None, fetched_at=now
+            )
+        self._save()
+
     def get_or_fetch(self, path: str) -> str:
         """
         Return cleaned content for a path. If cached and fresh, serve from cache.

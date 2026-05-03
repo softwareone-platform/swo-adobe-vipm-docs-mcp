@@ -55,6 +55,53 @@ DISABLE_ENV = "VIPMP_DISABLE_REMOTE_INDEX"
 
 _FETCH_TIMEOUT = httpx.Timeout(10.0, connect=5.0)
 
+# Structural invariants the fetched index must satisfy before we trust it
+# enough to overwrite the cached copy. The github-remote tier reads from
+# mutable `main`, so a poisoned or accidentally-broken index could otherwise
+# silently propagate to every downstream install within the 12h TTL. These
+# floors are well below the live counts (21 endpoints / 65 error codes / 18
+# schemas at the time of writing) but high enough to catch the realistic
+# failure mode: a refresh PR that mass-deletes content.
+#
+# This is defense-in-depth, not a substitute for signing. Targeted additions
+# of fake endpoints can't be detected without an authenticated source.
+MIN_ENDPOINTS = 10
+MIN_ERROR_CODES = 20
+MIN_SCHEMAS = 5
+
+
+class IndexInvariantError(ValueError):
+    """The fetched index didn't pass structural sanity checks."""
+
+
+def _check_invariants(data: dict) -> None:
+    """
+    Raise IndexInvariantError if the parsed JSON looks structurally wrong.
+
+    Imported lazily inside the function to avoid a circular import — the
+    expected schema_version lives in `index.py`.
+    """
+    from .index import INDEX_SCHEMA_VERSION
+
+    if data.get("schema_version") != INDEX_SCHEMA_VERSION:
+        raise IndexInvariantError(
+            f"schema_version is {data.get('schema_version')!r}, "
+            f"expected {INDEX_SCHEMA_VERSION}"
+        )
+
+    for key, floor in (
+        ("endpoints", MIN_ENDPOINTS),
+        ("error_codes", MIN_ERROR_CODES),
+        ("schemas", MIN_SCHEMAS),
+    ):
+        value = data.get(key)
+        if not isinstance(value, list):
+            raise IndexInvariantError(f"{key!r} is not a list")
+        if len(value) < floor:
+            raise IndexInvariantError(
+                f"{key!r} has {len(value)} entries, minimum {floor}"
+            )
+
 
 def _is_disabled() -> bool:
     return os.environ.get(DISABLE_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
@@ -172,12 +219,22 @@ def ensure_fresh() -> Path | None:
 
     body = response.content
     try:
-        # Sanity-parse: don't write garbage to disk. Schema validation
-        # happens when index.py tries to load the file — rejecting it
-        # there falls through to the baseline tier, which is correct.
-        json.loads(body)
+        parsed = json.loads(body)
     except json.JSONDecodeError as exc:
         log.warning("remote index response is not valid JSON (%s); ignoring", exc)
+        return index_path if have_cached else None
+
+    # Defense-in-depth: reject indexes that fail structural sanity checks
+    # before we overwrite the cached copy. This catches mass-deletion-style
+    # poisoning of `main` (PAT compromise, accidental bad merge) without
+    # blocking the legitimate daily refresh path.
+    try:
+        _check_invariants(parsed)
+    except IndexInvariantError as exc:
+        log.warning(
+            "remote index failed structural invariants (%s); using cached copy if any",
+            exc,
+        )
         return index_path if have_cached else None
 
     _write_atomic(body, index_path)

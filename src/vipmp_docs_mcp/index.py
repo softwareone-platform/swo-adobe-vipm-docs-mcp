@@ -135,14 +135,11 @@ def build_index() -> IndexSnapshot:
     ~20s cold (was ~60s serial).
 
     Callable from both synchronous contexts (CI scripts, REPL) and from
-    inside a running event loop (MCP tool handlers). See the fetch call
-    below for the asyncio.run nesting guard.
+    inside a running event loop (MCP tool handlers); the parallel fetch
+    is dispatched via `fetcher.run_async`, which handles either shape.
     """
-    import asyncio
-    import concurrent.futures
-
     from .autositemap import build_sitemap, save_sitemap
-    from .fetcher import async_fetch_many
+    from .fetcher import async_fetch_many, run_async
 
     # Refresh the sitemap from Adobe before doing anything else. The
     # hand-curated fallback in sitemap.py still uses underscore-separated
@@ -169,22 +166,7 @@ def build_index() -> IndexSnapshot:
     title_for = {entry["path"]: entry["title"] for entry in sitemap}
 
     log.info("build_index: fetching %d pages in parallel", len(paths))
-    # Run the parallel fetch whether we're in a sync context (CI, scripts)
-    # or already inside an event loop (MCP tool handler). `asyncio.run()`
-    # can't nest — it raises "cannot be called from a running event loop"
-    # — so when a loop is active we isolate the coroutine in a short-lived
-    # thread with its own fresh loop. The lambda is deliberate: it defers
-    # coroutine construction to the worker thread so no async state is
-    # built under the outer loop's context.
-    try:
-        asyncio.get_running_loop()
-    except RuntimeError:
-        fetch_results = asyncio.run(async_fetch_many(paths, concurrency=5))
-    else:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            fetch_results = pool.submit(
-                lambda: asyncio.run(async_fetch_many(paths, concurrency=5))
-            ).result()
+    fetch_results = run_async(lambda: async_fetch_many(paths, concurrency=5))
 
     for path in paths:
         result = fetch_results.get(path)

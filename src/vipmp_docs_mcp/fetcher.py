@@ -229,6 +229,25 @@ DEFAULT_CONCURRENCY = 5
 """Be polite to Adobe's CDN — 5 concurrent requests is plenty for our use case."""
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=0.5, min=0.5, max=4.0),
+    retry=retry_if_exception(_is_retryable),
+    reraise=True,
+)
+async def _async_fetch_with_retries(
+    client: httpx.AsyncClient, url: str, headers: dict[str, str]
+) -> httpx.Response:
+    """Async retry-wrapped fetch. Mirrors `_fetch_with_retries` policy."""
+    log.debug("async-fetching %s", url)
+    response = await client.get(url, headers=headers)
+    if response.status_code in _RETRYABLE_STATUS:
+        # Trigger tenacity retry. raise_for_status raises HTTPStatusError,
+        # which `_is_retryable` catches for the retryable status set.
+        response.raise_for_status()
+    return response
+
+
 async def _async_fetch_one(
     client: httpx.AsyncClient,
     path: str,
@@ -237,16 +256,27 @@ async def _async_fetch_one(
 ) -> str:
     """
     Async equivalent of fetch_page_html for one path. Includes the same
-    trailing-slash fallback semantics. Raises FetchError on failure.
+    trailing-slash fallback semantics and the same retry/backoff policy
+    as the sync fetcher. Raises FetchError on failure.
     """
     last_err: Exception | None = None
     for candidate in _trailing_slash_variants(path):
         url = BASE_URL + candidate
         try:
-            response = await client.get(url, headers=_default_headers())
+            response = await _async_fetch_with_retries(
+                client, url, _default_headers()
+            )
         except (httpx.TransportError, httpx.TimeoutException) as exc:
             log.warning("network error for %s: %s", candidate, exc)
             raise FetchError(f"network error fetching {path}: {exc}") from exc
+        except httpx.HTTPStatusError as exc:
+            log.warning("HTTP %s for %s after retries", exc.response.status_code, candidate)
+            raise FetchError(
+                f"HTTP {exc.response.status_code} {exc.response.reason_phrase} for {path}"
+            ) from exc
+        except RetryError as exc:
+            log.warning("retries exhausted for %s", candidate)
+            raise FetchError(f"retries exhausted fetching {path}") from exc
 
         if response.status_code == 404:
             last_err = FetchError(f"HTTP 404 Not Found for {candidate}")
@@ -330,3 +360,32 @@ async def async_fetch_many(
     succeeded = sum(1 for v in results.values() if isinstance(v, str))
     log.info("async_fetch_many: %d/%d succeeded", succeeded, total)
     return results
+
+
+def run_async(coro_factory):
+    """
+    Run an async coroutine from a sync context, even if a loop is active.
+
+    `asyncio.run()` raises "cannot be called from a running event loop"
+    when invoked under one — which can happen if a future MCP runtime
+    drives sync tool bodies inside the loop thread. To stay safe in
+    both shapes:
+
+      - if no loop is running, dispatch directly via `asyncio.run`;
+      - if a loop is running, isolate the work in a short-lived worker
+        thread with its own fresh loop.
+
+    `coro_factory` is a zero-arg callable that returns the coroutine.
+    The deferred construction matters: building the coroutine under one
+    loop and awaiting it under another raises "attached to a different
+    loop". The factory pattern defers construction to the worker.
+    """
+    import concurrent.futures
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro_factory())
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(lambda: asyncio.run(coro_factory())).result()

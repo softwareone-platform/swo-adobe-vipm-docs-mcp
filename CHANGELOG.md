@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security / hardening (response to external code review)
+- **Curl snippets now use a heredoc body** (`codegen.py`). The previous
+  `-d '{...}'` form silently broke whenever a JSON string value
+  contained an apostrophe. The new `--data-binary @- <<'JSON'` form
+  passes the body verbatim, so any byte (including `'`, `` ` ``, `$`)
+  is safe.
+- **Async fetcher now retries transient failures** (`fetcher.py`). The
+  parallel fetch path used by `warm_vipmp_cache` and `build_index`
+  previously surfaced 503/429/timeouts as immediate per-page failures;
+  it now uses the same tenacity policy as the sync path (3 attempts,
+  exponential backoff, retry only on transient transport/5xx/429).
+- **Shared `run_async` helper** (`fetcher.py`). Both `build_index` and
+  `warm_vipmp_cache` now dispatch their parallel fetch through one
+  helper that probes for a running event loop and isolates work in a
+  worker thread when needed. Removes the bare `asyncio.run` in
+  `warm_vipmp_cache` that would have raised under any future MCP
+  runtime that drives sync tools inside the loop thread.
+- **Public cache write APIs** (`cache.py`). New `DocsCache.put` and
+  `DocsCache.put_many` replace the private `_entries`/`_load`/`_save`
+  reach-around in `warm_vipmp_cache`. `put_many` issues one atomic
+  write for the whole batch instead of fsync-per-page.
+- **Remote-index structural invariants** (`remote_index.py`). Before
+  overwriting the cached copy, the GitHub-refreshed tier now checks
+  `schema_version` matches the expected value and that
+  `endpoints`/`error_codes`/`schemas` exceed conservative floors (10 /
+  20 / 5). Mass-deletion-style poisoning of `main` is rejected and the
+  existing cached/baseline copy is preserved. Defense-in-depth, not a
+  substitute for signing.
+- **Refresh workflow validates the rebuilt index**
+  (`refresh-index.yml`). A new step runs the same invariants plus a
+  parse-error fraction check (≥25% aborts, mirroring
+  `STALE_INDEX_FAILURE_FRACTION` in `server.py`) before opening the
+  auto-merged PR. A regression now fails the workflow loud rather than
+  landing on `main` and propagating to downstream installs within 12h
+  via the github-remote tier.
+
 ## [0.8.0] — 2026-04-21
 
 ### Added

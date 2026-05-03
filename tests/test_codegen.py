@@ -111,6 +111,21 @@ class TestGenerateSnippet:
         assert "X-Api-Key" in result.code
         assert "Content-Type: application/json" in result.code
 
+    def test_curl_body_with_apostrophe_is_safe(self, patched_index):
+        # Single quotes in JSON string values used to break the snippet
+        # because the body was wrapped in `-d '...'`. The heredoc form
+        # passes the bytes verbatim.
+        body = '{"name": "O\'Brien"}'
+        result = generate_snippet(
+            "POST /v3/customers", body_json=body, language="curl"
+        )
+        assert isinstance(result, CodeSnippet)
+        assert "<<'JSON'" in result.code
+        assert "\nJSON" in result.code
+        assert "O'Brien" in result.code
+        # The fragile `-d '...'` form must not appear.
+        assert " -d '" not in result.code
+
     def test_powershell_includes_invoke(self, patched_index):
         result = generate_snippet("POST /v3/customers", language="powershell")
         assert isinstance(result, CodeSnippet)
