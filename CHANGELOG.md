@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-05-03
+
 ### Security / hardening (response to external code review)
 - **Curl snippets now use a heredoc body** (`codegen.py`). The previous
   `-d '{...}'` form silently broke whenever a JSON string value
