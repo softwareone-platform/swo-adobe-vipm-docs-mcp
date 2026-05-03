@@ -271,43 +271,38 @@ def warm_vipmp_cache() -> str:
 
     Returns a summary of fetches, cache hits, and any errors.
     """
-    import asyncio
-
-    from .fetcher import async_fetch_many
+    from .fetcher import async_fetch_many, run_async
     from .html_cleaner import extract_text
 
     cache = get_cache()
     paths = [entry["path"] for entry in _get_sitemap()]
     before_snapshot = {p: cache.get(p) for p in paths}
 
-    # Parallel fetch — ~6s for 86 pages vs ~30s serial.
-    results = asyncio.run(async_fetch_many(paths, concurrency=5))
+    # Parallel fetch — ~6s for 86 pages vs ~30s serial. `run_async`
+    # tolerates being called from inside an active event loop, so this
+    # works under any MCP runtime shape.
+    results = run_async(lambda: async_fetch_many(paths, concurrency=5))
 
     fetched = 0
     revalidated = 0
     errors: list[tuple[str, str]] = []
+    to_persist: dict[str, str] = {}
 
     for path, result in results.items():
         if isinstance(result, FetchError):
             errors.append((path, str(result)))
             log.warning("warm_cache failed for %s: %s", path, result)
             continue
-        # Successful fetch — clean and persist.
         new_content = extract_text(result)
         before = before_snapshot.get(path)
         if before is None or before.content != new_content:
             fetched += 1
         else:
             revalidated += 1
-        # Reuse cache.get_or_fetch's cleaning + storage path by writing directly.
-        import time as _time
+        to_persist[path] = new_content
 
-        from .cache import CacheEntry
-        cache._load()
-        cache._entries[path] = CacheEntry(
-            content=new_content, etag=None, fetched_at=_time.time()
-        )
-    cache._save()
+    if to_persist:
+        cache.put_many(to_persist)
 
     lines = [
         "# Cache warmup complete",

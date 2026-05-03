@@ -32,7 +32,26 @@ def isolate_cache(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     return idx, meta
 
 
-SAMPLE_BODY = json.dumps({"schema_version": 4, "endpoints": []}).encode()
+def _valid_index_body() -> bytes:
+    """Build a payload that satisfies the structural-invariant floors."""
+    from vipmp_docs_mcp.index import INDEX_SCHEMA_VERSION
+    from vipmp_docs_mcp.remote_index import (
+        MIN_ENDPOINTS,
+        MIN_ERROR_CODES,
+        MIN_SCHEMAS,
+    )
+
+    return json.dumps(
+        {
+            "schema_version": INDEX_SCHEMA_VERSION,
+            "endpoints": [{} for _ in range(MIN_ENDPOINTS)],
+            "error_codes": [{} for _ in range(MIN_ERROR_CODES)],
+            "schemas": [{} for _ in range(MIN_SCHEMAS)],
+        }
+    ).encode()
+
+
+SAMPLE_BODY = _valid_index_body()
 
 
 class TestDisabled:
@@ -85,6 +104,66 @@ class TestFreshFetch:
             content=b"<html>rate limited</html>",
         )
         # No cached copy, so we return None rather than writing garbage.
+        assert remote_index.ensure_fresh() is None
+        assert not idx.exists()
+
+    def test_invariant_failure_keeps_cached_copy(
+        self, httpx_mock: HTTPXMock, isolate_cache
+    ):
+        idx, _ = isolate_cache
+        idx.write_bytes(SAMPLE_BODY)
+
+        # A poisoned index that's mostly empty must NOT overwrite the cache.
+        bad_body = json.dumps(
+            {
+                "schema_version": 4,
+                "endpoints": [],
+                "error_codes": [],
+                "schemas": [],
+            }
+        ).encode()
+        httpx_mock.add_response(
+            url=remote_index.REMOTE_INDEX_URL, content=bad_body
+        )
+
+        path = remote_index.ensure_fresh()
+        assert path == idx
+        # Cached copy preserved.
+        assert idx.read_bytes() == SAMPLE_BODY
+
+    def test_invariant_failure_returns_none_when_uncached(
+        self, httpx_mock: HTTPXMock, isolate_cache
+    ):
+        idx, _ = isolate_cache
+        bad_body = json.dumps(
+            {
+                "schema_version": 4,
+                "endpoints": [],
+                "error_codes": [],
+                "schemas": [],
+            }
+        ).encode()
+        httpx_mock.add_response(
+            url=remote_index.REMOTE_INDEX_URL, content=bad_body
+        )
+        assert remote_index.ensure_fresh() is None
+        assert not idx.exists()
+
+    def test_invariant_failure_on_schema_version_mismatch(
+        self, httpx_mock: HTTPXMock, isolate_cache
+    ):
+        idx, _ = isolate_cache
+        bad_body = json.dumps(
+            {
+                "schema_version": 999,
+                "endpoints": [{} for _ in range(20)],
+                "error_codes": [{} for _ in range(40)],
+                "schemas": [{} for _ in range(10)],
+            }
+        ).encode()
+        httpx_mock.add_response(
+            url=remote_index.REMOTE_INDEX_URL, content=bad_body
+        )
         assert remote_index.ensure_fresh() is None
         assert not idx.exists()
 

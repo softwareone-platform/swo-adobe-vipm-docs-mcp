@@ -77,3 +77,23 @@ class TestDocsCache:
         )
         cache = DocsCache(path=tmp_cache_path)
         assert cache.get("/x") is None
+
+    def test_put_persists_single(self, tmp_cache_path: Path):
+        cache = DocsCache(path=tmp_cache_path)
+        cache.put("/a", "body-a", etag='W/"1"')
+
+        cache2 = DocsCache(path=tmp_cache_path)
+        entry = cache2.get("/a")
+        assert entry is not None
+        assert entry.content == "body-a"
+        assert entry.etag == 'W/"1"'
+
+    def test_put_many_persists_with_one_save(self, tmp_cache_path: Path):
+        cache = DocsCache(path=tmp_cache_path)
+        cache.put_many({"/a": "A", "/b": "B", "/c": "C"})
+
+        cache2 = DocsCache(path=tmp_cache_path)
+        for path, expected in [("/a", "A"), ("/b", "B"), ("/c", "C")]:
+            entry = cache2.get(path)
+            assert entry is not None
+            assert entry.content == expected

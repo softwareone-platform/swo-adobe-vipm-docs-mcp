@@ -100,6 +100,65 @@ jobs:
           )
           PY
 
+      - name: Validate structural invariants
+        # Fail-loud guard against poisoning / parser regressions before the
+        # PR ever opens. Same floors that `remote_index._check_invariants`
+        # enforces at fetch time, plus a parse-error fraction check that
+        # mirrors `STALE_INDEX_FAILURE_FRACTION` in server.py. If any
+        # invariant fails the workflow fails and no PR is opened — the
+        # daily refresh just pauses until a human investigates.
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          from vipmp_docs_mcp.index import INDEX_SCHEMA_VERSION
+          from vipmp_docs_mcp.remote_index import (
+              MIN_ENDPOINTS,
+              MIN_ERROR_CODES,
+              MIN_SCHEMAS,
+              _check_invariants,
+              IndexInvariantError,
+          )
+          from vipmp_docs_mcp.server import STALE_INDEX_FAILURE_FRACTION
+
+          path = Path("src/vipmp_docs_mcp/data/index.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+
+          # Structural floors (schema version, endpoint/error-code/schema counts).
+          try:
+              _check_invariants(data)
+          except IndexInvariantError as exc:
+              print(f"::error::Index failed structural invariants: {exc}")
+              sys.exit(1)
+
+          # Parse-error fraction sanity check.
+          sitemap_size = int(data.get("source_sitemap_size") or 0)
+          parse_errors = data.get("parse_errors") or []
+          if sitemap_size > 0:
+              fraction = len(parse_errors) / sitemap_size
+              if fraction >= STALE_INDEX_FAILURE_FRACTION:
+                  print(
+                      f"::error::parse-error fraction {fraction:.0%} >= "
+                      f"threshold {STALE_INDEX_FAILURE_FRACTION:.0%} "
+                      f"({len(parse_errors)}/{sitemap_size}); aborting refresh"
+                  )
+                  sys.exit(1)
+
+          print(
+              f"OK: schema_version={data.get('schema_version')} "
+              f"(want {INDEX_SCHEMA_VERSION}), "
+              f"endpoints={len(data.get('endpoints', []))} "
+              f"(min {MIN_ENDPOINTS}), "
+              f"error_codes={len(data.get('error_codes', []))} "
+              f"(min {MIN_ERROR_CODES}), "
+              f"schemas={len(data.get('schemas', []))} "
+              f"(min {MIN_SCHEMAS}), "
+              f"parse_errors={len(parse_errors)}/{sitemap_size}"
+          )
+          PY
+
       - name: Check if index or sitemap changed
         id: diff
         run: |

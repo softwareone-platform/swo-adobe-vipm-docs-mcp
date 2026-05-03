@@ -117,9 +117,14 @@ def _emit_curl(method: str, url: str, body: dict | None) -> str:
     ]
     if body is not None and method in {"POST", "PATCH", "PUT"}:
         body_str = json.dumps(body, indent=2)
-        # Continue the last header line with backslash.
+        # Heredoc with single-quoted marker passes the body verbatim — no
+        # quoting/escaping needed for embedded apostrophes, backticks, or
+        # `$` sequences. Beats `-d '...'` which breaks on any single quote
+        # in a string value.
         lines[-1] = lines[-1] + " \\"
-        lines.append(f"  -d '{body_str}'")
+        lines.append("  --data-binary @- <<'JSON'")
+        lines.append(body_str)
+        lines.append("JSON")
     return "\n".join(lines)
 
 
