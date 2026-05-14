@@ -46,6 +46,14 @@ PACKAGE_SITEMAP_PATH = Path(__file__).parent / "data" / "sitemap.json"
 # Schema version — bump on breaking changes to the persisted JSON shape.
 SITEMAP_SCHEMA_VERSION = 1
 
+# Fail-loud floor for the vipmp path count parsed out of Adobe's sitemap.xml.
+# Adobe currently publishes ~86 vipmp paths; if a successful fetch returns
+# fewer than this, something has gone wrong on Adobe's side (CDN/bot
+# protection serving a stripped sitemap, namespace change, etc.) and we
+# would rather fail loudly than build an empty index. See refresh-index
+# workflow runs on 2026-05-13 / 2026-05-14 for the original incident.
+MIN_VIPMP_SITEMAP_PATHS = 50
+
 
 def _fetch_sitemap_paths() -> list[str]:
     """Fetch Adobe's sitemap.xml and return normalized vipmp doc paths."""
@@ -55,7 +63,21 @@ def _fetch_sitemap_paths() -> list[str]:
     urls = [u.find("sm:loc", ns).text or "" for u in root.findall("sm:url", ns)]
     vipmp = [u.replace(BASE_URL, "") for u in urls if "/vipmp/docs/" in u]
     paths = sorted({normalize_path(p) for p in vipmp})
-    log.info("fetched %d vipmp paths from %s", len(paths), SITEMAP_XML_PATH)
+    log.info(
+        "fetched %d vipmp paths from %s (response=%d bytes, %d total urls)",
+        len(paths),
+        SITEMAP_XML_PATH,
+        len(xml),
+        len(urls),
+    )
+    if len(paths) < MIN_VIPMP_SITEMAP_PATHS:
+        raise FetchError(
+            f"Adobe sitemap.xml returned only {len(paths)} vipmp paths "
+            f"(minimum {MIN_VIPMP_SITEMAP_PATHS}); response was {len(xml)} bytes, "
+            f"{len(urls)} total URLs, root tag {root.tag!r}. "
+            "Likely a CDN/bot-protection response — see workflow artifact "
+            "for the raw body."
+        )
     return paths
 
 
@@ -161,7 +183,18 @@ def build_sitemap(throttle: float = 0.0) -> list[SitemapEntry]:
 
 
 def save_sitemap(entries: list[SitemapEntry], path: Path = SITEMAP_JSON_PATH) -> None:
-    """Persist the sitemap to JSON (atomic write)."""
+    """Persist the sitemap to JSON (atomic write).
+
+    Refuses to overwrite an existing healthy file with an empty entries
+    list — defense-in-depth so a buggy build_sitemap() that returns ``[]``
+    can't corrupt the shipped fallback.
+    """
+    if not entries and path.exists():
+        existing = load_sitemap(path)
+        if existing:
+            raise ValueError(
+                f"refusing to overwrite {path} ({len(existing)} entries) with empty entries list"
+            )
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": SITEMAP_SCHEMA_VERSION,
@@ -211,7 +244,9 @@ def get_active_sitemap() -> list[SitemapEntry]:
     if package:
         log.debug("no per-user sitemap; using package-shipped fallback")
         return package
-    log.warning("no sitemap available (user cache missing and package "
-                "fallback unreadable) — search and listing tools will "
-                "return empty results until `refresh_vipmp_sitemap` runs")
+    log.warning(
+        "no sitemap available (user cache missing and package "
+        "fallback unreadable) — search and listing tools will "
+        "return empty results until `refresh_vipmp_sitemap` runs"
+    )
     return []

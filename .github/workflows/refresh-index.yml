@@ -100,6 +100,57 @@ jobs:
           )
           PY
 
+      - name: Capture Adobe response on rebuild failure
+        # When the rebuild step fails (typically because Adobe's sitemap.xml
+        # came back with too few vipmp paths — see MIN_VIPMP_SITEMAP_PATHS
+        # in autositemap.py), snapshot Adobe's raw response from the runner
+        # so we can compare against a known-good local capture. Uploaded as
+        # a workflow artifact below.
+        if: failure() && steps.rebuild.outcome == 'failure'
+        run: |
+          python - <<'PY'
+          import pathlib
+
+          import httpx
+
+          headers = {
+              "User-Agent": "Mozilla/5.0 (compatible; SWOVIPMPDocsMCP/0.2)",
+              "Accept": "text/html,application/xhtml+xml",
+              "Accept-Encoding": "gzip, deflate",
+          }
+          response = httpx.get(
+              "https://developer.adobe.com/sitemap.xml",
+              headers=headers,
+              follow_redirects=True,
+              timeout=30,
+          )
+          out = pathlib.Path("adobe-sitemap-debug")
+          out.mkdir(exist_ok=True)
+          (out / "status.txt").write_text(
+              f"{response.status_code} {response.reason_phrase}\n",
+              encoding="utf-8",
+          )
+          (out / "headers.txt").write_text(
+              "\n".join(f"{k}: {v}" for k, v in response.headers.items()),
+              encoding="utf-8",
+          )
+          (out / "body.xml").write_text(response.text, encoding="utf-8")
+          (out / "summary.txt").write_text(
+              f"status={response.status_code}\n"
+              f"body_bytes={len(response.text)}\n"
+              f"vipmp_docs_count={response.text.count('/vipmp/docs/')}\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload Adobe response artifact
+        if: failure() && steps.rebuild.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: adobe-sitemap-debug
+          path: adobe-sitemap-debug/
+          retention-days: 14
+
       - name: Validate structural invariants
         # Fail-loud guard against poisoning / parser regressions before the
         # PR ever opens. Same floors that `remote_index._check_invariants`
