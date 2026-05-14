@@ -17,10 +17,14 @@ import pytest
 
 from vipmp_docs_mcp import autositemap
 from vipmp_docs_mcp.autositemap import (
+    MIN_VIPMP_SITEMAP_PATHS,
     SITEMAP_SCHEMA_VERSION,
+    _fetch_sitemap_paths,
     get_active_sitemap,
     merge_curated_tags,
+    save_sitemap,
 )
+from vipmp_docs_mcp.fetcher import FetchError
 
 
 def _payload(entries: list[dict]) -> str:
@@ -136,3 +140,76 @@ class TestMergeCuratedTags:
         assert tags == sorted(tags)
         assert tags.count("oauth") == 1  # no duplicates
         assert "zzz-last" in tags
+
+
+class TestFetchSitemapPathsFailLoud:
+    """Guard added after the 2026-05-13/14 incident where Adobe's CDN
+    returned a sitemap.xml with zero vipmp paths and the build silently
+    produced an empty index."""
+
+    def _xml(self, vipmp_count: int = 0, extra_urls: int = 5) -> str:
+        urls = [
+            f"<url><loc>https://developer.adobe.com/other/{i}/</loc></url>"
+            for i in range(extra_urls)
+        ] + [
+            f"<url><loc>https://developer.adobe.com/vipmp/docs/page-{i}</loc></url>"
+            for i in range(vipmp_count)
+        ]
+        return (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+            + "".join(urls)
+            + "</urlset>"
+        )
+
+    def test_raises_when_no_vipmp_paths(self, monkeypatch: pytest.MonkeyPatch):
+        body = self._xml(vipmp_count=0, extra_urls=12)
+        monkeypatch.setattr(autositemap, "fetch_page_html", lambda *a, **k: body)
+        with pytest.raises(FetchError) as exc_info:
+            _fetch_sitemap_paths()
+        msg = str(exc_info.value)
+        assert "0 vipmp paths" in msg
+        assert str(len(body)) in msg  # response byte count for diagnosis
+        assert "12 total URLs" in msg
+
+    def test_raises_when_below_floor(self, monkeypatch: pytest.MonkeyPatch):
+        body = self._xml(vipmp_count=MIN_VIPMP_SITEMAP_PATHS - 1, extra_urls=0)
+        monkeypatch.setattr(autositemap, "fetch_page_html", lambda *a, **k: body)
+        with pytest.raises(FetchError, match=r"minimum 50"):
+            _fetch_sitemap_paths()
+
+    def test_passes_at_floor(self, monkeypatch: pytest.MonkeyPatch):
+        body = self._xml(vipmp_count=MIN_VIPMP_SITEMAP_PATHS, extra_urls=0)
+        monkeypatch.setattr(autositemap, "fetch_page_html", lambda *a, **k: body)
+        paths = _fetch_sitemap_paths()
+        assert len(paths) == MIN_VIPMP_SITEMAP_PATHS
+
+
+class TestSaveSitemapOverwriteGuard:
+    def test_refuses_to_overwrite_healthy_file_with_empty(self, tmp_path: Path):
+        path = tmp_path / "sitemap.json"
+        path.write_text(_payload([{"path": "/vipmp/docs/x", "title": "Existing", "tags": []}]))
+        with pytest.raises(ValueError, match=r"refusing to overwrite"):
+            save_sitemap([], path)
+        # File untouched.
+        assert json.loads(path.read_text())["entries"][0]["title"] == "Existing"
+
+    def test_overwrites_empty_file_with_empty(self, tmp_path: Path):
+        """An existing-but-empty file is fine to overwrite — there's nothing to lose."""
+        path = tmp_path / "sitemap.json"
+        path.write_text(_payload([]))
+        save_sitemap([], path)  # no exception
+        assert json.loads(path.read_text())["entries"] == []
+
+    def test_writes_normally_when_file_missing(self, tmp_path: Path):
+        path = tmp_path / "sitemap.json"
+        save_sitemap([], path)  # no exception, creates the file
+        assert path.exists()
+        assert json.loads(path.read_text())["entries"] == []
+
+    def test_writes_normally_with_non_empty_entries(self, tmp_path: Path):
+        """Non-empty payload always writes, even over an existing healthy file."""
+        path = tmp_path / "sitemap.json"
+        path.write_text(_payload([{"path": "/vipmp/docs/old", "title": "Old", "tags": []}]))
+        save_sitemap([{"path": "/vipmp/docs/new", "title": "New", "tags": []}], path)
+        assert json.loads(path.read_text())["entries"][0]["title"] == "New"
