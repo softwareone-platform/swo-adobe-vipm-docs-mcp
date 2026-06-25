@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "built_at": 1782193673.6394742,
+  "built_at": 1782366430.5416439,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -2097,7 +2097,7 @@
       "changes": [
         {
           "title": "Upcoming changes",
-          "body": "Churn and seat expansion propensity are now surfaced in the Recommendations API\n\nExpected release: July 2026\n\nPartners can now see churn risk and seat expansion signals for each customer through the existing Fetch Recommendations ( POST /v3/recommendations ) API.\n\nWhat changed?\n\nSetting the request parameter includePropensity to true fetches churn and seatExpansion arrays. Each contains a probability rating ( HIGH , MEDIUM , or LOW ), a refreshDate , and a reasons array with up to seven leading indicators ordered by relevance.\n\nSeat expansion also includes predictedAddonSize with the expected number of additional seats.\n\nImportant: An empty object {} for either node means propensity data is not available for that customer. Do not interpret {} as LOW risk or LOW expansion potential.\n\nWhy it matters\n\nPartners can now identify at-risk customers and high-growth opportunities using data-driven signals, rather than relying on anecdotal indicators or waiting for account-manager outreach.\n\nAction required\n\nFor more information, see Propensity Intelligence ."
+          "body": "Churn and seat expansion propensity are now surfaced in the Recommendations API\n\nExpected release: July 2026\n\nPartners can now see churn risk and seat expansion signals for each customer through the existing Fetch Recommendations ( POST /v3/recommendations ) API.\n\nWhat changed?\n\nSetting the request parameter includePropensity to true fetches churn and seatExpansion arrays. Each contains a probability rating ( HIGH , MEDIUM , or LOW ), a refreshDate , and a reasons array with up to seven leading indicators ordered by relevance.\n\nSeat expansion also includes predictedAddonSize with the expected number of additional seats.\n\nImportant: An empty object {} for either node means propensity data is not available for that customer. Do not interpret {} as LOW risk or LOW expansion potential.\n\nWhy it matters\n\nPartners can now identify at-risk customers and high-growth opportunities using data-driven signals, rather than relying on anecdotal indicators or waiting for account-manager outreach.\n\nAction required\n\nFor more information, see Propensity Intelligence .\n\nTesting Propensity Signals in sandbox\n\nA set of 13 predefined test seeds is configured in the Sandbox so you can exercise every combination of rating level and empty-array behavior during integration testing. Each seed returns a fixed response.\n\nFor more information, see Testing Propensity Signals in sandbox ."
         }
       ],
       "docs_path": "/vipmp/docs/release-notes/upcoming-releases"
