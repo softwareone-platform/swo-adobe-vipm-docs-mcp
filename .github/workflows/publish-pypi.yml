@@ -27,7 +27,48 @@ on:
   workflow_dispatch:
 
 jobs:
+  wait-for-ci:
+    # Tag pushes don't wait on ci.yml (different trigger entirely), so a
+    # bad commit that somehow got tagged could otherwise publish straight
+    # to PyPI. Poll for the CI run on this exact commit SHA and refuse to
+    # continue unless it succeeded. Skipped for workflow_dispatch reruns
+    # with no tag ref — see the downstream job's `if`.
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      actions: read
+    steps:
+      - name: Wait for CI to pass on this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA="${{ github.sha }}"
+          echo "Waiting for the CI workflow to complete on $SHA..."
+          for i in $(seq 1 60); do
+            RUN_JSON=$(gh run list --repo "${{ github.repository }}" --workflow ci.yml --commit "$SHA" --json status,conclusion --jq '.[0]')
+            if [ -n "$RUN_JSON" ] && [ "$RUN_JSON" != "null" ]; then
+              STATUS=$(echo "$RUN_JSON" | jq -r '.status')
+              CONCLUSION=$(echo "$RUN_JSON" | jq -r '.conclusion')
+              if [ "$STATUS" = "completed" ]; then
+                if [ "$CONCLUSION" = "success" ]; then
+                  echo "CI succeeded for $SHA."
+                  exit 0
+                fi
+                echo "::error::CI run for $SHA concluded '$CONCLUSION' — refusing to publish."
+                exit 1
+              fi
+              echo "CI status: $STATUS (attempt $i/60)"
+            else
+              echo "No CI run found yet for $SHA (attempt $i/60)"
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out after 10m waiting for CI to complete on $SHA"
+          exit 1
+
   build-and-publish:
+    needs: wait-for-ci
+    if: always() && (needs.wait-for-ci.result == 'success' || needs.wait-for-ci.result == 'skipped')
     runs-on: ubuntu-latest
 
     # The "pypi" environment scopes the OIDC trust to this exact workflow
