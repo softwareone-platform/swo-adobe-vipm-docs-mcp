@@ -27,10 +27,12 @@ from .extractors import (
     Endpoint,
     ErrorCode,
     SchemaResource,
+    StatusCode,
     ValidationRule,
     extract_endpoints,
     extract_error_codes,
     extract_schemas,
+    extract_status_codes,
     extract_validations,
 )
 from .fetcher import FetchError, fetch_page_html
@@ -45,7 +47,7 @@ from .releases import (
 
 log = get_logger("index")
 
-INDEX_SCHEMA_VERSION = 4  # v4 added `validations` (Adobe-published regex rules per field).
+INDEX_SCHEMA_VERSION = 5  # v5 added `status_codes` (resource lifecycle states, 1000-1026).
 
 # Per-user refresh: written by rebuild_vipmp_index tool / GHA artifact drop.
 USER_INDEX_PATH = CACHE_DIR / "index.json"
@@ -66,6 +68,7 @@ class IndexSnapshot:
     parse_errors: list[tuple[str, str]] = field(default_factory=list)
     endpoints: list[Endpoint] = field(default_factory=list)
     error_codes: list[ErrorCode] = field(default_factory=list)
+    status_codes: list[StatusCode] = field(default_factory=list)
     schemas: list[SchemaResource] = field(default_factory=list)
     releases: list[ReleaseEntry] = field(default_factory=list)
     validations: list[ValidationRule] = field(default_factory=list)
@@ -81,6 +84,7 @@ class IndexSnapshot:
             ],
             "endpoints": [e.to_dict() for e in self.endpoints],
             "error_codes": [e.to_dict() for e in self.error_codes],
+            "status_codes": [s.to_dict() for s in self.status_codes],
             "schemas": [s.to_dict() for s in self.schemas],
             "releases": [r.to_dict() for r in self.releases],
             "validations": [v.to_dict() for v in self.validations],
@@ -98,6 +102,7 @@ class IndexSnapshot:
             ],
             endpoints=[Endpoint(**e) for e in data.get("endpoints", [])],
             error_codes=[ErrorCode(**e) for e in data.get("error_codes", [])],
+            status_codes=[StatusCode(**s) for s in data.get("status_codes", [])],
             schemas=[
                 SchemaResource(
                     name=s["name"],
@@ -181,6 +186,7 @@ def build_index() -> IndexSnapshot:
         try:
             snap.endpoints.extend(extract_endpoints(html, path, title))
             snap.error_codes.extend(extract_error_codes(html, docs_path=path))
+            snap.status_codes.extend(extract_status_codes(html, docs_path=path))
             snap.schemas.extend(extract_schemas(html, docs_path=path))
             # Validations live exclusively on the references/validations page,
             # but extracting unconditionally is cheap (no-op if not the right
@@ -207,11 +213,13 @@ def build_index() -> IndexSnapshot:
             snap.parse_errors.append((path, str(exc)))
 
     log.info(
-        "built index: %d pages parsed, %d errors, %d endpoints, %d error codes, %d schemas, %d releases",
+        "built index: %d pages parsed, %d errors, %d endpoints, "
+        "%d error codes, %d status codes, %d schemas, %d releases",
         snap.pages_parsed,
         len(snap.parse_errors),
         len(snap.endpoints),
         len(snap.error_codes),
+        len(snap.status_codes),
         len(snap.schemas),
         len(snap.releases),
     )

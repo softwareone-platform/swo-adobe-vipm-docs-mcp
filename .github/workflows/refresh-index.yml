@@ -87,6 +87,7 @@ jobs:
               fh.write(f"sitemap_size={snap.source_sitemap_size}\n")
               fh.write(f"endpoints={len(snap.endpoints)}\n")
               fh.write(f"error_codes={len(snap.error_codes)}\n")
+              fh.write(f"status_codes={len(snap.status_codes)}\n")
               fh.write(f"schemas={len(snap.schemas)}\n")
               fh.write(f"parse_errors={len(snap.parse_errors)}\n")
               fh.write(f"sitemap_elapsed_seconds={sitemap_elapsed:.1f}\n")
@@ -169,6 +170,7 @@ jobs:
               MIN_ENDPOINTS,
               MIN_ERROR_CODES,
               MIN_SCHEMAS,
+              MIN_STATUS_CODES,
               _check_invariants,
               IndexInvariantError,
           )
@@ -204,6 +206,8 @@ jobs:
               f"(min {MIN_ENDPOINTS}), "
               f"error_codes={len(data.get('error_codes', []))} "
               f"(min {MIN_ERROR_CODES}), "
+              f"status_codes={len(data.get('status_codes', []))} "
+              f"(min {MIN_STATUS_CODES}), "
               f"schemas={len(data.get('schemas', []))} "
               f"(min {MIN_SCHEMAS}), "
               f"parse_errors={len(parse_errors)}/{sitemap_size}"
@@ -256,6 +260,7 @@ jobs:
             | Pages parsed | ${{ steps.rebuild.outputs.pages_parsed }} |
             | Endpoints | ${{ steps.rebuild.outputs.endpoints }} |
             | Error codes | ${{ steps.rebuild.outputs.error_codes }} |
+            | Status codes | ${{ steps.rebuild.outputs.status_codes }} |
             | Schemas | ${{ steps.rebuild.outputs.schemas }} |
             | Parse errors | ${{ steps.rebuild.outputs.parse_errors }} |
             | Sitemap build time | ${{ steps.rebuild.outputs.sitemap_elapsed_seconds }}s |

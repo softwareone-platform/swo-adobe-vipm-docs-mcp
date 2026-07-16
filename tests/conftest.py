@@ -98,6 +98,50 @@ def error_codes_html() -> str:
 
 
 @pytest.fixture
+def status_codes_html() -> str:
+    """Minimal synthetic HTML matching Adobe's status-codes-table shape."""
+    return """
+<html><body>
+<main>
+<h1>Error Handling</h1>
+
+<div class="table">
+  <div>
+    <div>Status Code</div>
+    <div>Description</div>
+    <div>Applicable Resources</div>
+  </div>
+  <div>
+    <div>1000</div>
+    <div>Resource Status: Green&lt;br /&gt;Account - Active</div>
+    <div>Reseller Account, Customer Account, Order</div>
+  </div>
+  <div>
+    <div>1008</div>
+    <div>Order Status: Cancelled</div>
+    <div>Order</div>
+  </div>
+</div>
+
+<h2 id="error-codes">Error Codes</h2>
+<div class="table">
+  <div>
+    <div>Error Code</div>
+    <div>Reason</div>
+  </div>
+  <div>
+    <div>1114</div>
+    <div>Invalid Distributor</div>
+  </div>
+</div>
+
+<p>vipmp marker</p>
+</main>
+</body></html>
+"""
+
+
+@pytest.fixture
 def resources_html() -> str:
     """Minimal synthetic HTML matching Adobe's resources-page shape."""
     return """

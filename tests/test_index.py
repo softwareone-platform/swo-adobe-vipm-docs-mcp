@@ -10,7 +10,13 @@ import pytest
 
 from vipmp_docs_mcp import index as index_module
 from vipmp_docs_mcp import remote_index
-from vipmp_docs_mcp.extractors import Endpoint, ErrorCode, SchemaField, SchemaResource
+from vipmp_docs_mcp.extractors import (
+    Endpoint,
+    ErrorCode,
+    SchemaField,
+    SchemaResource,
+    StatusCode,
+)
 from vipmp_docs_mcp.index import (
     INDEX_SCHEMA_VERSION,
     IndexSnapshot,
@@ -33,6 +39,13 @@ def _sample_snap() -> IndexSnapshot:
         ],
         error_codes=[
             ErrorCode(code="1117", reason="bad date", endpoint="POST /v3/customers"),
+        ],
+        status_codes=[
+            StatusCode(
+                code="1000",
+                description="Resource Status: Green",
+                applicable_resources="Customer Account",
+            ),
         ],
         schemas=[
             SchemaResource(
@@ -69,6 +82,9 @@ class TestRoundtrip:
         assert loaded.endpoints[0].path == "/v3/customers"
         assert len(loaded.error_codes) == 1
         assert loaded.error_codes[0].code == "1117"
+        assert len(loaded.status_codes) == 1
+        assert loaded.status_codes[0].code == "1000"
+        assert loaded.status_codes[0].applicable_resources == "Customer Account"
         assert len(loaded.schemas) == 1
         assert loaded.schemas[0].name == "Customer"
         assert loaded.schemas[0].fields[0].name == "id"
