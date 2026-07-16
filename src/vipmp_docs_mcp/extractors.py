@@ -276,6 +276,93 @@ def extract_error_codes(html: str, docs_path: str | None = None) -> list[ErrorCo
 
 
 # ---------------------------------------------------------------------------
+# Status codes
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class StatusCode:
+    code: str  # "1000"
+    description: str  # "Resource Status: Green — Account - Active ..."
+    applicable_resources: str | None = None  # "Reseller Account, Customer Account, ..."
+    docs_path: str | None = None  # where this was documented
+
+    def to_dict(self) -> dict:
+        return {
+            "code": self.code,
+            "description": self.description,
+            "applicable_resources": self.applicable_resources,
+            "docs_path": self.docs_path,
+        }
+
+
+# Known typos in Adobe's published status-code table, applied to the
+# "Applicable Resources" cell. Adobe drops the comma between "Subscription"
+# and "Transfer" for codes 1000 and 1002, conflating two distinct resources
+# into a nonexistent "Subscription Transfer" (row 1004 lists them correctly).
+# Corrected here so the fix survives index rebuilds instead of being a manual
+# edit to index.json that the next refresh would overwrite.
+_APPLICABLE_RESOURCE_CORRECTIONS: tuple[tuple[str, str], ...] = (
+    ("Subscription Transfer", "Subscription, Transfer"),
+)
+
+
+def _correct_applicable_resources(value: str) -> str:
+    """Apply known source corrections to an Applicable Resources cell."""
+    for wrong, right in _APPLICABLE_RESOURCE_CORRECTIONS:
+        value = value.replace(wrong, right)
+    return value
+
+
+def extract_status_codes(html: str, docs_path: str | None = None) -> list[StatusCode]:
+    """
+    Find status-code tables on a page.
+
+    These sit at the top of the error-handling reference and describe
+    resource lifecycle states (codes 1000-1026), as opposed to the
+    request-failure error codes lower down the same page. The table shape
+    is [Status Code, Description, Applicable Resources].
+
+    The `Applicable Resources` column is required: it's what distinguishes
+    this resource-lifecycle table from the per-endpoint HTTP status-code
+    tables (200/400/404/...) scattered across the docs, which share the
+    `Status Code`/`Description` headers but carry no resource column.
+
+    Args:
+        html: Pre-fetched page HTML.
+        docs_path: Optional docs path recorded on each extracted code.
+
+    Returns:
+        Every resource status code found, in document order.
+    """
+    codes: list[StatusCode] = []
+    for headers, rows in _find_tables(html):
+        header_lower = [h.lower() for h in headers]
+        if "status code" not in header_lower or "applicable resources" not in header_lower:
+            continue
+        code_idx = header_lower.index("status code")
+        desc_idx = (
+            header_lower.index("description") if "description" in header_lower else None
+        )
+        res_idx = header_lower.index("applicable resources")
+        for row in rows:
+            needed = max(code_idx, desc_idx if desc_idx is not None else 0, res_idx)
+            if len(row) <= needed:
+                continue
+            codes.append(
+                StatusCode(
+                    code=row[code_idx].strip(),
+                    description=row[desc_idx].strip() if desc_idx is not None else "",
+                    applicable_resources=_correct_applicable_resources(
+                        row[res_idx].strip()
+                    ),
+                    docs_path=docs_path,
+                )
+            )
+    return codes
+
+
+# ---------------------------------------------------------------------------
 # Field schemas
 # ---------------------------------------------------------------------------
 

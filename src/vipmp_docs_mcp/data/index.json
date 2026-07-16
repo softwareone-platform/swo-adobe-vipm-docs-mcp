@@ -1,6 +1,6 @@
 {
-  "schema_version": 4,
-  "built_at": 1782366430.5416439,
+  "schema_version": 5,
+  "built_at": 1784185517.8255181,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -650,6 +650,80 @@
       "reason": "Not a traditional VIP Indirect contract, so migration is currently not supported.",
       "endpoint": null,
       "response": null,
+      "docs_path": "/vipmp/docs/references/error-handling"
+    }
+  ],
+  "status_codes": [
+    {
+      "code": "1000",
+      "description": "Resource Status: Green\nAccount - Active\nOrder - Complete/Filled\nSubscription - Active",
+      "applicable_resources": "Reseller Account, Customer Account, Order, Subscription, Transfer, Deployment",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1002",
+      "description": "Resource Status: Yellow\nAccount - Pending\nOrder - Open\nSubscription - Pending",
+      "applicable_resources": "Reseller Account, Customer Account, Order, Subscription, Transfer",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1004",
+      "description": "Resource Status: Red\nAccount - Inactive\nOrder - Failed\nSubscription - Inactive\nIf there is another status code that describes the status better, that code will be used instead.",
+      "applicable_resources": "Reseller Account, Customer Account, Order, Subscription, Transfer, Deployment",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1008",
+      "description": "Order Status: Cancelled",
+      "applicable_resources": "Order",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1009",
+      "description": "Subscription Status: Scheduled",
+      "applicable_resources": "Subscription",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1010",
+      "description": "Account Status: Inactive\nReason: Invalid Address",
+      "applicable_resources": "Reseller Account, Customer Account",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1012",
+      "description": "Account Status: Inactive\nReason: Account is blocked",
+      "applicable_resources": "Reseller Account, Customer Account",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1014",
+      "description": "Account Status: Inactive\nReason: Customer already exists with the same Company Name and primary admin",
+      "applicable_resources": "Customer Account",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1020",
+      "description": "Order Status: Failed",
+      "applicable_resources": "Reason: Distributor is inactive",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1022",
+      "description": "Order Status: Failed\nReason: Reseller is inactive",
+      "applicable_resources": "Order",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1024",
+      "description": "Order Status: Failed\nReason: Customer is inactive",
+      "applicable_resources": "Order",
+      "docs_path": "/vipmp/docs/references/error-handling"
+    },
+    {
+      "code": "1026",
+      "description": "Order Status: Failed\nReason: Customer ID is invalid",
+      "applicable_resources": "Order",
       "docs_path": "/vipmp/docs/references/error-handling"
     }
   ],

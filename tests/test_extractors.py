@@ -7,6 +7,7 @@ from vipmp_docs_mcp.extractors import (
     extract_endpoints,
     extract_error_codes,
     extract_schemas,
+    extract_status_codes,
 )
 
 
@@ -48,6 +49,62 @@ class TestExtractErrorCodes:
 
     def test_no_table_returns_empty(self, flat_page_html: str):
         assert extract_error_codes(flat_page_html) == []
+
+
+class TestExtractStatusCodes:
+    def test_finds_status_codes(self, status_codes_html: str):
+        codes = extract_status_codes(status_codes_html, docs_path="/vipmp/docs/references/error-handling")
+        assert {c.code for c in codes} == {"1000", "1008"}
+
+    def test_description_captured(self, status_codes_html: str):
+        codes = extract_status_codes(status_codes_html)
+        code_1000 = next(c for c in codes if c.code == "1000")
+        assert "Green" in code_1000.description
+        assert "Active" in code_1000.description
+
+    def test_applicable_resources_captured(self, status_codes_html: str):
+        codes = extract_status_codes(status_codes_html)
+        code_1000 = next(c for c in codes if c.code == "1000")
+        assert "Customer Account" in (code_1000.applicable_resources or "")
+
+    def test_docs_path_recorded(self, status_codes_html: str):
+        codes = extract_status_codes(status_codes_html, docs_path="/x")
+        assert all(c.docs_path == "/x" for c in codes)
+
+    def test_error_code_table_ignored(self, status_codes_html: str):
+        codes = extract_status_codes(status_codes_html)
+        assert "1114" not in {c.code for c in codes}
+
+    def test_subscription_transfer_typo_corrected(self):
+        # Adobe's page drops the comma between "Subscription" and "Transfer"
+        # for codes 1000/1002; the extractor corrects it to two resources.
+        html = """
+<html><body><main>
+<div class="table">
+  <div><div>Status Code</div><div>Description</div><div>Applicable Resources</div></div>
+  <div><div>1000</div><div>Green</div><div>Order, Subscription Transfer, Deployment</div></div>
+</div>
+</main></body></html>
+"""
+        code = extract_status_codes(html)[0]
+        assert code.applicable_resources == "Order, Subscription, Transfer, Deployment"
+
+    def test_http_status_table_ignored(self):
+        # Per-endpoint HTTP status tables share the Status Code/Description
+        # headers but have no Applicable Resources column — must be skipped.
+        html = """
+<html><body><main>
+<div class="table">
+  <div><div>Status code</div><div>Description</div></div>
+  <div><div>200</div><div>OK</div></div>
+  <div><div>400</div><div>Bad request</div></div>
+</div>
+</main></body></html>
+"""
+        assert extract_status_codes(html) == []
+
+    def test_no_table_returns_empty(self, flat_page_html: str):
+        assert extract_status_codes(flat_page_html) == []
 
 
 class TestExtractSchemas:

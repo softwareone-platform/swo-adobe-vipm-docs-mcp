@@ -21,6 +21,7 @@ from .extractors import (
     extract_endpoints,
     extract_error_codes,
     extract_schemas,
+    extract_status_codes,
 )
 from .fetcher import FetchError
 from .index import (
@@ -576,6 +577,80 @@ def list_vipmp_error_codes(query: str | None = None) -> str:
 
 
 @mcp.tool(
+    title="List VIPMP status codes",
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
+def list_vipmp_status_codes(query: str | None = None) -> str:
+    """
+    Extract every resource status code documented across VIPMP docs
+    (numeric codes 1000-1026). These describe the lifecycle state of a
+    resource — e.g. account, order, or subscription status — as opposed
+    to the request-failure error codes surfaced by
+    `list_vipmp_error_codes`.
+
+    Args:
+        query: Optional substring filter. Matches against code,
+            description, or applicable resources. Case-insensitive.
+
+    Served from the pre-built index when available, falling back to live
+    extraction if not. Call `rebuild_vipmp_index` to refresh locally.
+    """
+    idx = get_active_index()
+    if idx is not None:
+        codes = list(idx.status_codes)
+    else:
+        codes = []
+        for docs_path, _title, html in _iter_pages():
+            codes.extend(extract_status_codes(html, docs_path=docs_path))
+
+    if query:
+        needle = query.lower()
+        codes = [
+            c
+            for c in codes
+            if needle in c.code.lower()
+            or needle in c.description.lower()
+            or (c.applicable_resources and needle in c.applicable_resources.lower())
+        ]
+
+    if not codes:
+        if query:
+            return (
+                f"_(No status codes matched query={query!r}.)_\n\n"
+                "Try:\n"
+                "- Calling `list_vipmp_status_codes` without a query to see "
+                "everything documented.\n"
+                "- A substring match — e.g. `'1000'`, `'active'`, `'order'`.\n"
+                "- `rebuild_vipmp_index` if you think the index is stale."
+            )
+        return (
+            "_(No status codes in the index.)_\n\n"
+            "Run `rebuild_vipmp_index` to populate from live Adobe docs."
+        )
+
+    codes.sort(key=lambda c: (c.code, c.docs_path or ""))
+    out = [
+        f"# VIPMP Status Codes ({len(codes)} shown"
+        + (f", query={query!r}" if query else "")
+        + ")\n",
+        _index_source_note(),
+        "",
+    ]
+    for c in codes:
+        description = c.description.replace("\n", "  \n  ")
+        out.append(f"- **{c.code}**\n  {description}")
+        if c.applicable_resources:
+            out.append(f"  _applies to:_ {c.applicable_resources}")
+        out.append(f"  _source:_ `{c.docs_path}`")
+    return "\n".join(out)
+
+
+@mcp.tool(
     title="Get VIPMP resource schema",
     annotations=ToolAnnotations(
         readOnlyHint=True,
@@ -703,8 +778,8 @@ def get_vipmp_code_examples(docs_path: str, language: str | None = None) -> str:
 )
 def rebuild_vipmp_index() -> str:
     """
-    Rebuild the pre-extracted index of endpoints, error codes, and schemas
-    by walking every page in the current sitemap. Saves to
+    Rebuild the pre-extracted index of endpoints, error codes, status
+    codes, and schemas by walking every page in the current sitemap. Saves to
     `~/.cache/swo-adobe-vipm-docs-mcp/index.json`.
 
     Run this if:
@@ -724,6 +799,7 @@ def rebuild_vipmp_index() -> str:
         f"- **Pages parsed:** {snap.pages_parsed} / {snap.source_sitemap_size}",
         f"- **Endpoints extracted:** {len(snap.endpoints)}",
         f"- **Error codes extracted:** {len(snap.error_codes)}",
+        f"- **Status codes extracted:** {len(snap.status_codes)}",
         f"- **Schemas extracted:** {len(snap.schemas)}",
         f"- **Parse errors:** {len(snap.parse_errors)}",
         f"- **Saved to:** `{USER_INDEX_PATH}`",
@@ -1025,6 +1101,7 @@ def vipmp_server_info() -> str:
             f"{len(idx.endpoints)} endpoints "
             f"({sum(1 for e in idx.endpoints if e.deprecated)} deprecated), "
             f"{len(idx.error_codes)} error codes, "
+            f"{len(idx.status_codes)} status codes, "
             f"{len(idx.schemas)} schemas, "
             f"{len(idx.releases)} releases — "
             f"built {idx.age_seconds / 3600:.1f}h ago"

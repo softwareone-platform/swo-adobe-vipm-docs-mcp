@@ -39,6 +39,7 @@ def _valid_index_body() -> bytes:
         MIN_ENDPOINTS,
         MIN_ERROR_CODES,
         MIN_SCHEMAS,
+        MIN_STATUS_CODES,
     )
 
     return json.dumps(
@@ -46,6 +47,7 @@ def _valid_index_body() -> bytes:
             "schema_version": INDEX_SCHEMA_VERSION,
             "endpoints": [{} for _ in range(MIN_ENDPOINTS)],
             "error_codes": [{} for _ in range(MIN_ERROR_CODES)],
+            "status_codes": [{} for _ in range(MIN_STATUS_CODES)],
             "schemas": [{} for _ in range(MIN_SCHEMAS)],
         }
     ).encode()

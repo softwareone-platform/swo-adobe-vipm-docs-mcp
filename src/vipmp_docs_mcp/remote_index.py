@@ -67,6 +67,7 @@ _FETCH_TIMEOUT = httpx.Timeout(10.0, connect=5.0)
 # of fake endpoints can't be detected without an authenticated source.
 MIN_ENDPOINTS = 10
 MIN_ERROR_CODES = 20
+MIN_STATUS_CODES = 8
 MIN_SCHEMAS = 5
 
 
@@ -92,6 +93,7 @@ def _check_invariants(data: dict) -> None:
     for key, floor in (
         ("endpoints", MIN_ENDPOINTS),
         ("error_codes", MIN_ERROR_CODES),
+        ("status_codes", MIN_STATUS_CODES),
         ("schemas", MIN_SCHEMAS),
     ):
         value = data.get(key)
