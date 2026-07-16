@@ -86,8 +86,7 @@ def _check_invariants(data: dict) -> None:
 
     if data.get("schema_version") != INDEX_SCHEMA_VERSION:
         raise IndexInvariantError(
-            f"schema_version is {data.get('schema_version')!r}, "
-            f"expected {INDEX_SCHEMA_VERSION}"
+            f"schema_version is {data.get('schema_version')!r}, expected {INDEX_SCHEMA_VERSION}"
         )
 
     for key, floor in (
@@ -100,9 +99,7 @@ def _check_invariants(data: dict) -> None:
         if not isinstance(value, list):
             raise IndexInvariantError(f"{key!r} is not a list")
         if len(value) < floor:
-            raise IndexInvariantError(
-                f"{key!r} has {len(value)} entries, minimum {floor}"
-            )
+            raise IndexInvariantError(f"{key!r} has {len(value)} entries, minimum {floor}")
 
 
 def _is_disabled() -> bool:
@@ -191,8 +188,10 @@ def ensure_fresh() -> Path | None:
     # don't make a network call. This is the common case — typical
     # sessions hit disk for free and never touch GitHub.
     if have_cached and _within_ttl(meta):
-        log.debug("remote index within TTL (fetched %.1fh ago); using cache",
-                  (time.time() - float(meta.get("fetched_at", 0))) / 3600)
+        log.debug(
+            "remote index within TTL (fetched %.1fh ago); using cache",
+            (time.time() - float(meta.get("fetched_at", 0))) / 3600,
+        )
         return index_path
 
     etag = meta.get("etag") if have_cached else None

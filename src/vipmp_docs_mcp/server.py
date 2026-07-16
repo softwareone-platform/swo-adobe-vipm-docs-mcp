@@ -96,7 +96,7 @@ mcp = FastMCP(
         "(max length, numeric limits), and deprecation.\n"
         "\n"
         "To produce a runnable request snippet, use `generate_vipmp_request` with "
-        "language=\"curl\" | \"powershell\" | \"python\" | \"csharp\".\n"
+        'language="curl" | "powershell" | "python" | "csharp".\n'
         "\n"
         "For fuzzy doc search, use `search_vipmp_docs`. For a specific page, "
         "`get_vipmp_page`. For release notes, `list_vipmp_releases(since, section)`."
@@ -442,7 +442,9 @@ def _index_source_note() -> str:
     """Human-readable source annotation for index-backed tool output."""
     idx = get_active_index()
     if idx is None:
-        return "_(Extracted live — consider calling `rebuild_vipmp_index` for faster future calls.)_"
+        return (
+            "_(Extracted live — consider calling `rebuild_vipmp_index` for faster future calls.)_"
+        )
     age_h = idx.age_seconds / 3600
     freshness = f"{age_h:.0f}h old" if age_h < 48 else f"{age_h / 24:.0f}d old"
     return f"_Served from pre-built index ({freshness}, {idx.pages_parsed} pages parsed)._"
@@ -501,9 +503,7 @@ def list_vipmp_endpoints() -> str:
         if group != current_group:
             out.append(f"\n## {group.replace('_', ' ').title()}\n")
             current_group = group
-        out.append(
-            f"- `{ep.method:6s}` `{ep.path}` — [{ep.title}](`{ep.docs_path}`)"
-        )
+        out.append(f"- `{ep.method:6s}` `{ep.path}` — [{ep.title}](`{ep.docs_path}`)")
     return "\n".join(out)
 
 
@@ -702,13 +702,7 @@ def get_vipmp_schema(resource_name: str | None = None) -> str:
         out.append("| Field | Type | Required | Description | Constraints |")
         out.append("|---|---|---|---|---|")
         for f in s.fields:
-            req = (
-                "✅"
-                if f.required is True
-                else "optional"
-                if f.required is False
-                else "—"
-            )
+            req = "✅" if f.required is True else "optional" if f.required is False else "—"
             desc = f.description.replace("\n", " ").replace("|", "\\|")
             cons = (f.constraints or "").replace("\n", " ").replace("|", "\\|")
             out.append(f"| `{f.name}` | {f.type} | {req} | {desc} | {cons} |")
@@ -898,7 +892,7 @@ def list_vipmp_releases(
             "Try:\n"
             "- Dropping the filter and calling `list_vipmp_releases()` to "
             "see every release.\n"
-            "- A broader `since` date — e.g. `since=\"2025-01-01\"`.\n"
+            '- A broader `since` date — e.g. `since="2025-01-01"`.\n'
             "- A different `section` — one of `api_changes`, `sandbox`, "
             "`upcoming`, `earlier`."
         )
@@ -1046,9 +1040,7 @@ def list_vipmp_tip_topics() -> str:
 
     topics = list_tip_topics()
     if not topics:
-        return (
-            "_(no tips available — the tips file is empty or missing)_"
-        )
+        return "_(no tips available — the tips file is empty or missing)_"
     lines = ["# VIPMP tip topics", ""]
     lines.extend(f"- {t}" for t in topics)
     lines.append("")
@@ -1137,13 +1129,11 @@ def vipmp_server_info() -> str:
         age_hours = (time.time() - float(fetched_at)) / 3600 if fetched_at else None
         age_str = f"{age_hours:.1f}h ago" if age_hours is not None else "unknown"
         remote_line = (
-            f"- **Status:** cached, last fetched {age_str} "
-            f"(TTL {remote['ttl_seconds'] // 3600}h)"
+            f"- **Status:** cached, last fetched {age_str} (TTL {remote['ttl_seconds'] // 3600}h)"
         )
     else:
         remote_line = (
-            f"- **Status:** enabled, nothing cached yet "
-            f"(TTL {remote['ttl_seconds'] // 3600}h)"
+            f"- **Status:** enabled, nothing cached yet (TTL {remote['ttl_seconds'] // 3600}h)"
         )
 
     sitemap_json_exists = Path(SITEMAP_JSON_PATH).exists()
@@ -1219,25 +1209,16 @@ def describe_vipmp_endpoint(
     """
     idx = get_active_index()
     if idx is None:
-        return (
-            "_(No index available — call `rebuild_vipmp_index` first.)_"
-        )
+        return "_(No index available — call `rebuild_vipmp_index` first.)_"
 
     method = method.strip().upper()
     path = path.strip()
 
-    matches = [
-        ep for ep in idx.endpoints if ep.method == method and ep.path == path
-    ]
+    matches = [ep for ep in idx.endpoints if ep.method == method and ep.path == path]
     if not matches:
-        suggestions = [
-            f"{ep.method} {ep.path}"
-            for ep in idx.endpoints
-            if ep.method == method
-        ][:5]
+        suggestions = [f"{ep.method} {ep.path}" for ep in idx.endpoints if ep.method == method][:5]
         hint = (
-            "\n\nSimilar endpoints with this method:\n"
-            + "\n".join(f"- `{s}`" for s in suggestions)
+            "\n\nSimilar endpoints with this method:\n" + "\n".join(f"- `{s}`" for s in suggestions)
             if suggestions
             else ""
         )
@@ -1268,19 +1249,11 @@ def describe_vipmp_endpoint(
         out.append("| Field | Type | Required | Description | Constraints |")
         out.append("|---|---|---|---|---|")
         for f in primary.fields:
-            req = (
-                "✅"
-                if f.required is True
-                else "optional"
-                if f.required is False
-                else "—"
-            )
+            req = "✅" if f.required is True else "optional" if f.required is False else "—"
             flag = " 🛑" if f.deprecated else ""
             desc = (f.description or "").replace("\n", " ").replace("|", "\\|")
             cons = (f.constraints or "").replace("\n", " ").replace("|", "\\|")
-            out.append(
-                f"| `{f.name}`{flag} | {f.type} | {req} | {desc} | {cons} |"
-            )
+            out.append(f"| `{f.name}`{flag} | {f.type} | {req} | {desc} | {cons} |")
     else:
         out.append("\n## Request schema\n\n_(No structured schema extracted.)_")
 
@@ -1293,19 +1266,21 @@ def describe_vipmp_endpoint(
     # (path parameters, capitalisation). Fall back to substring match.
     if not matching_errors:
         matching_errors = [
-            c
-            for c in idx.error_codes
-            if c.endpoint and ep.path.split("/")[-1] in c.endpoint
+            c for c in idx.error_codes if c.endpoint and ep.path.split("/")[-1] in c.endpoint
         ]
     if matching_errors:
         out.append(f"\n## Documented error codes ({len(matching_errors)})\n")
         for c in matching_errors[:20]:
             out.append(f"- **{c.code}** — {c.reason}")
         if len(matching_errors) > 20:
-            out.append(f"- _(+{len(matching_errors) - 20} more; call "
-                       f"`list_vipmp_error_codes` with `query=\"{ep.path}\"` for all)_")
+            out.append(
+                f"- _(+{len(matching_errors) - 20} more; call "
+                f'`list_vipmp_error_codes` with `query="{ep.path}"` for all)_'
+            )
     else:
-        out.append("\n## Documented error codes\n\n_(No error codes specifically attributed to this endpoint.)_")
+        out.append(
+            "\n## Documented error codes\n\n_(No error codes specifically attributed to this endpoint.)_"
+        )
 
     # Release notes mentioning this endpoint
     rel_mentions = []
@@ -1322,9 +1297,9 @@ def describe_vipmp_endpoint(
 
     out.append(
         f"\n---\n"
-        f"_Related tools: `get_vipmp_code_examples(\"{ep.docs_path}\")` for example JSON, "
-        f"`generate_vipmp_request(\"{ep.method} {ep.path}\")` for a runnable snippet, "
-        f"`validate_vipmp_request(\"{ep.method} {ep.path}\", body_json)` to check a body._"
+        f'_Related tools: `get_vipmp_code_examples("{ep.docs_path}")` for example JSON, '
+        f'`generate_vipmp_request("{ep.method} {ep.path}")` for a runnable snippet, '
+        f'`validate_vipmp_request("{ep.method} {ep.path}", body_json)` to check a body._'
     )
     return "\n".join(out)
 
@@ -1382,7 +1357,9 @@ def validate_vipmp_request(endpoint: str, body_json: str) -> str:
     )
 
     if not result.issues:
-        return summary + "\n_(No issues — body conforms to the documented schema at the top level.)_"
+        return (
+            summary + "\n_(No issues — body conforms to the documented schema at the top level.)_"
+        )
 
     # Group issues by level for readability.
     level_order = {ISSUE_ERROR: 0, ISSUE_WARNING: 1, ISSUE_INFO: 2}
@@ -1462,9 +1439,7 @@ def generate_vipmp_request(
     for note in result.notes:
         out.append(f"- {note}")
     out.append(
-        "\n_Supported languages: "
-        + ", ".join(f"`{lang}`" for lang in SUPPORTED_LANGUAGES)
-        + "._"
+        "\n_Supported languages: " + ", ".join(f"`{lang}`" for lang in SUPPORTED_LANGUAGES) + "._"
     )
     return "\n".join(out)
 

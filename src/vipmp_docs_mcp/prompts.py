@@ -44,7 +44,7 @@ def _tips_signpost(topic: str) -> str:
         f"After the walkthrough, close with one sentence: "
         f'*"For SoftwareOne operational tips on this topic, ask me for '
         f"'{topic} tips' — they cover commercial rules, gotchas, and "
-        f'field-experience notes that Adobe\'s docs don\'t."* '
+        f"field-experience notes that Adobe's docs don't.\"* "
         f"This is how learners find tips content without it polluting "
         f"the Adobe-grounded walkthrough."
     )
@@ -74,7 +74,7 @@ def register_prompts(mcp: FastMCP) -> None:
 
 Please:
 1. Call `search_vipmp_docs` with a query matching the endpoint
-   (e.g. "{endpoint.split()[-1].strip('/').split('/')[-1].replace('-', ' ')}")
+   (e.g. "{endpoint.split()[-1].strip("/").split("/")[-1].replace("-", " ")}")
    to find the right docs page.
 2. Call `get_vipmp_schema` with the relevant resource name to fetch the
    field definitions.
@@ -101,9 +101,7 @@ Be specific — quote the docs verbatim when flagging problems.
             endpoint: Optional endpoint it was triggered by (e.g.
                 "POST /v3/customers") — tightens the diagnosis.
         """
-        endpoint_hint = (
-            f" on `{endpoint}`" if endpoint else " (endpoint not specified)"
-        )
+        endpoint_hint = f" on `{endpoint}`" if endpoint else " (endpoint not specified)"
         return f"""I'm hitting VIPMP error code **{code}**{endpoint_hint}. Help me understand it and fix it.
 
 Please:
@@ -194,9 +192,7 @@ haven't told you about, ask me for it rather than inventing a value.
             if area
             else ""
         )
-        scope_note = (
-            f" in area {area!r}" if area else ""
-        )
+        scope_note = f" in area {area!r}" if area else ""
         return f"""Summarise what's changed in the VIPMP API recently.
 
 **Scope:**
@@ -354,11 +350,7 @@ Quote the docs directly when stating rules — don't paraphrase limits.
             goal: Free-text description of what they want to learn or
                 build. Used to route to a specific walkthrough.
         """
-        goal_line = (
-            f"\n- **Goal:** {goal}"
-            if goal
-            else "\n- **Goal:** (not specified — ask me)"
-        )
+        goal_line = f"\n- **Goal:** {goal}" if goal else "\n- **Goal:** (not specified — ask me)"
         return f"""I'd like to learn how Adobe VIP Marketplace (VIPMP) works.
 
 - **Role:** {role}{goal_line}

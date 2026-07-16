@@ -102,9 +102,7 @@ class TestGetTipSection:
         assert tips.get_tip_section("Empty section") is None
         assert tips.get_tip_section("Next") is not None
 
-    def test_horizontal_rule_does_not_terminate_section(
-        self, isolate_tips: Path
-    ):
+    def test_horizontal_rule_does_not_terminate_section(self, isolate_tips: Path):
         """`---` inside a section body should be kept verbatim."""
         isolate_tips.write_text(SAMPLE, encoding="utf-8")
         body = tips.get_tip_section("Auth and sandbox")
@@ -135,9 +133,7 @@ class TestListTipTopics:
 
     def test_ignores_h1_and_h3(self, isolate_tips: Path):
         isolate_tips.write_text(
-            "# H1 should be ignored\n\n"
-            "## Topic A\n\n### H3 should be ignored\n\n"
-            "## Topic B\n",
+            "# H1 should be ignored\n\n## Topic A\n\n### H3 should be ignored\n\n## Topic B\n",
             encoding="utf-8",
         )
         assert tips.list_tip_topics() == ["Topic A", "Topic B"]

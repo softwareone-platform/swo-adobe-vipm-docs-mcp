@@ -79,9 +79,7 @@ class IndexSnapshot:
             "built_at": self.built_at,
             "source_sitemap_size": self.source_sitemap_size,
             "pages_parsed": self.pages_parsed,
-            "parse_errors": [
-                {"path": p, "error": e} for p, e in self.parse_errors
-            ],
+            "parse_errors": [{"path": p, "error": e} for p, e in self.parse_errors],
             "endpoints": [e.to_dict() for e in self.endpoints],
             "error_codes": [e.to_dict() for e in self.error_codes],
             "status_codes": [s.to_dict() for s in self.status_codes],
@@ -97,9 +95,7 @@ class IndexSnapshot:
             built_at=float(data.get("built_at", 0.0)),
             source_sitemap_size=int(data.get("source_sitemap_size", 0)),
             pages_parsed=int(data.get("pages_parsed", 0)),
-            parse_errors=[
-                (e["path"], e["error"]) for e in data.get("parse_errors", [])
-            ],
+            parse_errors=[(e["path"], e["error"]) for e in data.get("parse_errors", [])],
             endpoints=[Endpoint(**e) for e in data.get("endpoints", [])],
             error_codes=[ErrorCode(**e) for e in data.get("error_codes", [])],
             status_codes=[StatusCode(**s) for s in data.get("status_codes", [])],
@@ -109,7 +105,9 @@ class IndexSnapshot:
                     level=s["level"],
                     docs_path=s.get("docs_path"),
                     fields=[
-                        __import__("vipmp_docs_mcp.extractors", fromlist=["SchemaField"]).SchemaField(**f)
+                        __import__(
+                            "vipmp_docs_mcp.extractors", fromlist=["SchemaField"]
+                        ).SchemaField(**f)
                         for f in s.get("fields", [])
                     ],
                 )
@@ -160,8 +158,7 @@ def build_index() -> IndexSnapshot:
         save_sitemap(entries)
     except Exception as exc:
         log.warning(
-            "build_index: sitemap refresh failed (%s); "
-            "proceeding with currently-active sitemap",
+            "build_index: sitemap refresh failed (%s); proceeding with currently-active sitemap",
             exc,
         )
 
