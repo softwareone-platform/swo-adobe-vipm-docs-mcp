@@ -1,0 +1,44 @@
+name: CodeQL
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Weekly full scan, so newly-published CodeQL queries run against the
+    # existing codebase even when nothing changes.
+    - cron: '27 4 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (Python)
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to upload results to the code-scanning dashboard.
+      security-events: write
+      # Only needed for private repos; harmless on public ones.
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          # `security-and-quality` adds maintainability/quality queries on
+          # top of the default security suite.
+          queries: security-and-quality
+
+      # Python is interpreted — no build step. Analyze directly.
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
