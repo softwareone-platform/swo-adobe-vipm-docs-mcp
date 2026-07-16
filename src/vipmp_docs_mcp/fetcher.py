@@ -140,9 +140,7 @@ def fetch_page_html(path: str, *, validate: bool = True) -> str:
 
         if response.status_code >= 400:
             log.warning("HTTP %s for %s (non-retryable)", response.status_code, candidate)
-            raise FetchError(
-                f"HTTP {response.status_code} {response.reason_phrase} for {path}"
-            )
+            raise FetchError(f"HTTP {response.status_code} {response.reason_phrase} for {path}")
 
         html = response.text
         if validate and not looks_like_docs_page(html):
@@ -199,9 +197,7 @@ def fetch_page_with_etag(
 
         if response.status_code >= 400:
             log.warning("HTTP %s for %s (non-retryable)", response.status_code, candidate)
-            raise FetchError(
-                f"HTTP {response.status_code} {response.reason_phrase} for {path}"
-            )
+            raise FetchError(f"HTTP {response.status_code} {response.reason_phrase} for {path}")
 
         html = response.text
         new_etag = response.headers.get("ETag")
@@ -263,9 +259,7 @@ async def _async_fetch_one(
     for candidate in _trailing_slash_variants(path):
         url = BASE_URL + candidate
         try:
-            response = await _async_fetch_with_retries(
-                client, url, _default_headers()
-            )
+            response = await _async_fetch_with_retries(client, url, _default_headers())
         except (httpx.TransportError, httpx.TimeoutException) as exc:
             log.warning("network error for %s: %s", candidate, exc)
             raise FetchError(f"network error fetching {path}: {exc}") from exc
@@ -285,9 +279,7 @@ async def _async_fetch_one(
 
         if response.status_code >= 400:
             log.warning("HTTP %s for %s (non-retryable)", response.status_code, candidate)
-            raise FetchError(
-                f"HTTP {response.status_code} {response.reason_phrase} for {path}"
-            )
+            raise FetchError(f"HTTP {response.status_code} {response.reason_phrase} for {path}")
 
         html = response.text
         if validate and not looks_like_docs_page(html):
@@ -335,9 +327,7 @@ async def async_fetch_many(
     timeout = httpx.Timeout(15.0, connect=10.0)
     limits = httpx.Limits(max_connections=concurrency * 2, max_keepalive_connections=concurrency)
 
-    async with httpx.AsyncClient(
-        timeout=timeout, limits=limits, follow_redirects=True
-    ) as client:
+    async with httpx.AsyncClient(timeout=timeout, limits=limits, follow_redirects=True) as client:
 
         async def fetch_one(path: str) -> None:
             nonlocal done

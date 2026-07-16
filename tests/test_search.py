@@ -70,9 +70,7 @@ class TestSplitSections:
 
 class TestSplitParagraphs:
     def test_basic(self):
-        assert _split_paragraphs("para 1\n\npara 2\n\npara 3") == [
-            "para 1", "para 2", "para 3"
-        ]
+        assert _split_paragraphs("para 1\n\npara 2\n\npara 3") == ["para 1", "para 2", "para 3"]
 
     def test_whitespace_only_blocks_ignored(self):
         assert _split_paragraphs("a\n\n   \n\nb") == ["a", "b"]

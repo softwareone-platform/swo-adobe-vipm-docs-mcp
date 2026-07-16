@@ -31,7 +31,9 @@ def extract_text(html: str) -> str:
     target: Tag = main if isinstance(main, Tag) else soup
 
     lines: list[str] = []
-    for element in target.find_all(["h1", "h2", "h3", "h4", "h5", "p", "li", "pre", "code", "th", "td"]):
+    for element in target.find_all(
+        ["h1", "h2", "h3", "h4", "h5", "p", "li", "pre", "code", "th", "td"]
+    ):
         text = element.get_text(separator=" ", strip=True)
         if not text:
             continue

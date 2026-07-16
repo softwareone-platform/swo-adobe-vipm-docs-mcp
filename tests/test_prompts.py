@@ -30,6 +30,7 @@ def _rendered_prompts() -> dict[str, str]:
     # The no-arg prompts are the six walkthroughs; the router takes
     # optional args which we can pass defaults to.
     import asyncio
+
     out: dict[str, str] = {}
     prompts_list = asyncio.run(mcp.list_prompts())
     for p in prompts_list:
@@ -39,9 +40,7 @@ def _rendered_prompts() -> dict[str, str]:
         try:
             result = asyncio.run(mcp.get_prompt(p.name, arguments={}))
             out[p.name] = "\n".join(
-                m.content.text
-                for m in result.messages
-                if hasattr(m.content, "text")
+                m.content.text for m in result.messages if hasattr(m.content, "text")
             )
         except Exception:
             pass
@@ -85,9 +84,7 @@ class TestWalkthroughInvariants:
         rendered = _rendered_prompts()
         for name in self.WALKTHROUGH_NAMES:
             body = rendered[name]
-            assert "tips" in body.lower(), (
-                f"{name} is missing any mention of tips"
-            )
+            assert "tips" in body.lower(), f"{name} is missing any mention of tips"
             # Each signpost uses the phrase "ask me for '<topic> tips'"
             # — locks in the specific framing so a refactor can't
             # silently drop it.

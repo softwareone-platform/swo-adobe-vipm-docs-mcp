@@ -101,9 +101,7 @@ class TestParseRecent:
 
     def test_sandbox_section_labeled(self):
         entries = parse_recent_releases(RECENT_HTML)
-        sandbox_dated = [
-            e for e in entries if e.section == SECTION_SANDBOX and e.date
-        ]
+        sandbox_dated = [e for e in entries if e.section == SECTION_SANDBOX and e.date]
         assert len(sandbox_dated) == 1
         assert sandbox_dated[0].date == "2026-01-08"
         assert any("Sandbox" in c.title for c in sandbox_dated[0].changes)
@@ -124,9 +122,7 @@ class TestParseRecent:
         assert "- Respects the discount lock end date." in body
 
     def test_docs_path_propagated(self):
-        entries = parse_recent_releases(
-            RECENT_HTML, docs_path="/vipmp/docs/release-notes"
-        )
+        entries = parse_recent_releases(RECENT_HTML, docs_path="/vipmp/docs/release-notes")
         for e in entries:
             assert e.docs_path == "/vipmp/docs/release-notes"
 
