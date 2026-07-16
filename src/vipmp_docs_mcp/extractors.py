@@ -227,9 +227,7 @@ def extract_error_codes(html: str, docs_path: str | None = None) -> list[ErrorCo
                 continue
             ep_idx = header_lower.index("endpoint") if "endpoint" in header_lower else None
             resp_idx = (
-                header_lower.index("error response")
-                if "error response" in header_lower
-                else None
+                header_lower.index("error response") if "error response" in header_lower else None
             )
             for row in rows:
                 if len(row) <= max(
@@ -341,9 +339,7 @@ def extract_status_codes(html: str, docs_path: str | None = None) -> list[Status
         if "status code" not in header_lower or "applicable resources" not in header_lower:
             continue
         code_idx = header_lower.index("status code")
-        desc_idx = (
-            header_lower.index("description") if "description" in header_lower else None
-        )
+        desc_idx = header_lower.index("description") if "description" in header_lower else None
         res_idx = header_lower.index("applicable resources")
         for row in rows:
             needed = max(code_idx, desc_idx if desc_idx is not None else 0, res_idx)
@@ -353,9 +349,7 @@ def extract_status_codes(html: str, docs_path: str | None = None) -> list[Status
                 StatusCode(
                     code=row[code_idx].strip(),
                     description=row[desc_idx].strip() if desc_idx is not None else "",
-                    applicable_resources=_correct_applicable_resources(
-                        row[res_idx].strip()
-                    ),
+                    applicable_resources=_correct_applicable_resources(row[res_idx].strip()),
                     docs_path=docs_path,
                 )
             )
@@ -559,21 +553,16 @@ def extract_validations(html: str, docs_path: str | None = None) -> list[Validat
         if not any("regular expression" in h or "regex" in h for h in header_lower):
             continue
         try:
-            field_idx = next(
-                i for i, h in enumerate(header_lower) if "field name" in h
-            )
+            field_idx = next(i for i, h in enumerate(header_lower) if "field name" in h)
             resource_idx = next(
                 i for i, h in enumerate(header_lower) if "resource" in h or "object" in h
             )
             regex_idx = next(
-                i for i, h in enumerate(header_lower)
-                if "regular expression" in h or "regex" in h
+                i for i, h in enumerate(header_lower) if "regular expression" in h or "regex" in h
             )
         except StopIteration:
             continue
-        notes_idx = next(
-            (i for i, h in enumerate(header_lower) if "note" in h), None
-        )
+        notes_idx = next((i for i, h in enumerate(header_lower) if "note" in h), None)
 
         for row in rows:
             if len(row) <= max(field_idx, resource_idx, regex_idx):
@@ -582,9 +571,7 @@ def extract_validations(html: str, docs_path: str | None = None) -> list[Validat
             resource = row[resource_idx].strip()
             pattern = row[regex_idx].strip()
             notes = (
-                row[notes_idx].strip()
-                if notes_idx is not None and notes_idx < len(row)
-                else None
+                row[notes_idx].strip() if notes_idx is not None and notes_idx < len(row) else None
             )
             if not field_name or not pattern:
                 continue
@@ -630,7 +617,5 @@ def extract_code_examples(html: str, language: str | None = None) -> list[CodeEx
 
         text = code.get_text()
         if text.strip():
-            examples.append(
-                CodeExample(language=lang, code=text, nearby_heading=heading_text)
-            )
+            examples.append(CodeExample(language=lang, code=text, nearby_heading=heading_text))
     return examples

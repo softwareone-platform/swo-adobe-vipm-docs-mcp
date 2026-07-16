@@ -78,9 +78,10 @@ class TestExtractValidations:
         assert first_name.notes is None
 
     def test_no_validations_table_returns_empty(self):
-        assert extract_validations(
-            "<html><body><main>vipmp marker — no tables</main></body></html>"
-        ) == []
+        assert (
+            extract_validations("<html><body><main>vipmp marker — no tables</main></body></html>")
+            == []
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +103,7 @@ class TestUnescapeJavaSource:
 
     def test_quoted_chars_unescaped(self):
         adobe_form = r'^[a-z\\"]+$'
-        assert _unescape_java_source(adobe_form) == r'^[a-z\"]+$'
+        assert _unescape_java_source(adobe_form) == r"^[a-z\"]+$"
 
 
 class TestToPythonPattern:

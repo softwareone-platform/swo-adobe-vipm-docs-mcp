@@ -186,79 +186,86 @@ class TestValidateBody:
         assert "companyProfile" in fields_flagged
 
     def test_unknown_field_warns(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {},
-            "extraBogusField": "oops",
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {},
+                "extraBogusField": "oops",
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         unknown = [i for i in r.issues if i.field == "extraBogusField"]
         assert unknown
         assert unknown[0].level == ISSUE_WARNING
 
     def test_string_too_long(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {},
-            "externalReferenceId": "x" * 100,
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {},
+                "externalReferenceId": "x" * 100,
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         constraint_errors = [
-            i for i in r.issues
-            if i.level == ISSUE_ERROR and "too long" in i.message
+            i for i in r.issues if i.level == ISSUE_ERROR and "too long" in i.message
         ]
         assert constraint_errors
         assert constraint_errors[0].field == "externalReferenceId"
 
     def test_numeric_max_exceeded(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {},
-            "orderCount": 9999,
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {},
+                "orderCount": 9999,
+            }
+        )
         r = validate_body("POST /v3/customers", body)
-        num_errors = [
-            i for i in r.issues
-            if i.level == ISSUE_ERROR and "exceeds max" in i.message
-        ]
+        num_errors = [i for i in r.issues if i.level == ISSUE_ERROR and "exceeds max" in i.message]
         assert num_errors
         assert num_errors[0].field == "orderCount"
 
     def test_type_mismatch(self, patched_index):
-        body = json.dumps({
-            "resellerId": 12345,  # should be String
-            "companyProfile": {},
-        })
+        body = json.dumps(
+            {
+                "resellerId": 12345,  # should be String
+                "companyProfile": {},
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         type_errors = [
-            i for i in r.issues
-            if i.level == ISSUE_ERROR and "type mismatch" in i.message.lower()
+            i for i in r.issues if i.level == ISSUE_ERROR and "type mismatch" in i.message.lower()
         ]
         assert type_errors
         assert type_errors[0].field == "resellerId"
 
     def test_deprecated_field_warns(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {},
-            "legacyField": "still using it",
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {},
+                "legacyField": "still using it",
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         depr = [
-            i for i in r.issues
-            if i.level == ISSUE_WARNING and "deprecated" in i.message.lower()
+            i for i in r.issues if i.level == ISSUE_WARNING and "deprecated" in i.message.lower()
         ]
         assert depr
         assert depr[0].field == "legacyField"
 
     def test_nested_object_info_note(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {"name": "Acme"},
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {"name": "Acme"},
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         info_notes = [
-            i for i in r.issues
+            i
+            for i in r.issues
             if i.level == ISSUE_INFO and "not recursively validated" in i.message
         ]
         assert info_notes
@@ -274,10 +281,12 @@ class TestValidateBody:
         assert any("must be a JSON object" in i.message for i in r.issues)
 
     def test_valid_body(self, patched_index):
-        body = json.dumps({
-            "resellerId": "R1",
-            "companyProfile": {},
-        })
+        body = json.dumps(
+            {
+                "resellerId": "R1",
+                "companyProfile": {},
+            }
+        )
         r = validate_body("POST /v3/customers", body)
         # companyProfile triggers an INFO note about nested, but no errors or warnings
         assert r.ok

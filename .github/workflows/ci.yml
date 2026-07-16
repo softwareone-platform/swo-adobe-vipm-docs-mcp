@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: ruff check src/ tests/
 
+      - name: Format check
+        run: ruff format --check src/ tests/
+
       - name: Import check
         run: |
           python -c "from vipmp_docs_mcp import server; print(f'Loaded {len(server._get_sitemap())} sitemap entries')"

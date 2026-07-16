@@ -50,6 +50,7 @@ class ScoredEntry:
 @dataclass
 class Section:
     """One chunk of a docs page — typically a `## Heading` and its body."""
+
     heading: str
     level: int  # 1 for #, 2 for ##, etc.
     body: str
@@ -75,7 +76,9 @@ def _tokens(text: str) -> list[str]:
     return re.findall(r"\w+", text.lower())
 
 
-def score_entry(entry: SitemapEntry, query_tokens: list[str], content: str | None = None) -> ScoredEntry:
+def score_entry(
+    entry: SitemapEntry, query_tokens: list[str], content: str | None = None
+) -> ScoredEntry:
     """Compute a composite score for a sitemap entry."""
     title_text = entry["title"].lower()
     tags_text = " ".join(entry["tags"]).lower()

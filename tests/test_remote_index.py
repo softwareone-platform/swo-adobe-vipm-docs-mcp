@@ -57,17 +57,13 @@ SAMPLE_BODY = _valid_index_body()
 
 
 class TestDisabled:
-    def test_env_var_disables(
-        self, monkeypatch: pytest.MonkeyPatch, httpx_mock: HTTPXMock
-    ):
+    def test_env_var_disables(self, monkeypatch: pytest.MonkeyPatch, httpx_mock: HTTPXMock):
         monkeypatch.setenv(remote_index.DISABLE_ENV, "1")
         # If the tier runs, pytest-httpx will complain about the unmocked request.
         assert remote_index.ensure_fresh() is None
 
     @pytest.mark.parametrize("value", ["1", "true", "yes", "ON", " 1 "])
-    def test_env_var_truthy_values(
-        self, monkeypatch: pytest.MonkeyPatch, value: str
-    ):
+    def test_env_var_truthy_values(self, monkeypatch: pytest.MonkeyPatch, value: str):
         monkeypatch.setenv(remote_index.DISABLE_ENV, value)
         assert remote_index.ensure_fresh() is None
 
@@ -80,9 +76,7 @@ class TestDisabled:
 
 
 class TestFreshFetch:
-    def test_first_fetch_writes_body_and_meta(
-        self, httpx_mock: HTTPXMock, isolate_cache
-    ):
+    def test_first_fetch_writes_body_and_meta(self, httpx_mock: HTTPXMock, isolate_cache):
         idx, meta = isolate_cache
         httpx_mock.add_response(
             url=remote_index.REMOTE_INDEX_URL,
@@ -109,9 +103,7 @@ class TestFreshFetch:
         assert remote_index.ensure_fresh() is None
         assert not idx.exists()
 
-    def test_invariant_failure_keeps_cached_copy(
-        self, httpx_mock: HTTPXMock, isolate_cache
-    ):
+    def test_invariant_failure_keeps_cached_copy(self, httpx_mock: HTTPXMock, isolate_cache):
         idx, _ = isolate_cache
         idx.write_bytes(SAMPLE_BODY)
 
@@ -124,9 +116,7 @@ class TestFreshFetch:
                 "schemas": [],
             }
         ).encode()
-        httpx_mock.add_response(
-            url=remote_index.REMOTE_INDEX_URL, content=bad_body
-        )
+        httpx_mock.add_response(url=remote_index.REMOTE_INDEX_URL, content=bad_body)
 
         path = remote_index.ensure_fresh()
         assert path == idx
@@ -145,9 +135,7 @@ class TestFreshFetch:
                 "schemas": [],
             }
         ).encode()
-        httpx_mock.add_response(
-            url=remote_index.REMOTE_INDEX_URL, content=bad_body
-        )
+        httpx_mock.add_response(url=remote_index.REMOTE_INDEX_URL, content=bad_body)
         assert remote_index.ensure_fresh() is None
         assert not idx.exists()
 
@@ -163,9 +151,7 @@ class TestFreshFetch:
                 "schemas": [{} for _ in range(10)],
             }
         ).encode()
-        httpx_mock.add_response(
-            url=remote_index.REMOTE_INDEX_URL, content=bad_body
-        )
+        httpx_mock.add_response(url=remote_index.REMOTE_INDEX_URL, content=bad_body)
         assert remote_index.ensure_fresh() is None
         assert not idx.exists()
 
@@ -187,9 +173,7 @@ class TestTTLShortCircuit:
         # No httpx_mock responses registered — any network call would fail.
         assert remote_index.ensure_fresh() == idx
 
-    def test_expired_ttl_triggers_conditional_get(
-        self, httpx_mock: HTTPXMock, isolate_cache
-    ):
+    def test_expired_ttl_triggers_conditional_get(self, httpx_mock: HTTPXMock, isolate_cache):
         idx, meta = isolate_cache
         idx.write_bytes(SAMPLE_BODY)
         stale = time.time() - (remote_index.TTL_SECONDS + 100)
@@ -211,14 +195,10 @@ class TestTTLShortCircuit:
 
 
 class TestNetworkFailureFallback:
-    def test_transport_error_returns_cached_copy(
-        self, httpx_mock: HTTPXMock, isolate_cache
-    ):
+    def test_transport_error_returns_cached_copy(self, httpx_mock: HTTPXMock, isolate_cache):
         idx, meta = isolate_cache
         idx.write_bytes(SAMPLE_BODY)
-        meta.write_text(
-            json.dumps({"fetched_at": time.time() - remote_index.TTL_SECONDS - 1})
-        )
+        meta.write_text(json.dumps({"fetched_at": time.time() - remote_index.TTL_SECONDS - 1}))
 
         # Simulate GitHub unreachable for every retry attempt.
         for _ in range(3):
@@ -228,9 +208,7 @@ class TestNetworkFailureFallback:
         assert path == idx  # stale-OK: we keep what we had
         assert idx.read_bytes() == SAMPLE_BODY
 
-    def test_transport_error_returns_none_when_uncached(
-        self, httpx_mock: HTTPXMock, isolate_cache
-    ):
+    def test_transport_error_returns_none_when_uncached(self, httpx_mock: HTTPXMock, isolate_cache):
         idx, _ = isolate_cache
         for _ in range(3):
             httpx_mock.add_exception(httpx.ConnectError("boom"))

@@ -39,7 +39,9 @@ def synthetic_index() -> IndexSnapshot:
                 docs_path="/vipmp/docs/customer-account/create-customer-account",
                 fields=[
                     SchemaField(name="resellerId", type="String", required=True, description=""),
-                    SchemaField(name="externalReferenceId", type="String", required=False, description=""),
+                    SchemaField(
+                        name="externalReferenceId", type="String", required=False, description=""
+                    ),
                 ],
             )
         ],
@@ -89,17 +91,13 @@ class TestGenerateSnippet:
 
     def test_user_body_is_used_verbatim(self, patched_index):
         custom_body = '{"customField": "customValue"}'
-        result = generate_snippet(
-            "POST /v3/customers", body_json=custom_body, language="python"
-        )
+        result = generate_snippet("POST /v3/customers", body_json=custom_body, language="python")
         assert isinstance(result, CodeSnippet)
         assert "customField" in result.code
         assert "customValue" in result.code
 
     def test_malformed_user_body_errors(self, patched_index):
-        result = generate_snippet(
-            "POST /v3/customers", body_json="{not json}", language="python"
-        )
+        result = generate_snippet("POST /v3/customers", body_json="{not json}", language="python")
         assert isinstance(result, str)
         assert "not valid JSON" in result
 
@@ -116,9 +114,7 @@ class TestGenerateSnippet:
         # because the body was wrapped in `-d '...'`. The heredoc form
         # passes the bytes verbatim.
         body = '{"name": "O\'Brien"}'
-        result = generate_snippet(
-            "POST /v3/customers", body_json=body, language="curl"
-        )
+        result = generate_snippet("POST /v3/customers", body_json=body, language="curl")
         assert isinstance(result, CodeSnippet)
         assert "<<'JSON'" in result.code
         assert "\nJSON" in result.code

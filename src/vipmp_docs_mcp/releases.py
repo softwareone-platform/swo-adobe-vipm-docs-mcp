@@ -186,18 +186,14 @@ def _parse_section(h2: Tag, section: str, docs_path: str) -> list[ReleaseEntry]:
                 break
             if isinstance(sib, Tag) and sib.name == "h4":
                 title = sib.get_text(strip=True)
-                body_elements = _siblings_until(
-                    sib, stop_names={"h2", "h3", "h4"}
-                )
+                body_elements = _siblings_until(sib, stop_names={"h2", "h3", "h4"})
                 body = _render_body(body_elements)
                 entry.changes.append(ReleaseChange(title=title, body=body))
 
         # If no h4s found (e.g. "Earlier releases from 2024"), fall back
         # to whatever paragraphs sit under the h3 directly.
         if not entry.changes:
-            body_elements = _siblings_until(
-                h3, stop_names={"h2", "h3"}
-            )
+            body_elements = _siblings_until(h3, stop_names={"h2", "h3"})
             body = _render_body(body_elements)
             if body:
                 entry.changes.append(ReleaseChange(title=raw, body=body))
@@ -270,9 +266,7 @@ def parse_upcoming_releases(
 # ---------------------------------------------------------------------------
 
 
-def filter_since(
-    entries: list[ReleaseEntry], since: str
-) -> list[ReleaseEntry]:
+def filter_since(entries: list[ReleaseEntry], since: str) -> list[ReleaseEntry]:
     """
     Keep only entries whose date is >= `since` (ISO "YYYY-MM-DD").
 
@@ -283,9 +277,7 @@ def filter_since(
     try:
         since_dt = datetime.strptime(since, "%Y-%m-%d").date()
     except ValueError as exc:
-        raise ValueError(
-            f"`since` must be ISO date 'YYYY-MM-DD', got {since!r}"
-        ) from exc
+        raise ValueError(f"`since` must be ISO date 'YYYY-MM-DD', got {since!r}") from exc
 
     out: list[ReleaseEntry] = []
     for e in entries:
@@ -300,8 +292,6 @@ def filter_since(
     return out
 
 
-def filter_section(
-    entries: list[ReleaseEntry], section: str
-) -> list[ReleaseEntry]:
+def filter_section(entries: list[ReleaseEntry], section: str) -> list[ReleaseEntry]:
     """Keep entries whose section matches."""
     return [e for e in entries if e.section == section]
