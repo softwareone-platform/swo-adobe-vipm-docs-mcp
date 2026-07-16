@@ -249,9 +249,7 @@ _MAX_VALUE_RE = re.compile(r"max[:\s]+(\d+)(?!\s*char)", re.IGNORECASE)
 _MIN_VALUE_RE = re.compile(r"min[:\s]+(\d+)(?!\s*char)", re.IGNORECASE)
 
 
-def _check_constraints(
-    field: SchemaField, value: Any
-) -> list[ValidationIssue]:
+def _check_constraints(field: SchemaField, value: Any) -> list[ValidationIssue]:
     """Best-effort constraint checking against Adobe's free-form limits prose."""
     c = field.constraints or ""
     if not c:
@@ -337,16 +335,18 @@ def resolve_schema(
     """
     parsed = _parse_endpoint(endpoint)
     if not parsed:
-        return None, None, (
-            f"Could not parse endpoint {endpoint!r}. Expected "
-            "'METHOD /path' (e.g. 'POST /v3/customers')."
+        return (
+            None,
+            None,
+            (
+                f"Could not parse endpoint {endpoint!r}. Expected "
+                "'METHOD /path' (e.g. 'POST /v3/customers')."
+            ),
         )
     method, path = parsed
 
     # Exact endpoint lookup.
-    matches = [
-        ep for ep in idx.endpoints if ep.method == method and ep.path == path
-    ]
+    matches = [ep for ep in idx.endpoints if ep.method == method and ep.path == path]
     if not matches:
         # Be lenient about path variants — try matching just the last segment.
         suffix = path.rstrip("/").split("/")[-1]
@@ -356,9 +356,13 @@ def resolve_schema(
             if ep.method == method and ep.path.rstrip("/").endswith(suffix)
         ]
         if not loose:
-            return None, None, (
-                f"Endpoint {method} {path} not found in index. "
-                "Try `list_vipmp_endpoints` to see documented endpoints."
+            return (
+                None,
+                None,
+                (
+                    f"Endpoint {method} {path} not found in index. "
+                    "Try `list_vipmp_endpoints` to see documented endpoints."
+                ),
             )
         matches = loose
 
@@ -366,16 +370,20 @@ def resolve_schema(
     schemas_here = [s for s in idx.schemas if s.docs_path == ep.docs_path]
 
     if not schemas_here:
-        return None, ep.docs_path, (
-            f"Endpoint {method} {path} is documented at "
-            f"{ep.docs_path} but no request schema was extracted from that "
-            "page. Try:\n"
-            f"  - `get_vipmp_page(path=\"{ep.docs_path}\")` to read the raw "
-            "docs — the page may not have a Property/Type table, only a "
-            "JSON example.\n"
-            f"  - `get_vipmp_code_examples(docs_path=\"{ep.docs_path}\", language=\"json\")` "
-            "to pull any example bodies Adobe documents there.\n"
-            "  - `rebuild_vipmp_index` if you think the index is stale."
+        return (
+            None,
+            ep.docs_path,
+            (
+                f"Endpoint {method} {path} is documented at "
+                f"{ep.docs_path} but no request schema was extracted from that "
+                "page. Try:\n"
+                f'  - `get_vipmp_page(path="{ep.docs_path}")` to read the raw '
+                "docs — the page may not have a Property/Type table, only a "
+                "JSON example.\n"
+                f'  - `get_vipmp_code_examples(docs_path="{ep.docs_path}", language="json")` '
+                "to pull any example bodies Adobe documents there.\n"
+                "  - `rebuild_vipmp_index` if you think the index is stale."
+            ),
         )
 
     # Heuristic: if multiple schemas, prefer one whose name doesn't suggest
@@ -520,8 +528,7 @@ def validate_body(endpoint: str, body_json: str) -> ValidationResult:
                 ValidationIssue(
                     ISSUE_ERROR,
                     name,
-                    f"Type mismatch: got {actual!r}, expected {expected!r} "
-                    f"(docs say: {f.type}).",
+                    f"Type mismatch: got {actual!r}, expected {expected!r} (docs say: {f.type}).",
                 )
             )
             continue

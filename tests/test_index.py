@@ -127,9 +127,7 @@ class TestBuildIndexFromAsyncContext:
     ships.
     """
 
-    async def test_build_index_runs_inside_event_loop(
-        self, monkeypatch: pytest.MonkeyPatch
-    ):
+    async def test_build_index_runs_inside_event_loop(self, monkeypatch: pytest.MonkeyPatch):
         from vipmp_docs_mcp import autositemap
         from vipmp_docs_mcp import fetcher as fetcher_module
 
@@ -141,9 +139,7 @@ class TestBuildIndexFromAsyncContext:
         # Stub the sitemap refresh path — no network, returns a tiny sitemap.
         monkeypatch.setattr(autositemap, "build_sitemap", lambda *a, **k: fake_sitemap)
         monkeypatch.setattr(autositemap, "save_sitemap", lambda *a, **k: None)
-        monkeypatch.setattr(
-            index_module, "get_active_sitemap", lambda: fake_sitemap
-        )
+        monkeypatch.setattr(index_module, "get_active_sitemap", lambda: fake_sitemap)
 
         # Stub the parallel fetch. `build_index` imports async_fetch_many from
         # `vipmp_docs_mcp.fetcher`, so patch at the source module.
@@ -180,9 +176,7 @@ class TestBuildIndexFromAsyncContext:
         fake_sitemap = [{"path": "/vipmp/docs/x", "title": "X", "tags": []}]
 
         monkeypatch.setattr(autositemap, "build_sitemap", fail_refresh)
-        monkeypatch.setattr(
-            index_module, "get_active_sitemap", lambda: fake_sitemap
-        )
+        monkeypatch.setattr(index_module, "get_active_sitemap", lambda: fake_sitemap)
 
         async def fake_fetch_many(paths, **_):
             return dict.fromkeys(paths, "<html><body>vipmp</body></html>")

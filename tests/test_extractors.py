@@ -53,7 +53,9 @@ class TestExtractErrorCodes:
 
 class TestExtractStatusCodes:
     def test_finds_status_codes(self, status_codes_html: str):
-        codes = extract_status_codes(status_codes_html, docs_path="/vipmp/docs/references/error-handling")
+        codes = extract_status_codes(
+            status_codes_html, docs_path="/vipmp/docs/references/error-handling"
+        )
         assert {c.code for c in codes} == {"1000", "1008"}
 
     def test_description_captured(self, status_codes_html: str):

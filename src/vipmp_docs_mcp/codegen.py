@@ -139,18 +139,22 @@ def _emit_powershell(method: str, url: str, body: dict | None) -> str:
     ]
     if body is not None and method in {"POST", "PATCH", "PUT"}:
         body_str = json.dumps(body, indent=4)
-        lines.extend([
-            "$body = @'",
-            body_str,
-            "'@",
-            "",
-            f"Invoke-RestMethod -Uri '{url}' -Method {method} `",
-            "    -Headers $headers -Body $body",
-        ])
+        lines.extend(
+            [
+                "$body = @'",
+                body_str,
+                "'@",
+                "",
+                f"Invoke-RestMethod -Uri '{url}' -Method {method} `",
+                "    -Headers $headers -Body $body",
+            ]
+        )
     else:
-        lines.extend([
-            f"Invoke-RestMethod -Uri '{url}' -Method {method} -Headers $headers",
-        ])
+        lines.extend(
+            [
+                f"Invoke-RestMethod -Uri '{url}' -Method {method} -Headers $headers",
+            ]
+        )
     return "\n".join(lines)
 
 
@@ -170,19 +174,17 @@ def _emit_python(method: str, url: str, body: dict | None) -> str:
         lines.append(f"body = {body_str}")
         lines.append("")
         lines.append("with httpx.Client(timeout=15.0) as client:")
-        lines.append(
-            f'    response = client.{method.lower()}("{url}", headers=headers, json=body)'
-        )
+        lines.append(f'    response = client.{method.lower()}("{url}", headers=headers, json=body)')
     else:
         lines.append("")
         lines.append("with httpx.Client(timeout=15.0) as client:")
-        lines.append(
-            f'    response = client.{method.lower()}("{url}", headers=headers)'
-        )
-    lines.extend([
-        "    response.raise_for_status()",
-        "    result = response.json()",
-    ])
+        lines.append(f'    response = client.{method.lower()}("{url}", headers=headers)')
+    lines.extend(
+        [
+            "    response.raise_for_status()",
+            "    result = response.json()",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -213,20 +215,20 @@ def _emit_csharp(method: str, url: str, body: dict | None) -> str:
         lines.append("    // replace the following with your typed record or anonymous object")
         lines.append("};")
         lines.append("")
-        lines.append(
-            f'var response = await client.{http_verb}AsJsonAsync("{url}", body);'
-        )
+        lines.append(f'var response = await client.{http_verb}AsJsonAsync("{url}", body);')
         lines.append("")
         lines.append("// Example body shape (from the VIPMP schema):")
         for line in body_str.splitlines():
             lines.append(f"// {line}")
     else:
         lines.append(f'var response = await client.{http_verb}Async("{url}");')
-    lines.extend([
-        "",
-        "response.EnsureSuccessStatusCode();",
-        "var payload = await response.Content.ReadAsStringAsync();",
-    ])
+    lines.extend(
+        [
+            "",
+            "response.EnsureSuccessStatusCode();",
+            "var payload = await response.Content.ReadAsStringAsync();",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -255,10 +257,7 @@ def generate_snippet(
     """
     language = language.lower().strip()
     if language not in _EMITTERS:
-        return (
-            f"Unsupported language {language!r}. "
-            f"Supported: {', '.join(SUPPORTED_LANGUAGES)}."
-        )
+        return f"Unsupported language {language!r}. Supported: {', '.join(SUPPORTED_LANGUAGES)}."
 
     parsed = _parse_endpoint(endpoint)
     if not parsed:
@@ -284,6 +283,7 @@ def generate_snippet(
     if method in {"POST", "PATCH", "PUT"}:
         if body_json:
             import json as _json
+
             try:
                 body = _json.loads(body_json)
                 notes.append("Used the JSON body you supplied.")

@@ -174,9 +174,7 @@ class DocsCache:
 
         # Stale or missing: fetch (conditionally if we have an etag).
         try:
-            html, new_etag = fetch_page_with_etag(
-                path, etag=entry.etag if entry else None
-            )
+            html, new_etag = fetch_page_with_etag(path, etag=entry.etag if entry else None)
         except FetchError as exc:
             # If we have a stale entry, serving it is strictly better than raising.
             if entry is not None:
@@ -195,9 +193,7 @@ class DocsCache:
 
         # 200 with fresh content — clean and store.
         content = extract_text(html)
-        self._entries[path] = CacheEntry(
-            content=content, etag=new_etag, fetched_at=time.time()
-        )
+        self._entries[path] = CacheEntry(content=content, etag=new_etag, fetched_at=time.time())
         self._save()
         log.info("cache refreshed %s (%d chars)", path, len(content))
         return content
