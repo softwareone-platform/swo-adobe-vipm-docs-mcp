@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Merged to main but not yet released. Nothing here changes the shipped
+package — CI config, a dev script, and docs.
+
+### Changed
+- **`ruff check` and `ruff format --check` now gate `scripts/` and
+  `examples/`** as well as `src/` and `tests/`, closing the gap that let those
+  two drift after 0.12.0 gated only half the tree `CONTRIBUTING.md` asks
+  contributors to lint. Formatting brought back into line in the same pass.
+- **`scripts/smoke_test.py` derives its expected tool set from
+  `manifest.json`** instead of a hardcoded list that had gone stale at 17 of
+  20 tools. Together with `tests/test_manifest.py` this closes a triangle:
+  the unit test holds manifest ↔ server registrations in sync in-process,
+  the smoke test verifies manifest ↔ what the running server serves over
+  stdio. A mismatch in either direction now fails; previously an undeclared
+  tool was reported as a pass, so the 0.13.1 condition would have gone
+  unnoticed here too. `EXPECTED_PROMPTS` was stale the same way (6 of 13) and
+  is now complete.
+- **`CONTRIBUTING.md`'s "Adding a new tool" checklist now includes declaring
+  the tool in `manifest.json`.** Its absence is the root cause of the 0.13.1
+  bug.
+
 ## [0.13.1] — 2026-07-27
 
 ### Fixed
@@ -33,7 +54,7 @@ Data-only release, auto-published by `auto-version-bump.yml` when the daily
 refresh PR merged. No code changes.
 
 ### Changed
-- **Baseline index + sitemap refreshed** from live Adobe docs ([#27]) — three
+- **Baseline index + sitemap refreshed** from live Adobe docs (PR #27) — three
   new documented codes picked up.
 
 ## [0.12.0] — 2026-07-16
@@ -62,8 +83,7 @@ refresh PR merged. No code changes.
 - `INDEX_SCHEMA_VERSION` 4 → 5 to carry `status_codes` in the index snapshot;
   shipped baseline index rebuilt.
 - **`ruff format` applied across the repo and gated in CI.** The gate covered
-  only `src/` and `tests/`, which is why `scripts/` and `examples/` later
-  drifted (fixed in [#29], gate widened in [#30]).
+  only `src/` and `tests/`, leaving `scripts/` and `examples/` free to drift.
 
 ## [0.11.0] — 2026-07-14
 
@@ -577,10 +597,6 @@ refresh PR merged. No code changes.
 - ~60 404s caused by Adobe's underscore-to-hyphen path migration.
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
-
-[#27]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/pull/27
-[#29]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/pull/29
-[#30]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/pull/30
 
 [Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.1...HEAD
 [0.13.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.0...v0.13.1
