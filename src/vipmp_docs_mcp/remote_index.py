@@ -37,6 +37,7 @@ from tenacity import (
     wait_exponential,
 )
 
+from .index_schema import INDEX_SCHEMA_VERSION
 from .logging_config import CACHE_DIR, get_logger
 
 log = get_logger("remote_index")
@@ -76,14 +77,7 @@ class IndexInvariantError(ValueError):
 
 
 def _check_invariants(data: dict) -> None:
-    """
-    Raise IndexInvariantError if the parsed JSON looks structurally wrong.
-
-    Imported lazily inside the function to avoid a circular import — the
-    expected schema_version lives in `index.py`.
-    """
-    from .index import INDEX_SCHEMA_VERSION
-
+    """Raise IndexInvariantError if the parsed JSON looks structurally wrong."""
     if data.get("schema_version") != INDEX_SCHEMA_VERSION:
         raise IndexInvariantError(
             f"schema_version is {data.get('schema_version')!r}, expected {INDEX_SCHEMA_VERSION}"

@@ -47,12 +47,10 @@ log = get_logger("validator")
 try:
     import regex as _regex_engine  # third-party — full Java-compatible Unicode
 
-    _REGEX_ENGINE_NAME = "regex"
     _REGEX_FALLBACK = False
 except ImportError:  # pragma: no cover - exercised on minimal installs
     import re as _regex_engine
 
-    _REGEX_ENGINE_NAME = "re"
     _REGEX_FALLBACK = True
 
 

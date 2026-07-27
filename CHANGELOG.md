@@ -7,8 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Merged to main but not yet released. Nothing here changes the shipped
-package — CI config, a dev script, and docs.
+Merged to main but not yet released. No behaviour changes — CI config, a dev
+script, docs, and internal restructuring with no effect on tool output.
+
+### Fixed
+- **Resolved the `index` ↔ `remote_index` import cycle.** `INDEX_SCHEMA_VERSION`
+  lived in `index.py` but `remote_index._check_invariants` needed it, so each
+  module reached for the other through a function-local import. The constant
+  now lives in a leaf module, `index_schema.py`, letting both import it at
+  module level; `index.py`'s import of `ensure_fresh` is no longer deferred
+  either. The package's module-level import graph is now acyclic. It still
+  imports from `vipmp_docs_mcp.index`, so callers — including
+  `refresh-index.yml` — are unaffected.
+- **A prompt that raises while rendering now reports its cause.** The
+  `_rendered_prompts` test helper caught every exception and `pass`ed, so a
+  broken template surfaced as a bare "didn't render" with no traceback. Render
+  failures are now recorded against the prompt name and asserted on
+  explicitly, so the underlying error reaches the test output.
+- Removed the dead `_REGEX_ENGINE_NAME` global in `validator.py`, assigned in
+  both branches of the `regex`/`re` import fallback and never read.
+
+  > These three came from CodeQL quality alerts. A fourth,
+  > `py/ineffectual-statement` on `await maybe_aw` in `fetcher.py`, is a false
+  > positive — the await runs the `on_progress` coroutine, as
+  > `test_async_progress_callback_awaited` asserts — and is dismissed rather
+  > than worked around.
 
 ### Changed
 - **`ruff check` and `ruff format --check` now gate `scripts/` and
