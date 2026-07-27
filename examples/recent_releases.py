@@ -35,9 +35,7 @@ async def fetch_releases(since: str) -> str:
         ClientSession(read, write) as session,
     ):
         await session.initialize()
-        r = await session.call_tool(
-            "list_vipmp_releases", {"since": since, "limit": 50}
-        )
+        r = await session.call_tool("list_vipmp_releases", {"since": since, "limit": 50})
         return "".join(c.text for c in r.content if hasattr(c, "text"))
 
 
