@@ -34,6 +34,13 @@ script, docs, and internal restructuring with no effect on tool output.
   > than worked around.
 
 ### Changed
+- **GitHub Actions bumped to current majors** across all seven workflows:
+  `checkout` v6→v7, `setup-python` v6→v7, `upload-artifact` v6/v4→v7,
+  `setup-node` v5→v7, `github-script` v7→v9, `codeql-action` v3→v4,
+  `action-gh-release` v2→v3. `upload-artifact` had drifted apart — v6 in
+  `ci.yml` but v4 in `publish-mcpb.yml` and `refresh-index.yml`.
+  `create-pull-request@v8` and `gh-action-pypi-publish@release/v1` were
+  already current.
 - **`ruff check` and `ruff format --check` now gate `scripts/` and
   `examples/`** as well as `src/` and `tests/`, closing the gap that let those
   two drift after 0.12.0 gated only half the tree `CONTRIBUTING.md` asks
