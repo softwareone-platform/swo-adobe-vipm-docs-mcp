@@ -65,9 +65,10 @@ Tests live in `tests/` with synthetic HTML fixtures in `tests/conftest.py`.
 
 1. Add the function to `src/vipmp_docs_mcp/server.py` with the `@mcp.tool(...)` decorator.
 2. Always set `title` and `annotations=ToolAnnotations(...)` — see existing tools for the pattern.
-3. Add the tool name to the `expected_tools` set in `scripts/smoke_test.py` and add an assertion that exercises it.
-4. Add at least one unit test in `tests/`.
-5. Update `README.md`'s tools table.
+3. **Declare the tool in `manifest.json`'s `tools` array** (name + one-line description). This is what MCP clients that read the bundle metadata — Claude Desktop among them — display, so a tool missing here is invisible to those users even though the server serves it. `tests/test_manifest.py` fails if you skip this.
+4. Add an assertion to `scripts/smoke_test.py` that exercises the tool. You do **not** need to register the name there — the expected set is derived from `manifest.json`.
+5. Add at least one unit test in `tests/`.
+6. Update `README.md`'s tools table.
 
 ## Adding a new extractor
 
@@ -82,7 +83,8 @@ Tests live in `tests/` with synthetic HTML fixtures in `tests/conftest.py`.
 1. Add a function with `@mcp.prompt()` in `src/vipmp_docs_mcp/prompts.py`.
 2. Be explicit about which tools Claude should chain — prompts are only as good as their tool hints.
 3. Avoid gaps in numbered steps (the smoke test checks for this).
-4. Add a smoke-test assertion that the prompt renders correctly.
+4. Add the prompt name to `EXPECTED_PROMPTS` in `scripts/smoke_test.py`. Prompts are registered dynamically, so unlike tools there's no manifest declaration to derive the set from.
+5. Add a smoke-test assertion that the prompt renders correctly.
 
 ## Commit style
 

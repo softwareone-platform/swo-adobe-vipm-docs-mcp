@@ -14,6 +14,7 @@ Run from the repo root with the venv active:
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+MANIFEST_PATH = REPO_ROOT / "manifest.json"
 # Use the venv's console script so we pick up the editable install.
 if sys.platform == "win32":
     CONSOLE_SCRIPT = REPO_ROOT / ".venv" / "Scripts" / "vipmp-docs-mcp.exe"
@@ -38,6 +40,41 @@ def ok(msg: str) -> None:
 
 def fail(msg: str) -> None:
     print(f"  {FAIL} {msg}")
+
+
+def declared_tool_names() -> set[str]:
+    """
+    Tool names declared in ``manifest.json``.
+
+    The manifest is the contract MCP clients that read bundle metadata —
+    Claude Desktop among them — present to users, so it is the right
+    expectation to hold the running server to. Deriving the set from it
+    also means there is one place to update when a tool is added;
+    hardcoding a second copy here is what let ``list_vipmp_status_codes``
+    ship in 0.12.0 while the manifest advertised 19 of 20 tools.
+    """
+    data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return {tool["name"] for tool in data["tools"]}
+
+
+# Prompts are registered dynamically (`prompts_generated: true` in the
+# manifest, so there is no declared list to derive from). Keep this in
+# step with `register_prompts` in src/vipmp_docs_mcp/prompts.py.
+EXPECTED_PROMPTS = {
+    "review_request_body",
+    "debug_error_code",
+    "draft_order",
+    "summarize_recent_changes",
+    "check_feature_status",
+    "check_3yc_eligibility",
+    "start_vipmp_learning",
+    "learn_customer_lifecycle",
+    "learn_ordering_flow",
+    "learn_3yc",
+    "learn_subscriptions_and_renewals",
+    "learn_returns_and_refunds",
+    "learn_auth_and_sandbox",
+}
 
 
 async def main() -> int:
@@ -69,47 +106,32 @@ async def main() -> int:
         ok(f"{len(tools.tools)} tools")
         ok(f"{len(prompts.prompts)} prompts")
 
-        expected_tools = {
-            "list_vipmp_docs",
-            "search_vipmp_docs",
-            "get_vipmp_page",
-            "warm_vipmp_cache",
-            "refresh_vipmp_sitemap",
-            "rebuild_vipmp_index",
-            "vipmp_cache_stats",
-            "vipmp_cache_clear",
-            "list_vipmp_endpoints",
-            "list_vipmp_error_codes",
-            "get_vipmp_schema",
-            "get_vipmp_code_examples",
-            "list_vipmp_releases",
-            "describe_vipmp_endpoint",
-            "validate_vipmp_request",
-            "generate_vipmp_request",
-            "vipmp_server_info",
-        }
+        expected_tools = declared_tool_names()
         got_tools = {t.name for t in tools.tools}
         missing = expected_tools - got_tools
-        extra = got_tools - expected_tools
+        undeclared = got_tools - expected_tools
         if missing:
-            fail(f"missing tools: {sorted(missing)}")
+            fail(f"declared in manifest.json but not served: {sorted(missing)}")
             failures += 1
-        if extra:
-            ok(f"extra tools (new?): {sorted(extra)}")
+        if undeclared:
+            fail(
+                f"served but not declared in manifest.json: {sorted(undeclared)} "
+                "— clients that read the manifest won't show these"
+            )
+            failures += 1
+        if not missing and not undeclared:
+            ok(f"all {len(expected_tools)} manifest-declared tools served")
 
-        expected_prompts = {
-            "review_request_body",
-            "debug_error_code",
-            "draft_order",
-            "summarize_recent_changes",
-            "check_feature_status",
-            "check_3yc_eligibility",
-        }
         got_prompts = {p.name for p in prompts.prompts}
-        missing_p = expected_prompts - got_prompts
+        missing_p = EXPECTED_PROMPTS - got_prompts
+        extra_p = got_prompts - EXPECTED_PROMPTS
         if missing_p:
             fail(f"missing prompts: {sorted(missing_p)}")
             failures += 1
+        if extra_p:
+            ok(f"extra prompts (new? add to EXPECTED_PROMPTS): {sorted(extra_p)}")
+        if not missing_p and not extra_p:
+            ok(f"all {len(EXPECTED_PROMPTS)} expected prompts served")
 
         # --- Tool: list_vipmp_docs (no network) ------------------------
         print("\nlist_vipmp_docs (no network)")
