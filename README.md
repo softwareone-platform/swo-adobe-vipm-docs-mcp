@@ -44,6 +44,7 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 |---|---|
 | `list_vipmp_endpoints()` | Every REST endpoint across the docs — method + path + source page. |
 | `list_vipmp_error_codes(query?)` | Every documented error code (numeric + symbolic) with triggering endpoint and reason. |
+| `list_vipmp_status_codes(query?)` | Every documented **resource lifecycle** status code (1000–1026) with its applicable resources — the state a customer, order, or subscription is in, as opposed to the request-failure codes above. |
 | `get_vipmp_schema(resource_name?)` | Structured field schemas (name, type, required, description, constraints) for VIPMP resources. |
 | `get_vipmp_code_examples(docs_path, language?)` | Pull JSON / curl / Python / etc. code blocks off a specific page. |
 | `list_vipmp_releases(since?, section?, limit?)` | **Dated release entries** — API changes, Sandbox changes, and upcoming. Filter by date or section. Refreshed daily. See [Tracking releases](#tracking-releases) below. |
@@ -256,7 +257,7 @@ Sections are kept separate because they mean different things: `api_changes` is 
 
 ## The structured index
 
-The `list_vipmp_endpoints`, `list_vipmp_error_codes`, `get_vipmp_schema`, and `get_vipmp_releases` tools are all served from a **pre-built index** — a single JSON file that captures every endpoint, error code, and field schema extracted from Adobe's docs. With the index in place these tools answer in **single-digit milliseconds**. Without it, they fall back to live extraction across ~86 pages (~30s cold, ~5s warm).
+The `list_vipmp_endpoints`, `list_vipmp_error_codes`, `list_vipmp_status_codes`, `get_vipmp_schema`, and `get_vipmp_releases` tools are all served from a **pre-built index** — a single JSON file that captures every endpoint, error code, status code, and field schema extracted from Adobe's docs. With the index in place these tools answer in **single-digit milliseconds**. Without it, they fall back to live extraction across ~86 pages (~30s cold, ~5s warm).
 
 **Three-tier resolution for the active index:**
 
