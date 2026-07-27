@@ -187,9 +187,13 @@ ecosystems:
 
 | Group | Covers |
 |---|---|
-| `runtime-dependencies` | `pyproject.toml` runtime deps + `uv.lock` — changes what users resolve on install |
+| `runtime-dependencies` | `pyproject.toml` runtime deps — what users resolve on install |
 | `dev-dependencies` | test tooling only — affects CI, not the shipped package |
-| `github-actions` | everything under `.github/workflows/` |
+| `github-actions` | actions referenced in `.github/workflows/` |
+
+There is no lockfile in the picture: `uv.lock` is gitignored by design and CI
+installs with `pip install -e ".[dev]"`, so updates land in `pyproject.toml`
+alone.
 
 Runtime and dev are deliberately separate: a runtime bump changes what
 `pip install vipmp-docs-mcp` gives users and deserves closer review than a
@@ -207,11 +211,47 @@ Two things to know when reviewing the PRs:
 - **A Dependabot merge does not cut a release.** `auto-version-bump.yml` only
   fires for branches prefixed `bot/`, and Dependabot uses `dependabot/…`. If a
   dependency bump should ship, tag it manually (see Releases above).
-- **`ruff` is capped below the next minor** (`>=0.15.0,<0.16`) because lint
+- **`ruff` is capped below the next minor** (`>=0.15.0,<0.17`) because lint
   rules change between minors. Dependabot *will* propose widening that ceiling
   when a new minor lands — it raises the cap rather than leaving ruff alone —
   so treat those PRs as a deliberate decision: check CI is green on the new
   minor before merging, since a rule change can surface fresh findings.
+
+### What Dependabot does *not* cover
+
+Configuring it is not the same as being covered. Verified against a real run
+(the job log for the `uv` and `github-actions` jobs), the actual reach is
+narrower than the table above suggests:
+
+**Python dependencies are effectively unwatched.** Every dep is declared as an
+open-ended range (`pytest>=8.0.0`, `httpx>=0.27.0`), so the newest release
+already satisfies the requirement — there is nothing in `pyproject.toml` to
+rewrite and no lockfile to re-pin. Dependabot evaluated all five dev packages
+and reported `update_not_possible` for each, then `Nothing to update`, even
+though newer versions existed. It only ever has something to propose when a
+requirement *blocks* the latest — which is why `ruff`, the one capped
+dependency, is the only Python PR it has opened.
+
+So a routine dependency bump will not arrive as a PR. If that matters, the
+options are committing `uv.lock` (reverses a deliberate decision — see
+`.gitignore`) or switching to patch pins (`pytest==9.1.*`). Doing neither is a
+defensible choice for a published library; just don't mistake silence for
+"everything is current".
+
+**Actions are watched for major bumps only.** They're pinned to floating major
+tags (`@v7`), so upstream patch releases arrive silently as the tag moves and
+generate no PR. You get a PR when `v8` ships. That's exactly why the Node 20
+deprecation went unnoticed until it surfaced as a workflow warning.
+
+**`pypa/gh-action-pypi-publish` is not tracked at all.** It's pinned to
+`@release/v1` — a branch, not a version tag — so there's no version for
+Dependabot to compare and it's excluded from the run. That ref is what PyPA
+recommends, so security fixes to the publishing action land automatically, which
+is what you want for the step holding the OIDC publishing rights. The trade-off
+is no visibility: it can change under you without a PR.
+
+Dependabot **security** alerts are separate from all of this and still apply
+across every dependency regardless of how it's declared.
 
 ## Reporting security issues
 
