@@ -1,8 +1,10 @@
 version: 2
 updates:
-  # Python dependencies declared in pyproject.toml and locked in uv.lock.
-  # The `uv` ecosystem (not `pip`) is what keeps the lockfile in step, which
-  # matters here because CI installs from it.
+  # Python dependencies declared in pyproject.toml. Note the project does not
+  # commit a lockfile — uv.lock is gitignored and CI installs with
+  # `pip install -e ".[dev]"` — so updates land in pyproject.toml alone. The
+  # `uv` ecosystem is used because uv is the project's dependency tool; it
+  # reads PEP 621 metadata and would maintain uv.lock if one were tracked.
   #
   # Runtime and dev updates are grouped separately: a runtime bump changes what
   # `pip install vipmp-docs-mcp` resolves for users and deserves its own review,
@@ -18,15 +20,27 @@ updates:
       include: "scope"
     labels:
       - "dependencies"
+    # Grouped by explicit name patterns, NOT `dependency-type`. Dependabot does
+    # not treat PEP 621 `[project.optional-dependencies]` as development, so a
+    # `dependency-type: development` group matches nothing here and every dev
+    # tool lands in the production group — which is what happened to `ruff` in
+    # PR #35. Dev patterns are listed first so they win the match.
+    #
+    # This list has to stay in step with the `dev` extra in pyproject.toml;
+    # tests/test_dependabot.py fails if a dev dependency isn't covered.
     groups:
-      runtime-dependencies:
-        dependency-type: "production"
-        patterns:
-          - "*"
       dev-dependencies:
-        dependency-type: "development"
+        patterns:
+          - "pytest*"
+          - "ruff"
+          - "pyyaml"
+      runtime-dependencies:
         patterns:
           - "*"
+        exclude-patterns:
+          - "pytest*"
+          - "ruff"
+          - "pyyaml"
 
   # Actions used by the workflows in .github/workflows/. Grouped into one PR —
   # these move together (the Node 20 to 24 migration bumped most of them at

@@ -195,14 +195,23 @@ Runtime and dev are deliberately separate: a runtime bump changes what
 `pip install vipmp-docs-mcp` gives users and deserves closer review than a
 pytest bump.
 
-Two things to know when reviewing them:
+**Adding a dev dependency means updating `dependabot.yml`.** The
+`dev-dependencies` group is a hand-written list of name patterns, because
+Dependabot doesn't recognise PEP 621 `[project.optional-dependencies]` as
+development deps — a `dependency-type: development` group matches nothing here.
+Add the new package to both the group's `patterns` and the runtime group's
+`exclude-patterns`; `tests/test_dependabot.py` fails if you forget.
+
+Two things to know when reviewing the PRs:
 
 - **A Dependabot merge does not cut a release.** `auto-version-bump.yml` only
   fires for branches prefixed `bot/`, and Dependabot uses `dependabot/…`. If a
   dependency bump should ship, tag it manually (see Releases above).
-- **`ruff` is pinned below the next minor** (`>=0.15.0,<0.16`) because lint
-  rules change between minors. Dependabot cannot cross that ceiling on its own;
-  widening it is a deliberate call, and expect new lint findings when you do.
+- **`ruff` is capped below the next minor** (`>=0.15.0,<0.16`) because lint
+  rules change between minors. Dependabot *will* propose widening that ceiling
+  when a new minor lands — it raises the cap rather than leaving ruff alone —
+  so treat those PRs as a deliberate decision: check CI is green on the new
+  minor before merging, since a rule change can surface fresh findings.
 
 ## Reporting security issues
 

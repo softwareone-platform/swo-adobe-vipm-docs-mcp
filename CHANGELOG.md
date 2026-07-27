@@ -40,6 +40,13 @@ script, docs, and internal restructuring with no effect on tool output.
   apart from test tooling. Dependabot branches are prefixed `dependabot/`, not
   `bot/`, so a merge does not trigger `auto-version-bump.yml`.
 
+  The dev/runtime split is by **name pattern**, not `dependency-type`:
+  Dependabot doesn't treat PEP 621 `[project.optional-dependencies]` as
+  development, so a `dependency-type: development` group matches nothing and
+  every dev tool falls into the production group — as `ruff` did on the first
+  run. `tests/test_dependabot.py` holds the pattern list to the `dev` extra so
+  it can't drift, and `pyyaml` was added to the `dev` extra for it.
+
 ### Changed
 - **Removed `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`** from all seven workflows. It
   was masking the Node 20 deprecation warning that `upload-artifact@v4` and
