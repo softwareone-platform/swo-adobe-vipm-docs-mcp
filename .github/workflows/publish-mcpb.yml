@@ -69,10 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
 
@@ -118,7 +118,7 @@ jobs:
 
       - name: Upload bundle as workflow artifact
         # Always available via the run page, regardless of release step.
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mcpb-bundle
           path: ${{ steps.pack.outputs.bundle }}
@@ -128,7 +128,7 @@ jobs:
         # Creates the Release if the tag doesn't have one yet, otherwise
         # updates it. Skipped for workflow_dispatch runs (no tag context).
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ steps.pack.outputs.bundle }}
           fail_on_unmatched_files: true
