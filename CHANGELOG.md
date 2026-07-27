@@ -68,6 +68,14 @@ script, docs, and internal restructuring with no effect on tool output.
 - **`CONTRIBUTING.md`'s "Adding a new tool" checklist now includes declaring
   the tool in `manifest.json`.** Its absence is the root cause of the 0.13.1
   bug.
+- **`CONTRIBUTING.md`'s release process rewritten to match reality.** It still
+  described building and creating the GitHub release by hand, told maintainers
+  to edit a `__version__` that has been derived from package metadata since
+  0.11.0, omitted `manifest.json`, and had them push the bump straight to a
+  branch that requires PRs. It now documents both paths — automated minor
+  releases from `bot/` PRs, and hand-tagged patch releases — what the tag
+  triggers in each publish workflow, and that the Release is created with an
+  empty body.
 
 ## [0.13.1] — 2026-07-27
 
