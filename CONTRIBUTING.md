@@ -114,8 +114,10 @@ Maintainers:
    or a prompt rendered malformed — CI won't catch those because it
    doesn't run the smoke test (it requires network).
 
-3. Bump `version` in `pyproject.toml` and `__version__` in
-   `src/vipmp_docs_mcp/__init__.py`.
+3. Bump `version` in **both** `pyproject.toml` and `manifest.json` — they must
+   match, and `tests/test_manifest.py` fails if they drift. Do **not** touch
+   `__version__` in `src/vipmp_docs_mcp/__init__.py`; it is derived from the
+   installed package metadata and needs no manual edit.
 
 4. Move the `## [Unreleased]` entries in `CHANGELOG.md` under a new
    `## [X.Y.Z] — YYYY-MM-DD` heading. Update the comparison links at
@@ -135,6 +137,30 @@ Maintainers:
    ```
    The release notes should reference the changelog entry and include
    the `uvx` install snippet pinned to `@vX.Y.Z`.
+
+## Dependency updates
+
+[Dependabot](.github/dependabot.yml) opens grouped PRs every Monday for two
+ecosystems:
+
+| Group | Covers |
+|---|---|
+| `runtime-dependencies` | `pyproject.toml` runtime deps + `uv.lock` — changes what users resolve on install |
+| `dev-dependencies` | test tooling only — affects CI, not the shipped package |
+| `github-actions` | everything under `.github/workflows/` |
+
+Runtime and dev are deliberately separate: a runtime bump changes what
+`pip install vipmp-docs-mcp` gives users and deserves closer review than a
+pytest bump.
+
+Two things to know when reviewing them:
+
+- **A Dependabot merge does not cut a release.** `auto-version-bump.yml` only
+  fires for branches prefixed `bot/`, and Dependabot uses `dependabot/…`. If a
+  dependency bump should ship, tag it manually (see Releases above).
+- **`ruff` is pinned below the next minor** (`>=0.15.0,<0.16`) because lint
+  rules change between minors. Dependabot cannot cross that ceiling on its own;
+  widening it is a deliberate call, and expect new lint findings when you do.
 
 ## Reporting security issues
 

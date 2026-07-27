@@ -17,9 +17,6 @@ name: Publish to PyPI
 #      and publishes the first version. From then on, the publisher is
 #      regular (not pending) and every subsequent v* tag publishes.
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   push:
     tags:
