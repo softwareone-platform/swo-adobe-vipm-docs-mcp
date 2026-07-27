@@ -36,6 +36,7 @@ from .extractors import (
     extract_validations,
 )
 from .fetcher import FetchError, fetch_page_html
+from .index_schema import INDEX_SCHEMA_VERSION
 from .logging_config import CACHE_DIR, get_logger
 from .releases import (
     RELEASE_NOTES_PATH,
@@ -44,10 +45,9 @@ from .releases import (
     parse_recent_releases,
     parse_upcoming_releases,
 )
+from .remote_index import ensure_fresh
 
 log = get_logger("index")
-
-INDEX_SCHEMA_VERSION = 5  # v5 added `status_codes` (resource lifecycle states, 1000-1026).
 
 # Per-user refresh: written by rebuild_vipmp_index tool / GHA artifact drop.
 USER_INDEX_PATH = CACHE_DIR / "index.json"
@@ -277,11 +277,6 @@ def resolve_active_index() -> ActiveIndex | None:
     if user is not None:
         log.debug("using user-local index (age=%.0fs)", user.age_seconds)
         return ActiveIndex(user, "user-local", USER_INDEX_PATH)
-
-    # Local import to avoid a circular dependency at module load time —
-    # remote_index doesn't import index, but this keeps the coupling
-    # one-way at runtime as well.
-    from .remote_index import ensure_fresh
 
     remote_path = ensure_fresh()
     if remote_path is not None:

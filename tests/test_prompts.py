@@ -17,11 +17,19 @@ from mcp.server.fastmcp import FastMCP
 
 from vipmp_docs_mcp.prompts import register_prompts
 
+# Marker used in place of a body when a prompt raises while rendering, so the
+# failure surfaces with its cause instead of the prompt simply going missing.
+RENDER_FAILED = "<render failed:"
+
 
 def _rendered_prompts() -> dict[str, str]:
     """Register all prompts on a throwaway FastMCP instance and return
     {prompt_name: rendered_body} for every walkthrough (no-arg prompts
-    only — the parameterised ones are exercised by their callers)."""
+    only — the parameterised ones are exercised by their callers).
+
+    A prompt that raises while rendering is recorded with its traceback as
+    the body rather than dropped, so the assertions below fail with the
+    underlying error instead of a bare "didn't render"."""
     mcp = FastMCP("test")
     register_prompts(mcp)
 
@@ -39,11 +47,12 @@ def _rendered_prompts() -> dict[str, str]:
             continue
         try:
             result = asyncio.run(mcp.get_prompt(p.name, arguments={}))
-            out[p.name] = "\n".join(
-                m.content.text for m in result.messages if hasattr(m.content, "text")
-            )
-        except Exception:
-            pass
+        except Exception as exc:
+            out[p.name] = f"{RENDER_FAILED} {type(exc).__name__}: {exc}>"
+            continue
+        out[p.name] = "\n".join(
+            m.content.text for m in result.messages if hasattr(m.content, "text")
+        )
     return out
 
 
@@ -71,6 +80,12 @@ class TestWalkthroughInvariants:
         rendered = _rendered_prompts()
         missing = self.WALKTHROUGH_NAMES - rendered.keys()
         assert not missing, f"these walkthroughs didn't render: {missing}"
+        failed = {
+            name: rendered[name]
+            for name in self.WALKTHROUGH_NAMES
+            if rendered[name].startswith(RENDER_FAILED)
+        }
+        assert not failed, f"these walkthroughs raised while rendering: {failed}"
 
     def test_every_walkthrough_promises_adobe_sole_source(self):
         rendered = _rendered_prompts()
