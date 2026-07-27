@@ -40,6 +40,14 @@ script, docs, and internal restructuring with no effect on tool output.
   apart from test tooling. Dependabot branches are prefixed `dependabot/`, not
   `bot/`, so a merge does not trigger `auto-version-bump.yml`.
 
+  `CONTRIBUTING.md` documents what Dependabot does **not** cover, verified
+  against a real run: Python deps are effectively unwatched (open-ended ranges
+  plus no committed lockfile leave nothing to rewrite — all five dev packages
+  reported `update_not_possible`), actions are watched for major bumps only
+  because they're pinned to floating major tags, and
+  `pypa/gh-action-pypi-publish@release/v1` is excluded entirely since a branch
+  ref has no version to compare.
+
   The dev/runtime split is by **name pattern**, not `dependency-type`:
   Dependabot doesn't treat PEP 621 `[project.optional-dependencies]` as
   development, so a `dependency-type: development` group matches nothing and
