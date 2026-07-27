@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Merged to main but not yet released. Nothing here changes the shipped
+package — CI config, a dev script, and docs.
+
+### Changed
+- **`ruff check` and `ruff format --check` now gate `scripts/` and
+  `examples/`** as well as `src/` and `tests/`, closing the gap that let those
+  two drift after 0.12.0 gated only half the tree `CONTRIBUTING.md` asks
+  contributors to lint. Formatting brought back into line in the same pass.
+- **`scripts/smoke_test.py` derives its expected tool set from
+  `manifest.json`** instead of a hardcoded list that had gone stale at 17 of
+  20 tools. Together with `tests/test_manifest.py` this closes a triangle:
+  the unit test holds manifest ↔ server registrations in sync in-process,
+  the smoke test verifies manifest ↔ what the running server serves over
+  stdio. A mismatch in either direction now fails; previously an undeclared
+  tool was reported as a pass, so the 0.13.1 condition would have gone
+  unnoticed here too. `EXPECTED_PROMPTS` was stale the same way (6 of 13) and
+  is now complete.
+- **`CONTRIBUTING.md`'s "Adding a new tool" checklist now includes declaring
+  the tool in `manifest.json`.** Its absence is the root cause of the 0.13.1
+  bug.
+
 ## [0.13.1] — 2026-07-27
 
 ### Fixed
@@ -27,8 +48,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`list_vipmp_status_codes` documented in the README** — added to the
   structured-extractors table and to the list of index-served tools.
 
-> **Note:** releases 0.10.0 through 0.13.0 predate this entry and are not
-> recorded here; the changelog was not kept up to date across those bumps.
+## [0.13.0] — 2026-07-27
+
+Data-only release, auto-published by `auto-version-bump.yml` when the daily
+refresh PR merged. No code changes.
+
+### Changed
+- **Baseline index + sitemap refreshed** from live Adobe docs (PR #27) — three
+  new documented codes picked up.
+
+## [0.12.0] — 2026-07-16
+
+### Added
+- **`list_vipmp_status_codes(query?)`** — extracts the resource *lifecycle*
+  status codes (1000–1026) that describe the state of an account, order, or
+  subscription, as distinct from the request-failure codes returned by
+  `list_vipmp_error_codes`. Backed by a new `StatusCode` dataclass and
+  `extract_status_codes()`, scoped to tables carrying both "Status Code" and
+  "Applicable Resources" headers so the per-endpoint HTTP status tables
+  (200/400/404…) aren't picked up. Adobe's source typo on codes 1000/1002
+  ("Subscription Transfer" for "Subscription, Transfer") is corrected in the
+  extractor so the fix survives index rebuilds.
+
+  > This tool was **not declared in `manifest.json`** until 0.13.1, so clients
+  > reading the bundle metadata — Claude Desktop among them — did not show it
+  > for two releases.
+- **CodeQL scanning** (`.github/workflows/codeql.yml`) on push, PR, and a
+  weekly schedule, using the `security-and-quality` suite. Complements the
+  ruff gates: ruff covers style, CodeQL covers vulnerabilities and deeper
+  quality issues.
+- **`CODEOWNERS`**.
+
+### Changed
+- `INDEX_SCHEMA_VERSION` 4 → 5 to carry `status_codes` in the index snapshot;
+  shipped baseline index rebuilt.
+- **`ruff format` applied across the repo and gated in CI.** The gate covered
+  only `src/` and `tests/`, leaving `scripts/` and `examples/` free to drift.
+
+## [0.11.0] — 2026-07-14
+
+### Added
+- **Automated version bump and release** (`auto-version-bump.yml`). When a
+  `bot/*` branch PR merges to main, the minor version is bumped in
+  `pyproject.toml` + `manifest.json`, committed to main, and tagged
+  `vX.(Y+1).0` once CI passes — which is what publishes the refreshed index.
+  Note this path only ever produces *minor* bumps; patch releases such as
+  0.13.1 need a manual tag.
+- **`wait-for-ci` gate** on `publish-mcpb.yml` / `publish-pypi.yml`, so any
+  tag push — automated or manual — only publishes after CI has succeeded on
+  that commit.
+
+### Fixed
+- **`__version__` no longer drifts from the released version.** `__init__.py`
+  hardcoded `0.8.0` and was never bumped alongside `pyproject.toml`, so
+  `vipmp_server_info` misreported the version for every release from 0.8.0
+  onward. It is now derived from `importlib.metadata`, so it cannot drift
+  again.
+
+## [0.10.0] — 2026-07-10
+
+### Fixed
+- **The daily index refresh now fails loudly when Adobe's sitemap returns too
+  few paths.** On 2026-05-13/14 Adobe's `sitemap.xml` returned successfully
+  with zero vipmp paths; `build_sitemap()` returned `[]`, `save_sitemap()`
+  overwrote the package fallback with `{"entries": []}`, and the run surfaced
+  as a bare "0 endpoints invariant" failure rather than naming the sitemap
+  fetch as the cause. Adds a `MIN_VIPMP_SITEMAP_PATHS` floor (50; live count
+  is ~86) raising `FetchError` with response size, URL count, and root tag;
+  refuses to overwrite a healthy sitemap with an empty one; and captures
+  Adobe's raw response as a debug artifact on failure.
+
+### Changed
+- Baseline index + sitemap refreshed from live Adobe docs (2026-06-11, 06-23,
+  06-25) — new endpoint, new error codes, and new dated release entries.
 
 ## [0.9.0] — 2026-05-03
 
@@ -506,7 +598,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.12.0...v0.13.0
+[0.12.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.9.0...v0.10.0
+[0.9.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.7.2...v0.8.0
+[0.7.2]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.4.1...v0.5.0
