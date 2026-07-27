@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.1] — 2026-07-27
+
+### Fixed
+- **`list_vipmp_status_codes` is now declared in `manifest.json`.** The tool
+  shipped in 0.12.0 but was never added to the manifest's `tools` array, which
+  is what MCP clients reading the bundle metadata — Claude Desktop among them —
+  display as the extension's tool set. The server advertised the tool correctly
+  over `tools/list`, so clients that enumerate tools dynamically (Claude Code,
+  the `examples/list_tools.py` script) were unaffected; Desktop users simply
+  never saw it.
+
+### Added
+- **Manifest parity tests** (`tests/test_manifest.py`). CI now fails if
+  `manifest.json` omits a tool the server registers, declares one it doesn't,
+  ships a tool without a description, or drifts out of version sync with
+  `pyproject.toml`. This is the check whose absence let the above go unnoticed
+  for two releases.
+- **`list_vipmp_status_codes` documented in the README** — added to the
+  structured-extractors table and to the list of index-served tools.
+
+> **Note:** releases 0.10.0 through 0.13.0 predate this entry and are not
+> recorded here; the changelog was not kept up to date across those bumps.
+
 ## [0.9.0] — 2026-05-03
 
 ### Security / hardening (response to external code review)
