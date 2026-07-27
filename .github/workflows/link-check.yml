@@ -4,9 +4,6 @@ name: Sitemap link check
 # reports 404s, and opens an issue if any are found. Run manually via
 # workflow_dispatch whenever the server starts returning "page not found".
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   schedule:
     # Sundays at 03:17 UTC — off-peak, avoids contention with other crons.

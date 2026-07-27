@@ -9,9 +9,6 @@ name: Publish MCPB bundle
 # Trigger: every `v*` tag push (same trigger as publish-pypi.yml), plus
 # manual via workflow_dispatch for re-packing without a new tag.
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   push:
     tags:

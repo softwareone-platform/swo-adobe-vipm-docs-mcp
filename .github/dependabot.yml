@@ -1,0 +1,47 @@
+version: 2
+updates:
+  # Python dependencies declared in pyproject.toml and locked in uv.lock.
+  # The `uv` ecosystem (not `pip`) is what keeps the lockfile in step, which
+  # matters here because CI installs from it.
+  #
+  # Runtime and dev updates are grouped separately: a runtime bump changes what
+  # `pip install vipmp-docs-mcp` resolves for users and deserves its own review,
+  # while test tooling only affects CI.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+    groups:
+      runtime-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "*"
+      dev-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "*"
+
+  # Actions used by the workflows in .github/workflows/. Grouped into one PR —
+  # these move together (the Node 20 to 24 migration bumped most of them at
+  # once) and reviewing them as a set is less work than one PR per action.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

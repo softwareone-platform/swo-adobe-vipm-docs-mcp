@@ -33,7 +33,18 @@ script, docs, and internal restructuring with no effect on tool output.
   > `test_async_progress_callback_awaited` asserts — and is dismissed rather
   > than worked around.
 
+### Added
+- **Dependabot** (`.github/dependabot.yml`) — weekly grouped PRs for the `uv`
+  and `github-actions` ecosystems. Runtime and dev Python updates are grouped
+  separately so a bump that changes what users resolve on install is reviewed
+  apart from test tooling. Dependabot branches are prefixed `dependabot/`, not
+  `bot/`, so a merge does not trigger `auto-version-bump.yml`.
+
 ### Changed
+- **Removed `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`** from all seven workflows. It
+  was masking the Node 20 deprecation warning that `upload-artifact@v4` and
+  `action-gh-release@v2` emitted in `publish-mcpb`; with every action now on a
+  natively `node24` major, the override was a no-op.
 - **GitHub Actions bumped to current majors** across all seven workflows:
   `checkout` v6→v7, `setup-python` v6→v7, `upload-artifact` v6/v4→v7,
   `setup-node` v5→v7, `github-script` v7→v9, `codeql-action` v3→v4,
@@ -57,6 +68,14 @@ script, docs, and internal restructuring with no effect on tool output.
 - **`CONTRIBUTING.md`'s "Adding a new tool" checklist now includes declaring
   the tool in `manifest.json`.** Its absence is the root cause of the 0.13.1
   bug.
+- **`CONTRIBUTING.md`'s release process rewritten to match reality.** It still
+  described building and creating the GitHub release by hand, told maintainers
+  to edit a `__version__` that has been derived from package metadata since
+  0.11.0, omitted `manifest.json`, and had them push the bump straight to a
+  branch that requires PRs. It now documents both paths — automated minor
+  releases from `bot/` PRs, and hand-tagged patch releases — what the tag
+  triggers in each publish workflow, and that the Release is created with an
+  empty body.
 
 ## [0.13.1] — 2026-07-27
 

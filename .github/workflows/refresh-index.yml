@@ -8,9 +8,6 @@ name: Refresh structured index
 # timestamp), opens a PR so humans can sanity-check the diff before
 # merging. Unchanged days produce nothing.
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   schedule:
     # Every day at 04:23 UTC — off-peak.

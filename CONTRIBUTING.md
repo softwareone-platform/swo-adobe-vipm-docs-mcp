@@ -24,9 +24,9 @@ Requires **Python 3.12+**.
 ## The feedback loop
 
 ```bash
-# Lint + format
-ruff check src/ tests/ scripts/
-ruff format src/ tests/ scripts/      # optional; project follows ruff defaults
+# Lint + format — CI gates all four paths
+ruff check src/ tests/ scripts/ examples/
+ruff format src/ tests/ scripts/ examples/
 
 # Fast unit tests (mocked httpx, no network)
 pytest -v
@@ -94,7 +94,29 @@ Tests live in `tests/` with synthetic HTML fixtures in `tests/conftest.py`.
 
 ## Releases
 
-Maintainers:
+**Pushing a `v*` tag is what releases.** Everything after the tag is automated —
+you never build, upload, or create a release by hand.
+
+There are two ways a tag gets created.
+
+### Automated: minor releases from bot PRs
+
+When a PR whose branch is prefixed `bot/` merges into `main` (today that's only
+`bot/refresh-index`, from [`refresh-index.yml`](.github/workflows/refresh-index.yml)),
+[`auto-version-bump.yml`](.github/workflows/auto-version-bump.yml) takes over:
+
+1. Bumps the **minor** version in `pyproject.toml` + `manifest.json`.
+2. Commits straight to `main` (admin PAT, bypassing the PR ruleset).
+3. Waits for CI to pass on that commit.
+4. Tags `vX.(Y+1).0` — **only** if CI passed.
+
+No human action needed. If CI fails, the version bump still lands on `main` but
+nothing is tagged or published; a maintainer investigates and tags manually.
+
+### Manual: patch releases and everything else
+
+The automation only ever produces **minor** bumps, so a patch release — like
+0.13.1 — needs a hand-pushed tag.
 
 1. **Refresh dev dependencies** so local matches CI:
    ```bash
@@ -107,34 +129,80 @@ Maintainers:
 2. **Full pre-tag check:**
    ```bash
    ruff check src/ tests/ scripts/ examples/
+   ruff format --check src/ tests/ scripts/ examples/
    pytest --cov=vipmp_docs_mcp --cov-report=term
    python scripts/smoke_test.py
    ```
-   All three must pass. If smoke fails, it usually means a tool broke
-   or a prompt rendered malformed — CI won't catch those because it
-   doesn't run the smoke test (it requires network).
+   All must pass. If smoke fails, it usually means a tool broke or a prompt
+   rendered malformed — CI won't catch those because it doesn't run the smoke
+   test (it requires network).
 
-3. Bump `version` in `pyproject.toml` and `__version__` in
-   `src/vipmp_docs_mcp/__init__.py`.
+3. Bump `version` in **both** `pyproject.toml` and `manifest.json` — they must
+   match, and `tests/test_manifest.py` fails if they drift. Do **not** touch
+   `__version__` in `src/vipmp_docs_mcp/__init__.py`; it is derived from the
+   installed package metadata and needs no manual edit.
 
 4. Move the `## [Unreleased]` entries in `CHANGELOG.md` under a new
-   `## [X.Y.Z] — YYYY-MM-DD` heading. Update the comparison links at
-   the bottom.
+   `## [X.Y.Z] — YYYY-MM-DD` heading. Add the comparison link at the bottom.
 
-5. Commit, tag, push `main` + tag:
+5. **Open a PR and merge it.** `main` requires changes to go through a PR, so
+   the version bump can't be pushed directly.
+
+6. Tag the merge commit on `main` and push the tag:
    ```bash
-   git commit -m "vX.Y.Z — short summary"
+   git checkout main && git pull
    git tag -a vX.Y.Z -m "vX.Y.Z — short summary"
-   git push origin main
    git push origin vX.Y.Z
    ```
 
-6. Create the GitHub release:
-   ```bash
-   gh release create vX.Y.Z --title "..." --latest --notes "..."
-   ```
-   The release notes should reference the changelog entry and include
-   the `uvx` install snippet pinned to `@vX.Y.Z`.
+### What the tag triggers
+
+Both publish workflows re-verify CI succeeded on the tagged commit before doing
+anything, so a hand-pushed tag gets the same protection as an automated one.
+
+| Workflow | Does |
+|---|---|
+| [`publish-pypi.yml`](.github/workflows/publish-pypi.yml) | Checks the tag matches `pyproject.toml`'s version, builds sdist + wheel, asserts the wheel contains `data/index.json`, publishes to PyPI via OIDC Trusted Publishing (no token or password anywhere) |
+| [`publish-mcpb.yml`](.github/workflows/publish-mcpb.yml) | Packs `vipmp-docs-mcp-X.Y.Z.mcpb`, uploads it as a run artifact, then **creates the GitHub Release** (if the tag doesn't have one) and attaches the bundle |
+
+A version/tag mismatch fails the PyPI job rather than publishing something
+mislabelled.
+
+### Release notes
+
+The Release is created with an **empty body** — nothing generates notes. Add them
+afterwards if the release warrants it:
+
+```bash
+gh release edit vX.Y.Z --notes "..."
+```
+
+Reference the changelog entry and include the `uvx` install snippet pinned to
+`@vX.Y.Z`.
+
+## Dependency updates
+
+[Dependabot](.github/dependabot.yml) opens grouped PRs every Monday for two
+ecosystems:
+
+| Group | Covers |
+|---|---|
+| `runtime-dependencies` | `pyproject.toml` runtime deps + `uv.lock` — changes what users resolve on install |
+| `dev-dependencies` | test tooling only — affects CI, not the shipped package |
+| `github-actions` | everything under `.github/workflows/` |
+
+Runtime and dev are deliberately separate: a runtime bump changes what
+`pip install vipmp-docs-mcp` gives users and deserves closer review than a
+pytest bump.
+
+Two things to know when reviewing them:
+
+- **A Dependabot merge does not cut a release.** `auto-version-bump.yml` only
+  fires for branches prefixed `bot/`, and Dependabot uses `dependabot/…`. If a
+  dependency bump should ship, tag it manually (see Releases above).
+- **`ruff` is pinned below the next minor** (`>=0.15.0,<0.16`) because lint
+  rules change between minors. Dependabot cannot cross that ceiling on its own;
+  widening it is a deliberate call, and expect new lint findings when you do.
 
 ## Reporting security issues
 
