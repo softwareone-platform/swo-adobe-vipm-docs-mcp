@@ -33,7 +33,7 @@ async def main() -> None:
         ClientSession(read, write) as session,
     ):
         init = await session.initialize()
-        print(f"Connected to {init.serverInfo.name} v{init.serverInfo.version}")
+        print(f"Connected to {init.server_info.name} v{init.server_info.version}")
         print()
 
         tools = await session.list_tools()

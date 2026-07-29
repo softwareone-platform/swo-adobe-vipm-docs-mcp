@@ -57,6 +57,27 @@ USER_INDEX_PATH = CACHE_DIR / "index.json"
 PACKAGE_INDEX_PATH = Path(__file__).parent / "data" / "index.json"
 
 
+# Fraction of the source sitemap that must fail to parse before a snapshot
+# counts as suspiciously incomplete. Read by `vipmp_server_info` (to flag a
+# broken active index) and by the refresh-index workflow (to abort a bad
+# rebuild before it opens a PR). It lives here, next to the `parse_errors`
+# and `source_sitemap_size` fields it is measured against, so the CI check
+# doesn't have to import the MCP server module — and therefore the whole
+# MCP SDK — just to read a float.
+#
+# The real regression in #4 surfaced as 57/72 pages failing (~79% failure
+# rate) because CI was building against the stale hand-curated underscore
+# paths that Adobe had migrated off. A healthy build against Adobe's live
+# sitemap parses every page (0% failure). A small number of parse errors is
+# normal when Adobe publishes a new page the parser hasn't seen yet; 25%
+# gives us headroom for that without hiding real regressions.
+#
+# Prior versions used an absolute endpoint-count threshold (30), which
+# false-flagged every healthy build — Adobe's Partner API legitimately
+# exposes ~21 endpoints, not hundreds. This is the replacement heuristic.
+STALE_INDEX_FAILURE_FRACTION = 0.25
+
+
 @dataclass
 class IndexSnapshot:
     """A point-in-time snapshot of structured data extracted from the docs."""

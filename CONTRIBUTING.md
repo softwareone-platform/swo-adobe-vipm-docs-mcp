@@ -44,7 +44,7 @@ All of these run in CI on every PR. Keep them green.
 
 ```
 src/vipmp_docs_mcp/
-├── server.py             # FastMCP entry point — tool/prompt registration
+├── server.py             # MCPServer entry point — tool/prompt registration
 ├── fetcher.py            # HTTP client (retries + trailing-slash fallback)
 ├── cache.py              # Disk cache with TTL + ETag
 ├── sitemap.py            # Hand-curated fallback sitemap

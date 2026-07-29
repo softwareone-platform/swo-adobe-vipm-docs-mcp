@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from vipmp_docs_mcp.prompts import register_prompts
 
@@ -23,17 +23,17 @@ RENDER_FAILED = "<render failed:"
 
 
 def _rendered_prompts() -> dict[str, str]:
-    """Register all prompts on a throwaway FastMCP instance and return
+    """Register all prompts on a throwaway MCPServer instance and return
     {prompt_name: rendered_body} for every walkthrough (no-arg prompts
     only — the parameterised ones are exercised by their callers).
 
     A prompt that raises while rendering is recorded with its traceback as
     the body rather than dropped, so the assertions below fail with the
     underlying error instead of a bare "didn't render"."""
-    mcp = FastMCP("test")
+    mcp = MCPServer("test")
     register_prompts(mcp)
 
-    # FastMCP exposes prompts via a private registry; we pull the
+    # MCPServer exposes prompts via a private registry; we pull the
     # callables out, call each no-arg prompt, and collect the string.
     # The no-arg prompts are the six walkthroughs; the router takes
     # optional args which we can pass defaults to.

@@ -27,7 +27,7 @@ def _manifest() -> dict:
 
 
 def _registered_tool_names() -> set[str]:
-    """Names of every tool the FastMCP server actually registers."""
+    """Names of every tool the MCP server actually registers."""
     from vipmp_docs_mcp.server import mcp
 
     return {tool.name for tool in asyncio.run(mcp.list_tools())}
@@ -70,3 +70,24 @@ class TestManifestVersion:
     def test_manifest_version_matches_pyproject(self):
         pyproject = tomllib.loads(PYPROJECT_PATH.read_text(encoding="utf-8"))
         assert _manifest()["version"] == pyproject["project"]["version"]
+
+    def test_server_handshake_reports_the_installed_version(self):
+        """
+        The version the server advertises in the initialize handshake is the
+        one users quote in bug reports, so it must be wired to the package
+        metadata rather than left at the empty string FastMCP 1.x always
+        sent (nothing noticed for the whole 1.x era).
+
+        Asserted against installed metadata, not `pyproject.toml`: hatchling
+        derives one from the other at build time, and comparing to the file
+        would instead fail on a stale editable install — right after a
+        maintainer bumps the version, which is the worst moment for it.
+        """
+        from vipmp_docs_mcp import __version__
+        from vipmp_docs_mcp.server import mcp
+
+        assert mcp.version == __version__
+        assert mcp.version not in ("", "0.0.0"), (
+            "server is advertising no usable version — is `version=` still "
+            "passed to MCPServer, and is the package installed?"
+        )
