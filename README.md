@@ -37,7 +37,7 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 |---|---|
 | `describe_vipmp_endpoint(method, path)` | **One-shot profile**: schema + error codes + release-note mentions + cross-references in a single call. The fastest way to understand an endpoint end-to-end. |
 | `validate_vipmp_request(endpoint, body_json)` | Programmatically checks a JSON body against the documented schema. Catches unknown fields, missing required fields, type mismatches, constraint violations (e.g. "Max: 35 characters"), and deprecated-field usage. |
-| `generate_vipmp_request(endpoint, body?, language?)` | Emits a runnable snippet in `curl` / `powershell` / `python` (httpx) / `csharp` (HttpClient). Builds a placeholder body from the schema when you don't supply one. |
+| `generate_vipmp_request(endpoint, body_json?, language?)` | Emits a runnable snippet in `curl` / `powershell` / `python` (httpx) / `csharp` (HttpClient). Builds a placeholder body from the schema when you don't supply one. |
 
 ### Structured extractors
 | Tool | What it does |
@@ -57,6 +57,7 @@ Claude calls one of the tools below, the server fetches and parses the relevant 
 | `vipmp_cache_clear(path?)` | Drop one entry or the whole cache. |
 | `refresh_vipmp_sitemap()` | Rebuild the sitemap from Adobe's published `/sitemap.xml`. Run when you're seeing 404s or think the sitemap has drifted. |
 | `rebuild_vipmp_index()` | Rebuild the pre-extracted index of endpoints/error codes/schemas (~60s). Run to refresh the data behind the structured tools between package updates. |
+| `vipmp_server_info()` | Diagnostic dump — package version, Python version, which index tier is active and how old it is, sitemap size, cache stats, log path. The right first call for "what version am I on?" or "why is this not working?". |
 
 ### SoftwareOne operational tips
 | Tool | What it does |
@@ -119,7 +120,7 @@ If you have [uv](https://docs.astral.sh/uv/) installed, drop this into `%APPDATA
   "mcpServers": {
     "vipmp-docs": {
       "command": "uvx",
-      "args": ["vipmp-docs-mcp==0.6.1"]
+      "args": ["vipmp-docs-mcp==0.14.0"]
     }
   }
 }
@@ -235,7 +236,7 @@ The `list_vipmp_releases` tool serves structured, dated entries pulled from Adob
 
 Each entry has an ISO date (where available), a section, and one or more changes with titles and Markdown bodies — so filtering by "what changed since February" is a one-line call.
 
-**Daily refresh.** The [`refresh-index.yml`](.github/workflows/refresh-index.yml) GitHub Action runs daily (04:23 UTC), rebuilds the index including releases, and opens a PR if anything changed. Published installs (`pip install -e .`, `uvx --from git+...`) pick up updates automatically once the PR merges. For bleeding-edge, call `rebuild_vipmp_index` locally.
+**Daily refresh.** The [`refresh-index.yml`](.github/workflows/refresh-index.yml) GitHub Action runs daily (04:23 UTC), rebuilds the index including releases, and opens a PR if anything changed. Once that PR merges, **every** install picks the refresh up within 12 hours via the GitHub-refreshed index tier — including plain `uvx vipmp-docs-mcp` from PyPI, which no longer has to wait for a release. For bleeding-edge, call `rebuild_vipmp_index` locally.
 
 **Prompting patterns:**
 
@@ -257,15 +258,18 @@ Sections are kept separate because they mean different things: `api_changes` is 
 
 ## The structured index
 
-The `list_vipmp_endpoints`, `list_vipmp_error_codes`, `list_vipmp_status_codes`, `get_vipmp_schema`, and `get_vipmp_releases` tools are all served from a **pre-built index** — a single JSON file that captures every endpoint, error code, status code, and field schema extracted from Adobe's docs. With the index in place these tools answer in **single-digit milliseconds**. Without it, they fall back to live extraction across ~86 pages (~30s cold, ~5s warm).
+The `list_vipmp_endpoints`, `list_vipmp_error_codes`, `list_vipmp_status_codes`, `get_vipmp_schema`, and `list_vipmp_releases` tools are all served from a **pre-built index** — a single JSON file that captures every endpoint, error code, status code, and field schema extracted from Adobe's docs. With the index in place these tools answer in **single-digit milliseconds**. Without it, they fall back to live extraction across ~86 pages (~30s cold, ~5s warm).
 
-**Three-tier resolution for the active index:**
+**Four-tier resolution for the active index** — first usable source wins:
 
 1. **User-local rebuild** (`~/.cache/swo-adobe-vipm-docs-mcp/index.json`) — freshest. Written by the `rebuild_vipmp_index` MCP tool when you run it.
-2. **Package-shipped baseline** (`src/vipmp_docs_mcp/data/index.json`) — what you get out of the box. Refreshed weekly by the `refresh-index.yml` GitHub Action and included in each release.
-3. **None** — tools fall back to live extraction. The output annotates this so you know.
+2. **GitHub-refreshed remote** (`~/.cache/swo-adobe-vipm-docs-mcp/remote-index.json`) — pulled on demand from `main` with a 12-hour TTL, so the daily refresh reaches you without waiting for a PyPI release. A conditional `If-None-Match` GET, so a 304 costs nothing. Always stale-OK: any failure (offline, rate limit, DNS, GitHub 5xx) falls through to the next tier with a logged warning, and a fetched copy must pass the same structural floors CI enforces before it is trusted. Opt out with `VIPMP_DISABLE_REMOTE_INDEX=1` for deterministic or air-gapped runs.
+3. **Package-shipped baseline** (`src/vipmp_docs_mcp/data/index.json`) — what you get out of the box. Refreshed daily by the `refresh-index.yml` GitHub Action and included in each release.
+4. **None** — tools fall back to live extraction. The output annotates this so you know.
 
-**Keeping the baseline fresh:** a GitHub Action ([`refresh-index.yml`](.github/workflows/refresh-index.yml)) runs **daily** (release notes change frequently) and also on demand via `workflow_dispatch`. It rebuilds the index against live Adobe docs and, if anything changed (new endpoint, removed error code, schema drift, fresh release entry, etc.), opens a PR for human review. Merging that PR publishes the new baseline to `pip install -e .` / `uvx --from git+...` installs automatically. Days where nothing changes produce no PR.
+`vipmp_server_info` reports which tier is actually in play, which is the quickest way to answer "is my index stale?".
+
+**Keeping the baseline fresh:** a GitHub Action ([`refresh-index.yml`](.github/workflows/refresh-index.yml)) runs **daily** (release notes change frequently) and also on demand via `workflow_dispatch`. It rebuilds the index against live Adobe docs and, if anything changed (new endpoint, removed error code, schema drift, fresh release entry, etc.), opens a PR for human review. Before that PR opens, the rebuilt index has to clear the same structural floors the remote tier enforces — endpoint, error-code, status-code and schema minimums plus a parse-error ceiling — so a parser regression or a mass deletion fails the workflow instead of shipping. Merging publishes the new baseline to git-source installs immediately and to every other install within the remote tier's 12-hour TTL. Days where nothing changes produce no PR.
 
 **Running on demand:**
 ```bash
@@ -299,11 +303,14 @@ The server logs to a rotating file so transient failures are debuggable:
 
 ```bash
 pip install -e ".[dev]"
-ruff check src/ tests/
+ruff check src/ tests/ scripts/ examples/
+ruff format --check src/ tests/ scripts/ examples/
 pytest -v
 ```
 
-The test suite is 56 pytest-mocked tests (no network required) covering parsers, cache, search, and fetcher retry logic.
+Lint and format gate all four directories, matching CI — checking only `src/` and `tests/` is how `scripts/` and `examples/` drifted after 0.12.0.
+
+The test suite is 216 pytest-mocked tests covering the parsers, cache, search, fetcher retry logic, validator, code generation, releases, tips, the remote-index tier, and manifest/server parity. `scripts/smoke_test.py` covers what unit tests can't — it drives the real server over stdio and needs network, so CI doesn't run it. Run it before tagging a release.
 
 ## Requirements
 

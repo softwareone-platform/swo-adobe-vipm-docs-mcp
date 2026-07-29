@@ -7,10 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Merged to main but not yet released. No behaviour changes — CI config, a dev
-script, docs, and internal restructuring with no effect on tool output.
+## [0.14.0] — 2026-07-29
+
+Tool output is unchanged, but this release **requires `mcp` 2.x** — see the
+migration note below — and the server now advertises its version to clients.
+The rest is CI config, a dev script, docs, and internal restructuring.
 
 ### Fixed
+- **The daily index refresh, broken by the `mcp` 2.0.0 release.** The SDK's
+  2.0.0 published on 2026-07-28 and moved `mcp.server.fastmcp.FastMCP` to
+  `mcp.server.mcpserver.MCPServer`. `pyproject.toml` pinned `mcp[cli]>=1.0.0`
+  with no ceiling, so the next scheduled run resolved 2.0.0 and failed on
+  `ModuleNotFoundError: No module named 'mcp.server.fastmcp'` — not in the
+  rebuild, which succeeded, but in the **Validate structural invariants**
+  step, which imported `STALE_INDEX_FAILURE_FRACTION` from `server.py` and so
+  dragged in the whole SDK to read one float.
+
+  Three separate fixes, because the pin was only the trigger:
+  the package now targets the 2.0 API, the requirement carries a `<3`
+  ceiling, and the validation step no longer imports from `server`.
+- **README inaccuracies**, found by a full pass over it and each verified
+  against the code rather than read for plausibility:
+  - `vipmp_server_info` was **undocumented** — registered, declared in
+    `manifest.json` and smoke-tested since 0.10.0, but absent from every tool
+    table, so 19 of 20 tools were listed.
+  - The tool tables still cited **`get_vipmp_releases`**, removed in 0.12.0 in
+    favour of `list_vipmp_releases`.
+  - The index section described **three tiers and omitted the
+    GitHub-refreshed remote tier** entirely — the 12h-TTL layer that is the
+    only reason a PyPI install sees the daily refresh at all. Neither the tier,
+    its TTL, its fail-soft behaviour, nor the `VIPMP_DISABLE_REMOTE_INDEX`
+    opt-out appeared anywhere. Two nearby paragraphs consequently understated
+    reach, claiming only git-source installs pick up index refreshes.
+  - The baseline was described as refreshed **weekly**, contradicting the two
+    other places that correctly said daily (`23 4 * * *`).
+  - `generate_vipmp_request`'s second parameter was documented as `body`; it
+    is `body_json`.
+  - The Development section ran `ruff check src/ tests/` and no format check,
+    so following the README passed locally while CI — which gates `scripts/`
+    and `examples/` too — failed. The test suite was described as **56**
+    tests; it is 218.
+  - The version-pinning example pinned `==0.6.1`, eight minor versions back.
 - **Resolved the `index` ↔ `remote_index` import cycle.** `INDEX_SCHEMA_VERSION`
   lived in `index.py` but `remote_index._check_invariants` needed it, so each
   module reached for the other through a function-local import. The constant
@@ -34,6 +71,23 @@ script, docs, and internal restructuring with no effect on tool output.
   > than worked around.
 
 ### Added
+- **README tool-parity tests** (`tests/test_readme.py`). CI now fails if the
+  README omits a tool the server registers or cites one it doesn't — the two
+  drifts fixed above, which `tests/test_manifest.py` already caught for
+  `manifest.json` but nothing caught for the prose. Both directions were
+  mutation-tested against the real drift rather than assumed to work; doing so
+  caught two bugs in the check itself (a pattern that silently skipped every
+  tool whose name *starts* with `vipmp`, and prompt names counted as stale
+  tools).
+- **The server now reports its version in the initialize handshake.**
+  `MCPServer(version=__version__)` — the installed distribution version, which
+  `auto-version-bump.yml` keeps in lockstep with `manifest.json`, so what a
+  client sees matches the .mcpb bundle release. FastMCP 1.x had no `version`
+  parameter, so the handshake had always sent an empty string —
+  `examples/list_tools.py` printed a bare `v` on connect, unnoticed for the
+  whole 1.x era. `tests/test_manifest.py` now asserts the handshake version
+  is wired to the package metadata and is not empty, alongside the existing
+  `manifest.json` ↔ `pyproject.toml` parity check.
 - **Dependabot** (`.github/dependabot.yml`) — weekly grouped PRs for the `uv`
   and `github-actions` ecosystems. Runtime and dev Python updates are grouped
   separately so a bump that changes what users resolve on install is reviewed
@@ -56,6 +110,20 @@ script, docs, and internal restructuring with no effect on tool output.
   it can't drift, and `pyyaml` was added to the `dev` extra for it.
 
 ### Changed
+- **Migrated to the `mcp` 2.0 server API**, and the requirement is now
+  `mcp[cli]>=2.0.0,<3` (was `>=1.0.0`, unbounded). The server surface is a
+  rename — `FastMCP` → `MCPServer` from `mcp.server.mcpserver`, with
+  `.tool()`, `.prompt()` and `.run()` unchanged and `ToolAnnotations` still
+  accepting its camelCase aliases — so all 20 tools and 13 prompts register
+  and serve identically. The one behavioural break was client-side:
+  `InitializeResult.serverInfo` is now `server_info` (2.0 renamed model fields
+  to snake_case, and aliases cover construction but not attribute access),
+  which affected `scripts/smoke_test.py` and `examples/list_tools.py`.
+- **`STALE_INDEX_FAILURE_FRACTION` moved from `server.py` to `index.py`**, next
+  to the `parse_errors` and `source_sitemap_size` fields it is measured
+  against. `refresh-index.yml`'s validation step imports it from there, so
+  the step no longer needs the MCP SDK — an SDK release can't break the
+  index refresh again. `vipmp_server_info` reads it from the new location.
 - **Removed `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`** from all seven workflows. It
   was masking the Node 20 deprecation warning that `upload-artifact@v4` and
   `action-gh-release@v2` emitted in `publish-mcpb`; with every action now on a
@@ -662,7 +730,8 @@ refresh PR merged. No code changes.
 - `<br />` tags encoded as literal text (`&lt;br /&gt;`) in Adobe's
   table cells are now parsed into line breaks.
 
-[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/softwareone-platform/swo-adobe-vipm-docs-mcp/compare/v0.11.0...v0.12.0

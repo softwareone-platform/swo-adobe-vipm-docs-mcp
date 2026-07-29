@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vipmp-docs-mcp"
-version = "0.13.1"
+version = "0.14.0"
 description = "MCP server exposing Adobe VIP Marketplace Partner API documentation as searchable tools"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -23,7 +23,11 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
 ]
 dependencies = [
-    "mcp[cli]>=1.0.0",
+    # 2.0 renamed the server class: `mcp.server.fastmcp.FastMCP` became
+    # `mcp.server.mcpserver.MCPServer`. server.py imports the new path, so
+    # 1.x won't work. The `<3` ceiling is deliberate — an unbounded pin is
+    # what let 2.0.0 break the scheduled index refresh on release day.
+    "mcp[cli]>=2.0.0,<3",
     "httpx>=0.27.0",
     "beautifulsoup4>=4.12.0",
     "lxml>=5.0.0",

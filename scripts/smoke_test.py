@@ -3,7 +3,7 @@ End-to-end smoke test for the MCP server.
 
 Starts `vipmp-docs-mcp` as a subprocess, connects over stdio using the
 MCP client SDK, and exercises the main tools + prompts. Catches regressions
-that unit tests can't — missing imports, broken FastMCP registration,
+that unit tests can't — missing imports, broken tool/prompt registration,
 transport failures, etc.
 
 Run from the repo root with the venv active:
@@ -97,7 +97,7 @@ async def main() -> int:
         # --- Handshake --------------------------------------------------
         print("Handshake")
         init = await session.initialize()
-        ok(f"server={init.serverInfo.name!r} version={init.serverInfo.version}")
+        ok(f"server={init.server_info.name!r} version={init.server_info.version}")
 
         # --- Discovery --------------------------------------------------
         print("\nDiscovery")

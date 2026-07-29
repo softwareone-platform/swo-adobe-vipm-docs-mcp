@@ -152,17 +152,25 @@ jobs:
       - name: Validate structural invariants
         # Fail-loud guard against poisoning / parser regressions before the
         # PR ever opens. Same floors that `remote_index._check_invariants`
-        # enforces at fetch time, plus a parse-error fraction check that
-        # mirrors `STALE_INDEX_FAILURE_FRACTION` in server.py. If any
-        # invariant fails the workflow fails and no PR is opened — the
+        # enforces at fetch time, plus the `STALE_INDEX_FAILURE_FRACTION`
+        # parse-error check that `vipmp_server_info` reports at runtime. If
+        # any invariant fails the workflow fails and no PR is opened — the
         # daily refresh just pauses until a human investigates.
+        #
+        # Import only from the index modules, never from `server`: pulling in
+        # the server module drags in the MCP SDK, so an SDK release can break
+        # this check even when the rebuild itself is healthy (mcp 2.0.0 did
+        # exactly that on 2026-07-28).
         run: |
           python - <<'PY'
           import json
           import sys
           from pathlib import Path
 
-          from vipmp_docs_mcp.index import INDEX_SCHEMA_VERSION
+          from vipmp_docs_mcp.index import (
+              INDEX_SCHEMA_VERSION,
+              STALE_INDEX_FAILURE_FRACTION,
+          )
           from vipmp_docs_mcp.remote_index import (
               MIN_ENDPOINTS,
               MIN_ERROR_CODES,
@@ -171,7 +179,6 @@ jobs:
               _check_invariants,
               IndexInvariantError,
           )
-          from vipmp_docs_mcp.server import STALE_INDEX_FAILURE_FRACTION
 
           path = Path("src/vipmp_docs_mcp/data/index.json")
           data = json.loads(path.read_text(encoding="utf-8"))

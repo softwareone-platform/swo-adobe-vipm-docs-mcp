@@ -1,5 +1,5 @@
 """
-FastMCP server — registers tools and runs the MCP transport.
+MCP server — registers tools and runs the MCP transport.
 
 Tool implementations live here but delegate real work to the supporting
 modules (fetcher, sitemap, html_cleaner). Disk cache, content search,
@@ -10,9 +10,10 @@ from __future__ import annotations
 
 from typing import Literal
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
+from . import __version__
 from .autositemap import build_sitemap, get_active_sitemap, save_sitemap
 from .cache import get_cache
 from .codegen import SUPPORTED_LANGUAGES, generate_snippet
@@ -25,6 +26,7 @@ from .extractors import (
 )
 from .fetcher import FetchError
 from .index import (
+    STALE_INDEX_FAILURE_FRACTION,
     USER_INDEX_PATH,
     build_index,
     get_active_index,
@@ -37,23 +39,6 @@ from .search import relevant_sections, search
 from .sitemap import normalize_path
 
 log = get_logger("server")
-
-
-# Fraction of the source sitemap that must fail to parse before
-# `vipmp_server_info` flags the active index as suspiciously
-# incomplete. The real regression in #4 surfaced as 57/72 pages
-# failing (~79% failure rate) because CI was building against the
-# stale hand-curated underscore paths that Adobe had migrated off.
-# A healthy build against Adobe's live sitemap parses every page
-# (0% failure). A small number of parse errors is normal when Adobe
-# publishes a new page the parser hasn't seen yet; 25% gives us
-# headroom for that without hiding real regressions.
-#
-# Prior versions used an absolute endpoint-count threshold (30),
-# which false-flagged every healthy build — Adobe's Partner API
-# legitimately exposes ~21 endpoints, not hundreds. This is the
-# replacement heuristic.
-STALE_INDEX_FAILURE_FRACTION = 0.25
 
 
 # Active sitemap: auto-generated (from Adobe's sitemap.xml, persisted to
@@ -81,8 +66,14 @@ def _known_paths() -> set[str]:
     return {normalize_path(e["path"]) for e in _active_sitemap}
 
 
-mcp = FastMCP(
+mcp = MCPServer(
     "vipmp-docs",
+    # Reported to clients in the initialize handshake. `__version__` is the
+    # installed distribution version, which `auto-version-bump.yml` keeps in
+    # lockstep with `manifest.json` — so what the server advertises matches
+    # the .mcpb bundle release it came from. FastMCP 1.x had no `version`
+    # parameter at all and always handshook an empty string.
+    version=__version__,
     instructions=(
         "Look up Adobe VIP Marketplace Partner API documentation and reason about "
         "it structurally.\n"

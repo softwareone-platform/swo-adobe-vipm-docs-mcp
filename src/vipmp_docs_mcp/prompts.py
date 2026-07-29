@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 # Shared pieces for the training-curriculum walkthroughs. Centralising
 # these means every ``learn_*`` prompt makes the same promise (Adobe
@@ -50,8 +50,8 @@ def _tips_signpost(topic: str) -> str:
     )
 
 
-def register_prompts(mcp: FastMCP) -> None:
-    """Register all VIPMP prompts on the given FastMCP instance."""
+def register_prompts(mcp: MCPServer) -> None:
+    """Register all VIPMP prompts on the given MCPServer instance."""
 
     @mcp.prompt()
     def review_request_body(endpoint: str, body_json: str) -> str:
