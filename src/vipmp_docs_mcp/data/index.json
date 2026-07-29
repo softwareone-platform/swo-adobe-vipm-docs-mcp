@@ -1,6 +1,6 @@
 {
   "schema_version": 5,
-  "built_at": 1785130607.4569862,
+  "built_at": 1785310621.017412,
   "source_sitemap_size": 86,
   "pages_parsed": 86,
   "parse_errors": [],
@@ -2165,6 +2165,18 @@
         {
           "title": "Earlier releases from 2024",
           "body": "- Included customer's VIP renewal status within migration preview API response. See Preview Offer for more details.\n\n- Ability to place renewal orders after anniversary date Added allowedActions field in the Get All Subscriptions for a Customer API to indicate the subscriptions that can be selected for manual renewals. See Get Subscription Details for more information.\n\n- The newly introduced RENEWAL order type in the Create Order API is used for renewals that are initiated after the anniversary date. See Create Order Scenarios for more details.\n\n- Enabling Global customers for Create Subscription. Global customers can now use Create Subscription API to create scheduled subscriptions. See Create Subscriptions for more details.\n\n- Create and manage linked memberships Adding support for creating and managing linked memberships that facilitates combining purchases across linked customer accounts to achieve better volume discounts. See Manage linked memberships for more information.\n\n- “Late renewals” or “Renewal” Order Type Introducing a new Order Type for partners to place “late renewal” after anniversary date. See Create Order for more information.\n\n- Create orders Implemented a validation to prevent partners from placing new orders before the subscription’s anniversary date. If a partner attempts to place an order before this date, an error message will appear as the response.\n\n- Worldwide offers: Added ability to enable a customer for worldwide (global) sales Added ability to create “Deployments” for a customer to purchase worldwide offers Added an optional currencyCode to the order lineItem level to support global deployments Added deploymentId to order lineItem (read/write) Added deploymentId and currencyCode to subscription resource (read only) Added deploymentId and currencyCode to transfer resource (read only)\n\n- Included 3yc info in preview migration and preview/execution of reseller change API calls.\n\n- Create Subscription: Added ability to create future dated subscription that would become active on next anniversary date. See Create Subscription for more information.\n\n- Added a new API to fetch all customers (under a given reseller) who have added seats via Adobe’s Admin console.\n\n- Added a new API to fetch all seats/licenses added by a given customer via admin console.\n\n- These APIs will inform our partners to place corresponding orders backing the seats added by the customers via admin console.\n\n- Added new Error Code for Preview / Create Transfer response. See Status Codes & Error Handling for more information.\n\n- Added self-service capability for a customer and partner to move between resellers/partners. See Reseller Change Process for more information."
+        }
+      ],
+      "docs_path": "/vipmp/docs/release-notes"
+    },
+    {
+      "date": "2026-07-27",
+      "raw_date": "July 27, 2026",
+      "section": "sandbox",
+      "changes": [
+        {
+          "title": "July 27, 2026",
+          "body": "Support for closed discounts in the Sandbox portal:\n\n- The Portal Resources > View Available Flex Discounts page now includes two new tabs, Closed Discount Templates and Closed Discounts (Customer-Specific) . Distributors can view available closed discount templates by market segment and create, search for, or delete customer-specific closed discount codes for testing purposes.\n\n- For more information, see Create, view, and manage closed discounts ."
         }
       ],
       "docs_path": "/vipmp/docs/release-notes"
