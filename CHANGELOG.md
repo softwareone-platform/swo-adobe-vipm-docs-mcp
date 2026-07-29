@@ -26,6 +26,28 @@ The rest is CI config, a dev script, docs, and internal restructuring.
   Three separate fixes, because the pin was only the trigger:
   the package now targets the 2.0 API, the requirement carries a `<3`
   ceiling, and the validation step no longer imports from `server`.
+- **README inaccuracies**, found by a full pass over it and each verified
+  against the code rather than read for plausibility:
+  - `vipmp_server_info` was **undocumented** — registered, declared in
+    `manifest.json` and smoke-tested since 0.10.0, but absent from every tool
+    table, so 19 of 20 tools were listed.
+  - The tool tables still cited **`get_vipmp_releases`**, removed in 0.12.0 in
+    favour of `list_vipmp_releases`.
+  - The index section described **three tiers and omitted the
+    GitHub-refreshed remote tier** entirely — the 12h-TTL layer that is the
+    only reason a PyPI install sees the daily refresh at all. Neither the tier,
+    its TTL, its fail-soft behaviour, nor the `VIPMP_DISABLE_REMOTE_INDEX`
+    opt-out appeared anywhere. Two nearby paragraphs consequently understated
+    reach, claiming only git-source installs pick up index refreshes.
+  - The baseline was described as refreshed **weekly**, contradicting the two
+    other places that correctly said daily (`23 4 * * *`).
+  - `generate_vipmp_request`'s second parameter was documented as `body`; it
+    is `body_json`.
+  - The Development section ran `ruff check src/ tests/` and no format check,
+    so following the README passed locally while CI — which gates `scripts/`
+    and `examples/` too — failed. The test suite was described as **56**
+    tests; it is 218.
+  - The version-pinning example pinned `==0.6.1`, eight minor versions back.
 - **Resolved the `index` ↔ `remote_index` import cycle.** `INDEX_SCHEMA_VERSION`
   lived in `index.py` but `remote_index._check_invariants` needed it, so each
   module reached for the other through a function-local import. The constant
@@ -49,6 +71,14 @@ The rest is CI config, a dev script, docs, and internal restructuring.
   > than worked around.
 
 ### Added
+- **README tool-parity tests** (`tests/test_readme.py`). CI now fails if the
+  README omits a tool the server registers or cites one it doesn't — the two
+  drifts fixed above, which `tests/test_manifest.py` already caught for
+  `manifest.json` but nothing caught for the prose. Both directions were
+  mutation-tested against the real drift rather than assumed to work; doing so
+  caught two bugs in the check itself (a pattern that silently skipped every
+  tool whose name *starts* with `vipmp`, and prompt names counted as stale
+  tools).
 - **The server now reports its version in the initialize handshake.**
   `MCPServer(version=__version__)` — the installed distribution version, which
   `auto-version-bump.yml` keeps in lockstep with `manifest.json`, so what a
