@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": 1788150948.033824,
+  "generated_at": 1791693514.4431193,
   "entries": [
     {
       "path": "/vipmp/docs",
@@ -375,6 +375,36 @@
         "flex discount apis",
         "flex discounts",
         "flexible"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/instant-deal-registration",
+      "title": "Adobe Instant Deal Registration",
+      "tags": [
+        "adobe",
+        "deal",
+        "instant",
+        "instant deal registration",
+        "registration"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/instant-deal-registration/apis",
+      "title": "Discover and verify Adobe Instant Deal Registration using APIs",
+      "tags": [
+        "API",
+        "adobe",
+        "apis",
+        "deal",
+        "discover",
+        "instant",
+        "instant deal registration",
+        "manage",
+        "mid-term",
+        "registration",
+        "upgrade",
+        "using",
+        "verify"
       ]
     },
     {
