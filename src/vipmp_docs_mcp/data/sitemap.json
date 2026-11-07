@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": 1788150948.033824,
+  "generated_at": 1794025512.8851542,
   "entries": [
     {
       "path": "/vipmp/docs",
@@ -256,6 +256,53 @@
       ]
     },
     {
+      "path": "/vipmp/docs/data-exports",
+      "title": "Data exports",
+      "tags": [
+        "data",
+        "data exports",
+        "exports"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/data-exports/apis",
+      "title": "Manage data exports using APIs",
+      "tags": [
+        "API",
+        "apis",
+        "data",
+        "data exports",
+        "exports",
+        "manage",
+        "mid-term",
+        "upgrade",
+        "using"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/data-exports/error-codes",
+      "title": "Error codes for data exports",
+      "tags": [
+        "1117",
+        "1118",
+        "1147",
+        "1163",
+        "1164",
+        "1167",
+        "1168",
+        "5117",
+        "LGA",
+        "codes",
+        "data",
+        "data exports",
+        "error",
+        "error codes",
+        "errors",
+        "exports",
+        "large government agency"
+      ]
+    },
+    {
       "path": "/vipmp/docs/deployment-management",
       "title": "Manage deployments",
       "tags": [
@@ -375,6 +422,36 @@
         "flex discount apis",
         "flex discounts",
         "flexible"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/instant-deal-registration",
+      "title": "Adobe Instant Deal Registration",
+      "tags": [
+        "adobe",
+        "deal",
+        "instant",
+        "instant deal registration",
+        "registration"
+      ]
+    },
+    {
+      "path": "/vipmp/docs/instant-deal-registration/apis",
+      "title": "Discover and verify Adobe Instant Deal Registration using APIs",
+      "tags": [
+        "API",
+        "adobe",
+        "apis",
+        "deal",
+        "discover",
+        "instant",
+        "instant deal registration",
+        "manage",
+        "mid-term",
+        "registration",
+        "upgrade",
+        "using",
+        "verify"
       ]
     },
     {
